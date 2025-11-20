@@ -1,0 +1,52 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies (frontend + backend)
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Testing
+coverage/
+
+# Next.js (any Next app in the repo)
+.next/
+out/
+
+# If you prefer to be explicit for frontend:
+# frontend/.next/
+# frontend/out/
+
+# Backend build output (if you build to dist/build later)
+backend/build/
+backend/dist/
+
+# Generic production builds
+build/
+
+# Misc OS files
+.DS_Store
+Thumbs.db
+*.pem
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Env files (keep secrets out of git)
+.env*
+frontend/.env*
+backend/.env*
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
