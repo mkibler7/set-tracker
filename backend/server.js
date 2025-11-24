@@ -19,11 +19,6 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Simple test
-app.get("/test", (req, res) => {
-  res.json({ message: "Test endpoint is working!" });
-});
-
 // Start server
 app.listen(PORT, () => {
   console.log(`Backend API is listening on http://localhost:${PORT}`);

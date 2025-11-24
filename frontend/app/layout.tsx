@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "RepTracker",
@@ -14,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-slate-950 text-slate-100">
+      <body className={`${inter.className} bg-slate-950 text-slate-50`}>
         <div className="flex min-h-screen">
           {/* Sidebar */}
           <aside className="hidden md:flex w-60 flex-col border-r border-slate-800 bg-slate-900/60 p-4 gap-4">
@@ -47,7 +50,7 @@ export default function RootLayout({
           </aside>
 
           {/* Main content */}
-          <main className="flex-1 p-4 md:p-8">{children}</main>
+          <main className="flex-1 bg-slate-950 p-4 md:p-8">{children}</main>
         </div>
       </body>
     </html>
