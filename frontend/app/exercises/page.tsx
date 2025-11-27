@@ -10,7 +10,7 @@ export default function ExercisesPage() {
     <section className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Exercises</h1>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-muted-foreground">
           Browse and manage your exercise library. Mock-only for now.
         </p>
       </header>
@@ -20,10 +20,12 @@ export default function ExercisesPage() {
           <li key={ex.id}>
             <Link
               href={`/exercises/${ex.id}`}
-              className="flex items-center justify-between rounded-lg border border-slate-800 px-4 py-3 text-sm hover:border-emerald-500"
+              className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm hover:bg-card/70"
             >
               <span>{ex.name}</span>
-              <span className="text-xs text-slate-400">{ex.muscleGroup}</span>
+              <span className="text-xs text-muted-foreground">
+                {ex.muscleGroup}
+              </span>
             </Link>
           </li>
         ))}

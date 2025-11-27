@@ -34,7 +34,7 @@ export default function SetForm({
     initialValues?.rpe !== undefined ? String(initialValues.rpe) : ""
   );
   const [tempo, setTempo] = useState<string>(initialValues?.tempo ?? "");
-  const [notes, setNotes] = useState<string>(initialValues?.notes ?? "");
+  // const [notes, setNotes] = useState<string>(initialValues?.notes ?? "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,48 +56,51 @@ export default function SetForm({
       volume: repsNum * weightNum,
       rpe: rpeNum,
       tempo: tempo || undefined,
-      notes: notes || undefined,
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2 text-xs text-slate-200">
+    <form onSubmit={handleSubmit} className="space-y-2 text-xs text-foreground">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="flex flex-col gap-1">
-          <label className="text-[11px] text-slate-400">Reps</label>
+          <label className="text-[11px] text-muted-foreground">Reps</label>
           <input
             type="number"
             min={1}
             value={reps}
             onChange={(e) => setReps(e.target.value)}
-            className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 outline-none focus:border-sky-500"
+            className="form-input"
             required
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[11px] text-slate-400">Weight (lb)</label>
+          <label className="text-[11px] text-muted-foreground">
+            Weight (lb)
+          </label>
           <input
             type="number"
             min={0}
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 outline-none focus:border-sky-500"
+            className="form-input"
             required
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[11px] text-slate-400">RPE (1-10)</label>
+          <label className="text-[11px] text-muted-foreground">
+            RPE (1-10)
+          </label>
           <input
             type="number"
             min={1}
             max={10}
             value={rpe}
             onChange={(e) => setRpe(e.target.value)}
-            className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 outline-none focus:border-sky-500"
+            className="form-input"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[11px] text-slate-400">Tempo</label>
+          <label className="text-[11px] text-muted-foreground">Tempo</label>
           <input
             type="text"
             placeholder="e.g. 4-2-1-2"
@@ -117,21 +120,21 @@ export default function SetForm({
                 e.currentTarget.setCustomValidity("");
               }
             }}
-            className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 outline-none focus:border-sky-500"
+            className="form-input"
           />
         </div>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="text-[11px] text-slate-400">Notes</label>
+      {/* <div className="flex flex-col gap-1">
+        <label className="text-[11px] text-muted-foreground">Notes</label>
         <textarea
           rows={2}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="w-full rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 outline-none focus:border-sky-500"
+          className={inputClassName}
           placeholder="e.g., felt heavy, tweak stance next time"
         />
-      </div>
+      </div> */}
 
       <div className="flex items-center justify-end gap-2 pt-1">
         {onCancel && (
@@ -145,7 +148,7 @@ export default function SetForm({
         )}
         <button
           type="submit"
-          className="rounded-md bg-sky-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-sky-500"
+          className="rounded-md bg-primary px-3 py-1 text-[11px] font-medium text-primary-foreground hover:bg-primary/80"
         >
           {submitLabel}
         </button>

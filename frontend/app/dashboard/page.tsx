@@ -6,6 +6,7 @@ import {
   WorkoutCard,
   type DashboardWorkout,
 } from "@/components/dashboard/WorkoutCard";
+import Link from "next/link";
 
 const mockStats = [
   {
@@ -58,14 +59,13 @@ export default async function DashboardPage() {
       {/* Header */}
       <section className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-300">
+          <h1 className="text-2xl font-semibold text-foreground">
             Welcome back, {userFirstName}
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             Here&apos;s a snapshot of your recent training.
           </p>
         </div>
-
         <Button
           variant="primary"
           className="whitespace-nowrap"
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
           title="Training volume"
           subtitle="Charts and trends will live here."
         />
-        <Card className="h-52 flex items-center justify-center text-sm text-slate-500">
+        <Card className="h-52 flex items-center justify-center text-sm text-muted-foreground">
           {/* TODO: Replace with Recharts/Chart.js chart (Day 13) */}
           Volume-over-time chart placeholder
         </Card>

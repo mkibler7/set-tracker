@@ -17,11 +17,11 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
   return (
     <Card className="flex items-center justify-between gap-2">
       <div>
-        <p className="text-sm font-semibold text-slate-100">{workout.name}</p>
-        <p className="text-xs text-slate-400">{workout.date}</p>
+        <p className="text-sm font-semibold text-foreground">{workout.name}</p>
+        <p className="text-xs text-muted-foreground">{workout.date}</p>
       </div>
 
-      <div className="flex gap-6 text-xs text-slate-300">
+      <div className="flex gap-6 text-xs text-muted-foreground">
         <div className="flex flex-col items-end">
           <span className="font-semibold">{workout.totalSets}</span>
           <span className="text-[0.7rem] uppercase tracking-wide">Sets</span>

@@ -13,9 +13,9 @@ export function Button({
     "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants = {
-    primary: "bg-emerald-500 text-slate-950 hover:bg-emerald-400 shadow-md",
+    primary: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md",
     ghost:
-      "border border-slate-700 bg-slate-900/60 text-slate-100 hover:bg-slate-800/80",
+      "border border-border bg-card/70 text-card-foreground hover:bg-card/80",
   };
 
   return (

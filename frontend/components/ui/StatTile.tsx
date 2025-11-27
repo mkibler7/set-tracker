@@ -10,12 +10,12 @@ interface StatTileProps {
 export function StatTile({ label, value, helperText }: StatTileProps) {
   return (
     <Card className="flex flex-col gap-1">
-      <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </span>
-      <span className="text-2xl font-semibold text-slate-50">{value}</span>
+      <span className="text-2xl font-semibold text-foreground">{value}</span>
       {helperText && (
-        <span className="text-xs text-slate-500">{helperText}</span>
+        <span className="text-xs text-muted-foreground">{helperText}</span>
       )}
     </Card>
   );

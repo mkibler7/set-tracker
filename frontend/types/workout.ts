@@ -1,0 +1,23 @@
+import type { Exercise } from "@/types/exercise";
+
+export type WorkoutSet = {
+  id: string;
+  reps: number;
+  weight: number;
+  volume: number;
+  rpe?: number;
+  tempo?: string;
+};
+
+export type WorkoutExercise = Exercise & {
+  notes?: string;
+  sets: WorkoutSet[];
+  volume: number;
+};
+
+export type Workout = {
+  id: string;
+  date: string;
+  split: string;
+  exercises: WorkoutExercise[];
+};
