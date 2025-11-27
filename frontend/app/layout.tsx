@@ -17,8 +17,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-950 text-slate-50`}>
-        <div className="flex min-h-screen">
+      <body className={`${inter.className} bg-background text-foreground`}>
+        <div className="flex h-screen overflow-hidden">
           {/* Sidebar */}
           <aside className="hidden md:flex w-60 flex-col border-r border-slate-800 bg-slate-900/60 p-4 gap-4">
             <div className="text-xl font-semibold tracking-tight">
@@ -28,8 +28,8 @@ export default function RootLayout({
               <Link href="/dashboard" className="hover:text-emerald-400">
                 Dashboard
               </Link>
-              <Link href="/start" className="hover:text-emerald-400">
-                Start Workout
+              <Link href="/dailylog" className="hover:text-emerald-400">
+                Daily Log
               </Link>
               <Link href="/workouts" className="hover:text-emerald-400">
                 Workouts
@@ -50,7 +50,9 @@ export default function RootLayout({
           </aside>
 
           {/* Main content */}
-          <main className="flex-1 bg-slate-950 p-4 md:p-8">{children}</main>
+          <main className="flex-1 bg-background-dark p-4 md:p-8">
+            {children}
+          </main>
         </div>
       </body>
     </html>

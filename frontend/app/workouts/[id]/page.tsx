@@ -20,20 +20,22 @@ export default async function WorkoutDetailsPage({
         <h1 className="text-2xl font-semibold tracking-tight">
           Workout Details
         </h1>
-        <p className="text-sm text-slate-400">Workout ID: {id} (mock data)</p>
+        <p className="text-sm text-muted-foreground">
+          Workout ID: {id} (mock data)
+        </p>
       </header>
 
       <div className="space-y-3">
-        <div className="rounded-lg border border-slate-800 p-4">
+        <div className="rounded-lg border border-border p-4">
           <h2 className="text-sm font-medium">Summary</h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-muted-foreground">
             Placeholder for date, notes, total volume, etc.
           </p>
         </div>
 
-        <div className="rounded-lg border border-slate-800 p-4">
+        <div className="rounded-lg border border-border p-4">
           <h2 className="text-sm font-medium">Exercises &amp; Sets</h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-muted-foreground">
             Placeholder for exercise-list and set-table.
           </p>
         </div>
