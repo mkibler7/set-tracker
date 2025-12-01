@@ -36,7 +36,7 @@ export default function ExerciseCard({
       {/* Header */}
       <div className="mb-3 flex items-start justify-between gap-2">
         <div>
-          <h2 className="text-base font-semibold text-foreground">
+          <h2 className="mb-2 text-base font-semibold text-foreground">
             {exercise.name}
           </h2>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
