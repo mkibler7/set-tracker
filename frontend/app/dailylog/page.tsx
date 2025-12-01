@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/dailylog/Header";
 import EmptyState from "@/components/dailylog/EmptyState";
 import SplitSelector from "@/components/dailylog/SplitSelector";
 import SessionView from "@/components/dailylog/SessionView";
+import { MOCK_WORKOUTS, Workout } from "@/data/mockWorkouts"; // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
 
 type WorkoutStep = "empty" | "split" | "session";
 
@@ -25,11 +27,35 @@ const ALL_SPLIT_GROUPS = [
 ];
 
 export default function DailyLogPage() {
+  const searchParams = useSearchParams();
+  const fromWorkoutId = searchParams.get("fromWorkout");
+
   const [step, setStep] = useState<WorkoutStep>("empty");
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>(
     []
   );
-  const [workoutDate] = useState(new Date());
+  const [workoutDate, setWorkoutDate] = useState(new Date());
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+
+  // 🔹 If we arrive with ?fromWorkout=123, auto-load that workout
+  useEffect(() => {
+    if (!fromWorkoutId) return;
+
+    // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
+    const workout: Workout | undefined = MOCK_WORKOUTS.find(
+      (w) => w.id === fromWorkoutId
+    );
+    if (!workout) return;
+
+    const groups = workout.split
+      .split("/")
+      .map((g) => g.trim())
+      .filter(Boolean);
+
+    setSelectedMuscleGroups(groups);
+    setWorkoutDate(new Date(workout.date));
+    setStep("session");
+  }, [fromWorkoutId]);
 
   const splitLabel =
     selectedMuscleGroups.length > 0
@@ -50,34 +76,45 @@ export default function DailyLogPage() {
   };
 
   return (
-    <main className="flex-1 h-full flex flex-col px-4 py-2 sm:px-6 lg:px-8">
-      <Header
-        title={headerTitle}
-        date={workoutDate}
-        isSession={step === "session"}
-        onEditSplit={step === "session" ? () => setStep("split") : undefined}
-      />
-
-      {step === "empty" && <EmptyState onStart={() => setStep("split")} />}
-
-      {step === "split" && (
-        <SplitSelector
-          allGroups={ALL_SPLIT_GROUPS}
-          selected={selectedMuscleGroups}
-          onToggleGroup={handleToggleMuscleGroup}
-          onCancel={() => {
-            setSelectedMuscleGroups([]);
-            setStep("empty");
-          }}
-          onBegin={handleBeginSession}
+    <main className="flex h-full px-4 py-2 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-full w-full max-w-4xl flex-col">
+        <Header
+          title={headerTitle}
+          date={workoutDate}
+          isSession={step === "session"}
+          onEditSplit={step === "session" ? () => setStep("split") : undefined}
+          onAddExercise={
+            step === "session" ? () => setIsPickerOpen(true) : undefined
+          }
         />
-      )}
 
-      {step === "session" && (
-        <div className="flex-1 flex flex-col overflow-hidden px-4 sm:px-6 lg:px-8 scroll">
-          <SessionView selectedMuscleGroups={selectedMuscleGroups} />
-        </div>
-      )}
+        {step === "empty" && <EmptyState onStart={() => setStep("split")} />}
+
+        {step === "split" && (
+          <SplitSelector
+            allGroups={ALL_SPLIT_GROUPS}
+            selected={selectedMuscleGroups}
+            onToggleGroup={handleToggleMuscleGroup}
+            onCancel={() => {
+              setSelectedMuscleGroups([]);
+              setStep("empty");
+            }}
+            onBegin={handleBeginSession}
+          />
+        )}
+
+        {step === "session" && (
+          <div className="flex-1 flex flex-col overflow-hidden scroll">
+            <SessionView
+              selectedMuscleGroups={selectedMuscleGroups}
+              fromWorkoutId={fromWorkoutId}
+              isPickerOpen={isPickerOpen}
+              onClosePicker={() => setIsPickerOpen(false)}
+              onOpenPicker={() => setIsPickerOpen(true)}
+            />
+          </div>
+        )}
+      </div>
     </main>
   );
 }

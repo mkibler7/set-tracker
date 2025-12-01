@@ -1,5 +1,7 @@
 import type { Exercise } from "@/types/exercise";
 
+export type TimeFilter = "all" | "7d" | "30d";
+
 export type WorkoutSet = {
   id: string;
   reps: number;

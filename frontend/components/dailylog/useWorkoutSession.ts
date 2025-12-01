@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import type { WorkoutExercise, WorkoutSet } from "@/types/workout";
+import { useCallback, useState } from "react";
+import type { Workout, WorkoutExercise, WorkoutSet } from "@/types/workout";
 import { MOCK_EXERCISES } from "@/data/mockExercises";
 import type { SetFormValues } from "@/components/dailylog/SetForm";
+
+type SessionExercise = WorkoutExercise;
 
 const createId = () => Math.random().toString(36).slice(2);
 
@@ -12,6 +14,24 @@ export function useWorkoutSession() {
 
   const hasExercises = exercises.length > 0;
   const excludeIds = exercises.map((e) => e.id);
+
+  const resetSession = useCallback(() => {
+    setExercises([]);
+  }, []);
+
+  const loadFromWorkout = useCallback((workout: Workout) => {
+    const loadedExercises: SessionExercise[] = workout.exercises.map(
+      (exercise) => ({
+        ...exercise,
+        notes: exercise.notes ?? "",
+        sets: exercise.sets.map((set: WorkoutSet) => ({
+          ...set,
+        })),
+      })
+    );
+
+    setExercises(loadedExercises);
+  }, []);
 
   const addExercise = (exerciseId: string) => {
     const template = MOCK_EXERCISES.find((e) => e.id === exerciseId);
@@ -115,7 +135,10 @@ export function useWorkoutSession() {
     exercises,
     hasExercises,
     excludeIds,
+    setExercises,
+    resetSession,
     addExercise,
+    loadFromWorkout,
     removeExercise,
     updateExerciseNotes,
     addSet,

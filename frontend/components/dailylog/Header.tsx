@@ -1,7 +1,8 @@
-import Link from "next/link";
+"use client";
+
 import React from "react";
 import { Button } from "../ui/Button";
-import { on } from "events";
+import { useRouter } from "next/navigation";
 import EditIcon from "./edit-icon";
 
 type HeaderProps = {
@@ -9,6 +10,7 @@ type HeaderProps = {
   date: Date;
   isSession: boolean;
   onEditSplit?: () => void;
+  onAddExercise?: () => void;
 };
 
 export default function Header({
@@ -16,7 +18,10 @@ export default function Header({
   date,
   isSession,
   onEditSplit,
+  onAddExercise,
 }: HeaderProps) {
+  const router = useRouter();
+
   const formattedDate = date.toLocaleDateString(undefined, {
     weekday: "short",
     month: "short",
@@ -24,21 +29,33 @@ export default function Header({
     year: "numeric",
   });
 
-  return (
-    <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <Button
-          className="mb-4 rounded-md border border-border
-             px-3 py-1 text-xs text-muted-foreground hover:bg-card/40"
-        >
-          ← Back
-        </Button>
-        <p className="text-sm bt-4 text-muted-foreground mb-2">
-          Today&apos;s workout:
-        </p>
+  const isToday = date.toDateString() === new Date().toDateString();
+  const shortLabelDate = date.toLocaleDateString(undefined, {
+    month: "long",
+    day: "numeric",
+  });
+  const headerPrefix = isToday
+    ? "Today's Workout"
+    : `${shortLabelDate}'s Workout`;
 
-        {/* Title + Edit button on one line */}
-        <div className="mb-2 flex items-center gap-3">
+  return (
+    // <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <Button
+        type="button"
+        onClick={() => router.back()}
+        className="mb-4 rounded-md border border-border
+             px-3 py-1 text-xs text-muted-foreground hover:bg-card/40"
+      >
+        ← Back
+      </Button>
+      <p className="text-sm mb-2 tracking-tight text-muted-foreground">
+        {headerPrefix}
+      </p>
+
+      {/* Title + Edit button on one line */}
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             {title}
           </h1>
@@ -53,8 +70,21 @@ export default function Header({
             </button>
           )}
         </div>
-        <p className="text-sm text-muted-foreground">{formattedDate}</p>
+
+        {/* 🔹 Right-aligned "+ Add Exercise" on session views */}
+        {isSession && onAddExercise && (
+          <button
+            type="button"
+            onClick={onAddExercise}
+            className="primary-button"
+          >
+            + Add Exercise
+          </button>
+        )}
       </div>
+
+      <p className="mb-6 text-sm text-muted-foreground">{formattedDate}</p>
     </div>
+    // </div>
   );
 }

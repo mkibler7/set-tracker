@@ -1,17 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ExercisePicker from "@/components/dailylog/ExercisePicker";
 import ExerciseCard from "@/components/dailylog/ExerciseCard";
 import DeleteExerciseModal from "./DeleteExerciseModal";
 import { useWorkoutSession } from "@/components/dailylog/useWorkoutSession";
+import { MOCK_WORKOUTS, Workout } from "@/data/mockWorkouts";
 
 type SessionViewProps = {
   selectedMuscleGroups: string[];
+  fromWorkoutId?: string | null;
+  isPickerOpen: boolean;
+  onClosePicker: () => void;
+  onOpenPicker: () => void;
 };
 
 export default function SessionView({
   selectedMuscleGroups,
+  fromWorkoutId,
+  isPickerOpen,
+  onClosePicker,
+  onOpenPicker,
 }: SessionViewProps) {
   const {
     exercises,
@@ -23,9 +32,20 @@ export default function SessionView({
     addSet,
     updateSet,
     deleteSet,
+    loadFromWorkout,
+    resetSession,
   } = useWorkoutSession();
 
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  useEffect(() => {
+    if (!fromWorkoutId) return;
+
+    const workout: Workout | undefined = MOCK_WORKOUTS.find(
+      (w) => w.id === fromWorkoutId
+    );
+    if (!workout) return;
+    resetSession();
+    loadFromWorkout(workout);
+  }, [fromWorkoutId, loadFromWorkout, resetSession]);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const exerciseToDelete = pendingDeleteId
@@ -59,7 +79,7 @@ export default function SessionView({
           No exercises added yet. Click{" "}
           <button
             type="button"
-            onClick={() => setIsPickerOpen(true)}
+            onClick={onOpenPicker}
             className="font-medium text-foreground underline-offset-2 underline decoration-dotted hover:decoration-solid"
           >
             Add Exercise
@@ -68,19 +88,9 @@ export default function SessionView({
         </div>
       )}
 
-      {/* Add exercise button once we have at least one */}
+      {/* Session view with exercises */}
       {hasExercises && (
         <section className="flex h-full flex-col">
-          <div className="mb-4 flex justify-end shrink-0">
-            <button
-              type="button"
-              onClick={() => setIsPickerOpen(true)}
-              className="inline-flex items-center justify-center primary-button"
-            >
-              + Add Exercise
-            </button>
-          </div>
-
           {/* Exercise cards */}
           <div className="flex-1 overflow-y-auto pr-1 pb-4 space-y-6">
             {exercises.map((exercise) => (
@@ -124,10 +134,10 @@ export default function SessionView({
       {/* Exercise picker modal */}
       <ExercisePicker
         isOpen={isPickerOpen}
-        onClose={() => setIsPickerOpen(false)}
+        onClose={onClosePicker}
         onSelect={(id) => {
           addExercise(id);
-          setIsPickerOpen(false);
+          onClosePicker();
         }}
         excludeIds={excludeIds}
         split={selectedMuscleGroups}

@@ -71,7 +71,7 @@
       focus:border-accent focus:ring-1 focus:ring-accent;
   }
   .primary-button {
-    @apply rounded-md border border-border bg-primary px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-primary/90;
+    @apply rounded-md border border-border bg-primary px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-primary/80;
   }
 }
 
