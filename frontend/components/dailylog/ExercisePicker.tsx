@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { MOCK_EXERCISES } from "@/data/mockExercises";
 import type { Exercise } from "@/types/exercise";
+import { formatExerciseMuscleLabel } from "@/lib/util/exercises";
 
 type ExercisePickerProps = {
   isOpen: boolean;
@@ -37,9 +38,10 @@ export default function ExercisePicker({
 
       // 2) filter by split / muscle group if provided
       if (split.length > 0) {
-        const exerciseMuscleGroups = exercise.muscleGroup.map((group) =>
-          group.toLowerCase()
-        );
+        const exerciseMuscleGroups = [
+          exercise.primaryMuscleGroup,
+          ...(exercise.secondaryMuscleGroups ?? []),
+        ].map((group) => group.toLowerCase());
 
         const hasMuscleGroup = split.some((splitGroup) =>
           exerciseMuscleGroups.includes(splitGroup.toLowerCase())
@@ -101,7 +103,7 @@ export default function ExercisePicker({
               >
                 <div>{exercise.name}</div>
                 <div className="text-[11px] uppercase tracking-wide text-muted-foreground mt-1">
-                  {exercise.muscleGroup.join("/")}
+                  {formatExerciseMuscleLabel(exercise)}
                 </div>
               </button>
             ))

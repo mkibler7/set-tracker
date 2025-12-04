@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { MOCK_WORKOUTS } from "@/data/mockWorkouts"; // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
 import type { Workout } from "@/types/workout";
 import DeleteWorkoutModal from "@/components/workouts/DeleteWorkoutModal";
@@ -9,10 +8,9 @@ import { WorkoutsFilters } from "@/components/workouts/WorkoutFilters";
 import { WorkoutList } from "@/components/workouts/WorkoutsList";
 import { Header } from "@/components/workouts/Header";
 import { TimeFilter } from "@/types/workout";
+import PageBackButton from "@/components/shared/PageBackButton";
 
 export default function WorkoutsPage() {
-  const router = useRouter();
-
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [workouts, setWorkouts] = useState<Workout[]>(MOCK_WORKOUTS); // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
   const [deleteTarget, setDeleteTarget] = useState<Workout | null>(null);
@@ -60,35 +58,25 @@ export default function WorkoutsPage() {
   };
 
   return (
-    <main className="flex h-full flex-col px-4 py-2 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-4xl flex h-full flex-col">
-        {/* Header */}
-        <div className="mb-4 flex items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="rounded-md border border-border text-xs hover:primary-button/80 primary-button"
-          >
-            ← Back
-          </button>
-        </div>
-        <Header />
+    <main className="page">
+      {/* Header */}
+      <PageBackButton />
+      <Header />
 
-        {/* Filters */}
-        <WorkoutsFilters
-          timeFilter={timeFilter}
-          onTimeFilterChange={setTimeFilter}
-          search={search}
-          onSearchChange={setSearch}
-        />
+      {/* Filters */}
+      <WorkoutsFilters
+        timeFilter={timeFilter}
+        onTimeFilterChange={setTimeFilter}
+        search={search}
+        onSearchChange={setSearch}
+      />
 
-        {/* List */}
-        <WorkoutList
-          filteredWorkouts={filteredWorkouts}
-          setWorkouts={setWorkouts}
-          setDeleteTarget={setDeleteTarget}
-        />
-      </div>
+      {/* List */}
+      <WorkoutList
+        filteredWorkouts={filteredWorkouts}
+        setWorkouts={setWorkouts}
+        setDeleteTarget={setDeleteTarget}
+      />
 
       <DeleteWorkoutModal
         isOpen={!!deleteTarget}

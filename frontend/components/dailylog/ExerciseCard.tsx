@@ -25,11 +25,15 @@ export default function ExerciseCard({
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [isAddingSet, setIsAddingSet] = useState(false);
 
-  const muscleLabel = Array.isArray(exercise.muscleGroup)
-    ? exercise.muscleGroup.join(" / ")
-    : // fallback if some mock data still uses `muscleGroup`
-      // @ts-ignore
-      exercise.muscleGroup;
+  let muscleLabel: string;
+  if (!exercise.secondaryMuscleGroups) {
+    muscleLabel = exercise.primaryMuscleGroup;
+  } else {
+    muscleLabel =
+      exercise.primaryMuscleGroup +
+      " / " +
+      exercise.secondaryMuscleGroups.join(" / ");
+  }
 
   return (
     <section className="rounded-lg border border-border bg-card/60 p-4 shadow-sm">
