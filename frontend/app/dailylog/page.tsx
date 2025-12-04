@@ -76,45 +76,43 @@ export default function DailyLogPage() {
   };
 
   return (
-    <main className="flex h-full px-4 py-2 sm:px-6 lg:px-8">
-      <div className="mx-auto flex h-full w-full max-w-4xl flex-col">
-        <Header
-          title={headerTitle}
-          date={workoutDate}
-          isSession={step === "session"}
-          onEditSplit={step === "session" ? () => setStep("split") : undefined}
-          onAddExercise={
-            step === "session" ? () => setIsPickerOpen(true) : undefined
-          }
+    <main className="page">
+      <Header
+        title={headerTitle}
+        date={workoutDate}
+        isSession={step === "session"}
+        onEditSplit={step === "session" ? () => setStep("split") : undefined}
+        onAddExercise={
+          step === "session" ? () => setIsPickerOpen(true) : undefined
+        }
+      />
+
+      {step === "empty" && <EmptyState onStart={() => setStep("split")} />}
+
+      {step === "split" && (
+        <SplitSelector
+          allGroups={ALL_SPLIT_GROUPS}
+          selected={selectedMuscleGroups}
+          onToggleGroup={handleToggleMuscleGroup}
+          onCancel={() => {
+            setSelectedMuscleGroups([]);
+            setStep("empty");
+          }}
+          onBegin={handleBeginSession}
         />
-
-        {step === "empty" && <EmptyState onStart={() => setStep("split")} />}
-
-        {step === "split" && (
-          <SplitSelector
-            allGroups={ALL_SPLIT_GROUPS}
-            selected={selectedMuscleGroups}
-            onToggleGroup={handleToggleMuscleGroup}
-            onCancel={() => {
-              setSelectedMuscleGroups([]);
-              setStep("empty");
-            }}
-            onBegin={handleBeginSession}
+      )}
+      
+      {step === "session" && (
+        <div className="flex-1 flex flex-col overflow-hidden scroll">
+          <SessionView
+            selectedMuscleGroups={selectedMuscleGroups}
+            fromWorkoutId={fromWorkoutId}
+            isPickerOpen={isPickerOpen}
+            onClosePicker={() => setIsPickerOpen(false)}
+            onOpenPicker={() => setIsPickerOpen(true)}
           />
-        )}
-
-        {step === "session" && (
-          <div className="flex-1 flex flex-col overflow-hidden scroll">
-            <SessionView
-              selectedMuscleGroups={selectedMuscleGroups}
-              fromWorkoutId={fromWorkoutId}
-              isPickerOpen={isPickerOpen}
-              onClosePicker={() => setIsPickerOpen(false)}
-              onOpenPicker={() => setIsPickerOpen(true)}
-            />
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -23,3 +23,19 @@ export type Workout = {
   split: string;
   exercises: WorkoutExercise[];
 };
+
+export interface CurrentSessionExerciseSet {
+  id: string;
+  setNumber: number;
+  reps: number;
+  weight: number;
+  rpe?: number;
+  tempo?: string;
+  notes?: string;
+}
+
+export interface CurrentSessionExercise {
+  exerciseId: string; // id from your Exercise model
+  exerciseName: string;
+  sets: CurrentSessionExerciseSet[];
+}

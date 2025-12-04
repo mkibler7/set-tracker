@@ -1,135 +1,170 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo } from "react";
+import { useWorkoutStore } from "@/app/store/useWorkoutStore";
 import type { Workout, WorkoutExercise, WorkoutSet } from "@/types/workout";
-import { MOCK_EXERCISES } from "@/data/mockExercises";
-import type { SetFormValues } from "@/components/dailylog/SetForm";
+import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
+import { MOCK_EXERCISES } from "@/data/mockExercises"; // whatever your exercise library is
 
-type SessionExercise = WorkoutExercise;
-
-const createId = () => Math.random().toString(36).slice(2);
+// Whatever your set form values look like coming from ExerciseCard
+export type SetFormValues = {
+  weight?: number;
+  reps?: number;
+  rpe?: number;
+  tempo?: string;
+  notes?: string;
+};
 
 export function useWorkoutSession() {
-  const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
+  const exercises = useWorkoutStore((s) => s.exercises);
+  const setExercises = useWorkoutStore((s) => s.setExercises);
+  const updateExerciseInStore = useWorkoutStore((s) => s.updateExercise);
+  const resetWorkout = useWorkoutStore((s) => s.resetWorkout);
+  const startWorkout = useWorkoutStore((s) => s.startWorkout);
+  const currentWorkoutId = useWorkoutStore((s) => s.currentWorkoutId);
+
+  // Make sure a workout exists once the user starts logging
+  const ensureWorkoutStarted = useCallback(() => {
+    if (!currentWorkoutId) {
+      startWorkout();
+    }
+  }, [currentWorkoutId, startWorkout]);
 
   const hasExercises = exercises.length > 0;
-  const excludeIds = exercises.map((e) => e.id);
 
-  const resetSession = useCallback(() => {
-    setExercises([]);
-  }, []);
+  // For ExercisePicker: avoid adding duplicates
+  const excludeIds = useMemo(() => exercises.map((ex) => ex.id), [exercises]);
 
-  const loadFromWorkout = useCallback((workout: Workout) => {
-    const loadedExercises: SessionExercise[] = workout.exercises.map(
-      (exercise) => ({
-        ...exercise,
-        notes: exercise.notes ?? "",
-        sets: exercise.sets.map((set: WorkoutSet) => ({
-          ...set,
-        })),
-      })
-    );
+  /** ✅ NEW: create a new WorkoutExercise in the global store */
+  const addExercise = useCallback(
+    (exerciseId: string) => {
+      ensureWorkoutStarted();
 
-    setExercises(loadedExercises);
-  }, []);
+      // Look up exercise metadata from your exercise library
+      const base = MOCK_EXERCISES.find(
+        (exercise) => exercise.id === exerciseId
+      );
 
-  const addExercise = (exerciseId: string) => {
-    const template = MOCK_EXERCISES.find((e) => e.id === exerciseId);
-    if (!template) return;
-
-    setExercises((prev) => {
-      if (prev.some((e) => e.id === template.id)) return prev;
+      if (!base) return;
 
       const newExercise: WorkoutExercise = {
-        ...template,
-        notes: "",
+        // id: crypto.randomUUID(), // local id for this workout
+        // exerciseId, // link back to Exercise
+        // name: base?.name ?? "New Exercise",
+        // muscleGroup: base?.primaryMuscleGroup ?? "Unknown",
+        ...base,
         sets: [],
         volume: 0,
       };
 
-      return [...prev, newExercise];
-    });
-  };
+      updateExerciseInStore(newExercise);
+    },
+    [ensureWorkoutStarted, updateExerciseInStore]
+  );
 
-  const removeExercise = (exerciseId: string) => {
-    setExercises((prev) => prev.filter((e) => e.id !== exerciseId));
-  };
+  /**  Push a new set into that exercise’s sets array */
+  const addSet = useCallback(
+    (exerciseId: string, values: SetFormValues) => {
+      ensureWorkoutStarted();
 
-  const updateExerciseNotes = (exerciseId: string, notes: string) => {
-    setExercises((prev) =>
-      prev.map((ex) => (ex.id === exerciseId ? { ...ex, notes } : ex))
-    );
-  };
+      const existing = exercises.find(
+        (ex: any) => ex.id === exerciseId || ex.exerciseId === exerciseId
+      );
+      if (!existing) return;
 
-  const addSet = (exerciseId: string, values: SetFormValues) => {
-    setExercises((prev) =>
-      prev.map((ex) => {
-        if (ex.id !== exerciseId) return ex;
+      const nextSetNumber = existing.sets.length + 1;
 
-        const newSet: WorkoutSet = {
-          id: createId(),
-          reps: values.reps,
-          weight: values.weight,
-          volume: values.volume ?? values.reps * values.weight,
-          rpe: values.rpe,
-          tempo: values.tempo,
-        };
+      const weight = values.weight ?? 0;
+      const reps = values.reps ?? 0;
 
-        const updatedSets = [...ex.sets, newSet];
-        return {
-          ...ex,
-          sets: updatedSets,
-          volume: updatedSets.reduce((sum, s) => sum + s.volume, 0),
-        };
-      })
-    );
-  };
+      const newSet = {
+        id: crypto.randomUUID(),
+        setNumber: nextSetNumber,
+        weight,
+        reps,
+        volume: weight * reps,
+        rpe: values.rpe,
+        tempo: values.tempo ?? "",
+        notes: values.notes ?? "",
+      };
 
-  const updateSet = (
-    exerciseId: string,
-    setId: string,
-    values: SetFormValues
-  ) => {
-    setExercises((prev) =>
-      prev.map((ex) => {
-        if (ex.id !== exerciseId) return ex;
+      const updated: WorkoutExercise = {
+        ...existing,
+        sets: [...existing.sets, newSet],
+      };
 
-        const updatedSets = ex.sets.map((set) =>
-          set.id === setId
-            ? {
-                ...set,
-                reps: values.reps,
-                weight: values.weight,
-                volume: values.volume ?? values.reps * values.weight,
-                rpe: values.rpe,
-                tempo: values.tempo,
-              }
-            : set
-        );
+      updateExerciseInStore(updated);
+    },
+    [ensureWorkoutStarted, exercises, updateExerciseInStore]
+  );
 
-        return {
-          ...ex,
-          sets: updatedSets,
-          volume: updatedSets.reduce((sum, s) => sum + s.volume, 0),
-        };
-      })
-    );
-  };
+  /** Update an existing set */
+  const updateSet = useCallback(
+    (exerciseId: string, setId: string, values: SetFormValues) => {
+      const ex = exercises.find((exercise: any) => exercise.id === exerciseId);
+      if (!ex) return;
 
-  const deleteSet = (exerciseId: string, setId: string) => {
-    setExercises((prev) =>
-      prev.map((ex) => {
-        if (ex.id !== exerciseId) return ex;
+      const updatedSets = ex.sets.map((set: any) =>
+        set.id === setId ? { ...set, ...values } : set
+      );
 
-        const updatedSets = ex.sets.filter((set) => set.id !== setId);
-        return {
-          ...ex,
-          sets: updatedSets,
-          volume: updatedSets.reduce((sum, s) => sum + s.volume, 0),
-        };
-      })
-    );
-  };
+      updateExerciseInStore({ ...ex, sets: updatedSets });
+    },
+    [exercises, updateExerciseInStore]
+  );
+
+  /** Delete a set */
+  const deleteSet = useCallback(
+    (exerciseId: string, setId: string) => {
+      const ex = exercises.find(
+        (e: any) => e.id === exerciseId || e.exerciseId === exerciseId
+      );
+      if (!ex) return;
+
+      const updatedSets = ex.sets.filter((set: any) => set.id !== setId);
+
+      updateExerciseInStore({ ...ex, sets: updatedSets });
+    },
+    [exercises, updateExerciseInStore]
+  );
+
+  /** Update notes on an exercise */
+  const updateExerciseNotes = useCallback(
+    (exerciseId: string, notes: string) => {
+      const ex = exercises.find(
+        (e: any) => e.id === exerciseId || e.exerciseId === exerciseId
+      );
+      if (!ex) return;
+
+      updateExerciseInStore({ ...ex, notes });
+    },
+    [exercises, updateExerciseInStore]
+  );
+
+  /** Remove an entire exercise from the workout */
+  const removeExercise = useCallback(
+    (exerciseId: string) => {
+      const remaining = exercises.filter(
+        (e: any) => e.id !== exerciseId && e.exerciseId !== exerciseId
+      );
+      setExercises(remaining);
+    },
+    [exercises, setExercises]
+  );
+
+  /** Load an existing mock workout (your “repeat workout” flow) */
+  const loadFromWorkout = useCallback(
+    (workout: Workout) => {
+      // Assuming workout.exercises already has the correct WorkoutExercise shape:
+      setExercises(workout.exercises as WorkoutExercise[]);
+    },
+    [setExercises]
+  );
+
+  /** Clear the current in-memory workout session */
+  const resetSession = useCallback(() => {
+    resetWorkout();
+  }, [resetWorkout]);
 
   return {
     exercises,

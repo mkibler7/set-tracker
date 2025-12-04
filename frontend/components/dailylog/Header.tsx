@@ -4,6 +4,7 @@ import React from "react";
 import { Button } from "../ui/Button";
 import { useRouter } from "next/navigation";
 import EditIcon from "./edit-icon";
+import PageBackButton from "@/components/shared/PageBackButton";
 
 type HeaderProps = {
   title: string;
@@ -41,14 +42,7 @@ export default function Header({
   return (
     // <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <Button
-        type="button"
-        onClick={() => router.back()}
-        className="mb-4 rounded-md border border-border
-             px-3 py-1 text-xs text-muted-foreground hover:bg-card/40"
-      >
-        ← Back
-      </Button>
+      <PageBackButton />
       <p className="text-sm mb-2 tracking-tight text-muted-foreground">
         {headerPrefix}
       </p>
@@ -84,7 +78,6 @@ export default function Header({
       </div>
 
       <p className="mb-6 text-sm text-muted-foreground">{formattedDate}</p>
-    </div>
-    // </div>
+    </div>  
   );
 }
