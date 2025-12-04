@@ -78,7 +78,6 @@ export default function Header({
       </div>
 
       <p className="mb-6 text-sm text-muted-foreground">{formattedDate}</p>
-    </div>
-    // </div>
+    </div>  
   );
 }

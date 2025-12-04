@@ -1,6 +1,6 @@
 import type { CurrentSessionExercise } from "@/types/exercise";
 
-export default function ExerciseCurrentSessionCard({
+export default function CurrentSessionCard({
   session,
   workoutId,
 }: {

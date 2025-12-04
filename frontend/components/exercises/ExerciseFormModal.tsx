@@ -133,7 +133,7 @@ export default function ExerciseFormModal({
               Secondary muscle groups (optional)
             </label>
 
-            <div className="flex flex-wrap gap-2 rounded-md bg-slate-900/60 px-3 py-2">
+            <div className="flex flex-wrap gap-2 rounded-md bg-slate-850 px-3 py-2">
               {ALL_MUSCLE_GROUPS.map((group) => {
                 const isSelected = values.secondaryMuscleGroups.includes(group);
 
@@ -146,7 +146,7 @@ export default function ExerciseFormModal({
                       "rounded-full border px-3 py-1 text-xs transition-colors " +
                       (isSelected
                         ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-card/40 text-muted-foreground hover:bg-card/80")
+                        : "border-border bg-card/50 text-muted-foreground hover:bg-card/80")
                     }
                     aria-pressed={isSelected}
                   >

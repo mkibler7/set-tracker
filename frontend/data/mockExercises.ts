@@ -34,6 +34,18 @@ export const MOCK_EXERCISES: Exercise[] = [
       "The machine chest press is a strength training exercise that targets the chest muscles (pectoralis major) using a specialized machine. It is designed to mimic the motion of a traditional bench press while providing added stability and support. This exercise primarily works the chest, shoulders, and triceps.",
   },
   {
+    id: "incline-dumbbell-bench-press",
+    name: "Incline Dumbbell Bench Press",
+    primaryMuscleGroup: "Chest",
+    secondaryMuscleGroups: ["Shoulders", "Triceps"],
+  },
+  {
+    id: "machine-chest-press",
+    name: "Machine Chest Press",
+    primaryMuscleGroup: "Chest",
+    secondaryMuscleGroups: ["Shoulders", "Triceps"],
+  },
+  {
     id: "back-squat",
     name: "Barbell Squat",
     primaryMuscleGroup: "Quads",
@@ -56,6 +68,18 @@ export const MOCK_EXERCISES: Exercise[] = [
     secondaryMuscleGroups: ["Glutes", "Hamstrings"],
     description:
       "Walking lunges are a unilateral lower-body exercise that targets the quads and glutes while improving balance, coordination, and hip stability.",
+  },
+  {
+    id: "front-squat",
+    name: "Front Squat",
+    primaryMuscleGroup: "Quads",
+    secondaryMuscleGroups: ["Glutes", "Hamstrings"],
+  },
+  {
+    id: "walking-lunge",
+    name: "Walking Lunge",
+    primaryMuscleGroup: "Quads",
+    secondaryMuscleGroups: ["Glutes", "Hamstrings"],
   },
   {
     id: "deadlift",
@@ -128,6 +152,19 @@ export const MOCK_EXERCISES: Exercise[] = [
     secondaryMuscleGroups: ["Biceps", "Shoulders"],
     description:
       "The single-arm row uses a dumbbell or cable to train each side of the back independently, helping correct imbalances and improve mind–muscle connection.",
+  },
+  {
+    id: "pull-up",
+    name: "Pull Up",
+    primaryMuscleGroup: "Back",
+    secondaryMuscleGroups: ["Biceps", "Shoulders"],
+  },
+  {
+    id: "single-arm-row",
+    name: "Single Arm Row",
+    primaryMuscleGroup: "Back",
+    secondaryMuscleGroups: ["Biceps", "Shoulders"],
+
   },
   {
     id: "lat-pulldown-wide",

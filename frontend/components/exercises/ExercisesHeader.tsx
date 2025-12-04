@@ -17,9 +17,9 @@ export default function ExercisesHeader({
       <PageBackButton />
 
       <div className="mb-5 flex items-center justify-between gap-2">
-        <h1 className="text-2xl mb-1 font-semibold tracking-tight text-foreground">
+        <p className="text-2xl mb-1 font-semibold tracking-tight text-foreground">
           Exercises
-        </h1>
+        </p>
         <button className="primary-button" onClick={onAddExercise}>
           + Add Exercise
         </button>

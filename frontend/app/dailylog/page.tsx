@@ -101,7 +101,7 @@ export default function DailyLogPage() {
           onBegin={handleBeginSession}
         />
       )}
-
+      
       {step === "session" && (
         <div className="flex-1 flex flex-col overflow-hidden scroll">
           <SessionView

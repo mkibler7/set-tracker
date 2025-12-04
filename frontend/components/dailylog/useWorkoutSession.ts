@@ -48,7 +48,6 @@ export function useWorkoutSession() {
       if (!base) return;
 
       const newExercise: WorkoutExercise = {
-        // ⚠️ make sure these fields match your existing WorkoutExercise type
         // id: crypto.randomUUID(), // local id for this workout
         // exerciseId, // link back to Exercise
         // name: base?.name ?? "New Exercise",
@@ -171,13 +170,14 @@ export function useWorkoutSession() {
     exercises,
     hasExercises,
     excludeIds,
+    setExercises,
+    resetSession,
     addExercise,
+    loadFromWorkout,
     removeExercise,
     updateExerciseNotes,
     addSet,
     updateSet,
     deleteSet,
-    loadFromWorkout,
-    resetSession,
   };
 }
