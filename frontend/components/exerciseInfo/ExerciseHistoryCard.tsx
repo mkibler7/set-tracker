@@ -29,9 +29,12 @@ export default function ExerciseHistoryCard({
     <article className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3 sm:px-6 sm:py-4">
       <header className="mb-3 flex items-center justify-between gap-2">
         <div>
-          <p className="mb-1 text-sm font-semibold text-foreground">
-            {entry.workoutName} • {entry.workoutDate}
-          </p>
+          <div className=" mb-1 flex gap-1 items-center">
+            <p className="text-sm font-semibold text-foreground">
+              {entry.workoutName}
+            </p>
+            <p className="text-xs font-light">• {entry.workoutDate}</p>
+          </div>
           <h3 className="text-xs text-muted-foreground">
             {entry.totalVolume.toLocaleString()} volume
           </h3>
@@ -59,13 +62,13 @@ export default function ExerciseHistoryCard({
             </tr>
           </thead>
           <tbody>
-            {entry.sets.map((s) => (
-              <tr key={s.setNumber} className="border-b border-slate-900">
-                <td className="py-1">{s.setNumber}</td>
-                <td className="py-1 text-right">{s.weight}</td>
-                <td className="py-1 text-right">{s.reps}</td>
-                <td className="py-1 text-right">{s.tempo ?? "-"}</td>
-                <td className="py-1 text-right">{s.rpe ?? "-"}</td>
+            {entry.sets.map((set) => (
+              <tr key={set.setNumber} className="border-b border-slate-900">
+                <td className="py-1">{set.setNumber}</td>
+                <td className="py-1 text-right">{set.weight}</td>
+                <td className="py-1 text-right">{set.reps}</td>
+                <td className="py-1 text-right">{set.tempo ?? "-"}</td>
+                <td className="py-1 text-right">{set.rpe ?? "-"}</td>
               </tr>
             ))}
           </tbody>
