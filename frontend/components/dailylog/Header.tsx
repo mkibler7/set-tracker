@@ -48,9 +48,13 @@ export default function Header({
       </p>
 
       {/* Title + Edit button on one line */}
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        {/* left side: title + edit */}
+        <div className="flex min-w-0 items-center gap-2">
+          <h1
+            className="max-w-[70vw] truncate text-2xl font-semibold tracking-tight text-foreground sm:max-w-none"
+            title={title} // shows full string on hover / long-press
+          >
             {title}
           </h1>
 
@@ -70,7 +74,7 @@ export default function Header({
           <button
             type="button"
             onClick={onAddExercise}
-            className="primary-button"
+            className="primary-button min-w-[8rem] flex-shrink-0 whitespace-nowrap"
           >
             + Add Exercise
           </button>
