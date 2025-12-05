@@ -29,27 +29,29 @@ export default function HistoryTable({
               </tr>
             </thead>
             <tbody>
-              {history.map((row) => (
-                <tr
-                  key={row.workoutId}
-                  className="border-b border-slate-800 last:border-0"
-                >
-                  <td className="py-1 pr-4">
-                    {format(new Date(row.workoutDate), "MMM d, yyyy")}
-                  </td>
-                  <td className="py-1 pr-4">
-                    {row.topSet
-                      ? `${row.topSet.weight} x ${row.topSet.reps}`
-                      : "-"}
-                  </td>
-                  <td className="py-1 pr-4">
-                    {row.totalVolume.toLocaleString()} lb
-                  </td>
-                  <td className="py-1 pr-4 max-w-xs truncate text-slate-400">
-                    {row.notes ?? ""}
-                  </td>
-                </tr>
-              ))}
+              {history.map((row) => {
+                const topSet = row.sets[0];
+
+                return (
+                  <tr
+                    key={row.workoutId}
+                    className="border-b border-slate-800 last:border-0"
+                  >
+                    <td className="py-1 pr-4">
+                      {format(new Date(row.workoutDate), "MMM d, yyyy")}
+                    </td>
+                    <td className="py-1 pr-4">
+                      {topSet ? `${topSet.weight} x ${topSet.reps}` : "-"}
+                    </td>
+                    <td className="py-1 pr-4">
+                      {row.totalVolume.toLocaleString()} lb
+                    </td>
+                    <td className="py-1 pr-4 max-w-xs truncate text-slate-400">
+                      {row.notes ?? ""}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
