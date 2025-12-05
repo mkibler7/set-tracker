@@ -14,6 +14,11 @@ type ExercisePickerProps = {
   split?: string[]; // e.g. "Chest", "Back", etc. (optional for now)
 };
 
+// 🔹 Build a de-duplicated list of exercises by id
+const UNIQUE_EXERCISES = Array.from(
+  new Map(MOCK_EXERCISES.map((exercise) => [exercise.id, exercise])).values()
+);
+
 const buttonClassName =
   "w-full mt-3 h-[2rem] rounded-md border border-border bg-card px-3 font-medium text-muted-foreground hover:bg-accent/20 hover:border-accent hover:text-accent-foreground";
 
@@ -30,7 +35,7 @@ export default function ExercisePicker({
   const filteredExercises = useMemo(() => {
     const lowerSearch = search.toLowerCase();
 
-    return MOCK_EXERCISES.filter((exercise) => {
+    return UNIQUE_EXERCISES.filter((exercise) => {
       // 1) hide ones already in the workout
       if (excludeIds.includes(exercise.id)) {
         return false;

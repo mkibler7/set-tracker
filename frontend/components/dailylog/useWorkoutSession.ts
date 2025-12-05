@@ -1,183 +1,213 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
-import { useWorkoutStore } from "@/app/store/useWorkoutStore";
-import type { Workout, WorkoutExercise, WorkoutSet } from "@/types/workout";
-import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
-import { MOCK_EXERCISES } from "@/data/mockExercises"; // whatever your exercise library is
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { WorkoutExercise, WorkoutSession } from "@/types/workout";
+import type { SetFormValues } from "@/components/dailylog/SetForm";
 
-// Whatever your set form values look like coming from ExerciseCard
-export type SetFormValues = {
-  weight?: number;
-  reps?: number;
-  rpe?: number;
-  tempo?: string;
-  notes?: string;
+/**
+ * Shape of the workout session store.
+ * - currentWorkout: the active in-progress workout
+ * - actions: functions to start/modify/end that workout
+ */
+type WorkoutSessionState = {
+  currentWorkout: WorkoutSession | null;
+  // actions
+  startWorkout: (
+    name: string,
+    date: string,
+    exercises?: WorkoutExercise[]
+  ) => void;
+  addExercise: (exercise: WorkoutExercise) => void;
+  removeExercise: (exerciseId: string) => void;
+  addSet: (exerciseId: string, values: SetFormValues) => void;
+  updateSet: (exerciseId: string, setId: string, values: SetFormValues) => void;
+  deleteSet: (exerciseId: string, setId: string) => void;
+  updateExerciseNotes: (exerciseId: string, notes: string) => void;
+  endWorkout: () => void;
 };
 
-export function useWorkoutSession() {
-  const exercises = useWorkoutStore((s) => s.exercises);
-  const setExercises = useWorkoutStore((s) => s.setExercises);
-  const updateExerciseInStore = useWorkoutStore((s) => s.updateExercise);
-  const resetWorkout = useWorkoutStore((s) => s.resetWorkout);
-  const startWorkout = useWorkoutStore((s) => s.startWorkout);
-  const currentWorkoutId = useWorkoutStore((s) => s.currentWorkoutId);
+/**
+ * Global Zustand store for the current workout session.
+ * Wrapped in `persist` so it survives page reloads (localStorage key: "workout-session").
+ */
+export const useWorkoutSession = create<WorkoutSessionState>()(
+  persist(
+    (set, get) => ({
+      // No active workout by default
+      currentWorkout: null,
 
-  // Make sure a workout exists once the user starts logging
-  const ensureWorkoutStarted = useCallback(() => {
-    if (!currentWorkoutId) {
-      startWorkout();
+      /**
+       * Start a new workout session.
+       * - name -> becomes the `split` label (e.g. "Chest / Triceps")
+       * - date -> ISO string or similar
+       * - exercises -> optional seed list (e.g. when loading from a saved workout)
+       */
+      startWorkout: (name, date, exercises = []) =>
+        set({
+          currentWorkout: {
+            id: "session-" + Date.now(),
+            split: name,
+            date,
+            exercises,
+          },
+        }),
+
+      /**
+       * Add a new exercise to the current workout.
+       * If there is no active workout, this is a no-op.
+       */
+      addExercise: (exercise) =>
+        set((state) =>
+          state.currentWorkout
+            ? {
+                currentWorkout: {
+                  ...state.currentWorkout,
+                  exercises: [...state.currentWorkout.exercises, exercise],
+                },
+              }
+            : state
+        ),
+
+      /**
+       * Remove an exercise (and all of its sets) from the workout.
+       */
+      removeExercise: (exerciseId) =>
+        set((state) =>
+          state.currentWorkout
+            ? {
+                currentWorkout: {
+                  ...state.currentWorkout,
+                  exercises: state.currentWorkout.exercises.filter(
+                    (exercise) => exercise.id !== exerciseId
+                  ),
+                },
+              }
+            : state
+        ),
+
+      /**
+       * Add a new set to a specific exercise.
+       * - Finds the exercise by id
+       * - Appends a new set object with a generated id and computed volume
+       */
+      addSet: (exerciseId, values) =>
+        set((state) => {
+          const session = state.currentWorkout;
+          if (!session) return state;
+
+          const weight = values.weight ?? 0;
+          const reps = values.reps ?? 0;
+
+          return {
+            currentWorkout: {
+              ...session,
+              exercises: session.exercises.map((exercise) =>
+                exercise.id === exerciseId
+                  ? {
+                      ...exercise,
+                      sets: [
+                        ...exercise.sets,
+                        {
+                          id: "set-" + Date.now(),
+                          reps,
+                          weight,
+                          tempo: values.tempo,
+                          rpe: values.rpe,
+                          volume: weight * reps,
+                        },
+                      ],
+                    }
+                  : exercise
+              ),
+            },
+          };
+        }),
+
+      /**
+       * Update an existing set on an exercise.
+       * - Merges the new values into the set
+       * - Recalculates volume from reps * weight
+       */
+      updateSet: (exerciseId, setId, values) =>
+        set((state) => {
+          const session = state.currentWorkout;
+          if (!session) return state;
+
+          return {
+            currentWorkout: {
+              ...session,
+              exercises: session.exercises.map((exercise) =>
+                exercise.id === exerciseId
+                  ? {
+                      ...exercise,
+                      sets: exercise.sets.map((set) =>
+                        set.id === setId
+                          ? {
+                              ...set,
+                              ...values,
+                              volume:
+                                (values.reps ?? set.reps) *
+                                (values.weight ?? set.weight),
+                            }
+                          : set
+                      ),
+                    }
+                  : exercise
+              ),
+            },
+          };
+        }),
+
+      /**
+       * Delete a set from an exercise.
+       */
+      deleteSet: (exerciseId, setId) =>
+        set((state) => {
+          const session = state.currentWorkout;
+          if (!session) return state;
+
+          return {
+            currentWorkout: {
+              ...session,
+              exercises: session.exercises.map((exercise) =>
+                exercise.id === exerciseId
+                  ? {
+                      ...exercise,
+                      sets: exercise.sets.filter((set) => set.id !== setId),
+                    }
+                  : exercise
+              ),
+            },
+          };
+        }),
+
+      /**
+       * Update the free-text notes field on a specific exercise.
+       */
+      updateExerciseNotes: (exerciseId, notes) =>
+        set((state) => {
+          const session = state.currentWorkout;
+          if (!session) return state;
+
+          return {
+            currentWorkout: {
+              ...session,
+              exercises: session.exercises.map((exercise) =>
+                exercise.id === exerciseId ? { ...exercise, notes } : exercise
+              ),
+            },
+          };
+        }),
+
+      /**
+       * Completely clear the active workout.
+       * (You might later replace this with logic that also POSTs to an API first.)
+       */
+      endWorkout: () => set({ currentWorkout: null }),
+    }),
+    {
+      name: "workout-session",
     }
-  }, [currentWorkoutId, startWorkout]);
-
-  const hasExercises = exercises.length > 0;
-
-  // For ExercisePicker: avoid adding duplicates
-  const excludeIds = useMemo(() => exercises.map((ex) => ex.id), [exercises]);
-
-  /** ✅ NEW: create a new WorkoutExercise in the global store */
-  const addExercise = useCallback(
-    (exerciseId: string) => {
-      ensureWorkoutStarted();
-
-      // Look up exercise metadata from your exercise library
-      const base = MOCK_EXERCISES.find(
-        (exercise) => exercise.id === exerciseId
-      );
-
-      if (!base) return;
-
-      const newExercise: WorkoutExercise = {
-        // id: crypto.randomUUID(), // local id for this workout
-        // exerciseId, // link back to Exercise
-        // name: base?.name ?? "New Exercise",
-        // muscleGroup: base?.primaryMuscleGroup ?? "Unknown",
-        ...base,
-        sets: [],
-        volume: 0,
-      };
-
-      updateExerciseInStore(newExercise);
-    },
-    [ensureWorkoutStarted, updateExerciseInStore]
-  );
-
-  /**  Push a new set into that exercise’s sets array */
-  const addSet = useCallback(
-    (exerciseId: string, values: SetFormValues) => {
-      ensureWorkoutStarted();
-
-      const existing = exercises.find(
-        (ex: any) => ex.id === exerciseId || ex.exerciseId === exerciseId
-      );
-      if (!existing) return;
-
-      const nextSetNumber = existing.sets.length + 1;
-
-      const weight = values.weight ?? 0;
-      const reps = values.reps ?? 0;
-
-      const newSet = {
-        id: crypto.randomUUID(),
-        setNumber: nextSetNumber,
-        weight,
-        reps,
-        volume: weight * reps,
-        rpe: values.rpe,
-        tempo: values.tempo ?? "",
-        notes: values.notes ?? "",
-      };
-
-      const updated: WorkoutExercise = {
-        ...existing,
-        sets: [...existing.sets, newSet],
-      };
-
-      updateExerciseInStore(updated);
-    },
-    [ensureWorkoutStarted, exercises, updateExerciseInStore]
-  );
-
-  /** Update an existing set */
-  const updateSet = useCallback(
-    (exerciseId: string, setId: string, values: SetFormValues) => {
-      const ex = exercises.find((exercise: any) => exercise.id === exerciseId);
-      if (!ex) return;
-
-      const updatedSets = ex.sets.map((set: any) =>
-        set.id === setId ? { ...set, ...values } : set
-      );
-
-      updateExerciseInStore({ ...ex, sets: updatedSets });
-    },
-    [exercises, updateExerciseInStore]
-  );
-
-  /** Delete a set */
-  const deleteSet = useCallback(
-    (exerciseId: string, setId: string) => {
-      const ex = exercises.find(
-        (e: any) => e.id === exerciseId || e.exerciseId === exerciseId
-      );
-      if (!ex) return;
-
-      const updatedSets = ex.sets.filter((set: any) => set.id !== setId);
-
-      updateExerciseInStore({ ...ex, sets: updatedSets });
-    },
-    [exercises, updateExerciseInStore]
-  );
-
-  /** Update notes on an exercise */
-  const updateExerciseNotes = useCallback(
-    (exerciseId: string, notes: string) => {
-      const ex = exercises.find(
-        (e: any) => e.id === exerciseId || e.exerciseId === exerciseId
-      );
-      if (!ex) return;
-
-      updateExerciseInStore({ ...ex, notes });
-    },
-    [exercises, updateExerciseInStore]
-  );
-
-  /** Remove an entire exercise from the workout */
-  const removeExercise = useCallback(
-    (exerciseId: string) => {
-      const remaining = exercises.filter(
-        (e: any) => e.id !== exerciseId && e.exerciseId !== exerciseId
-      );
-      setExercises(remaining);
-    },
-    [exercises, setExercises]
-  );
-
-  /** Load an existing mock workout (your “repeat workout” flow) */
-  const loadFromWorkout = useCallback(
-    (workout: Workout) => {
-      // Assuming workout.exercises already has the correct WorkoutExercise shape:
-      setExercises(workout.exercises as WorkoutExercise[]);
-    },
-    [setExercises]
-  );
-
-  /** Clear the current in-memory workout session */
-  const resetSession = useCallback(() => {
-    resetWorkout();
-  }, [resetWorkout]);
-
-  return {
-    exercises,
-    hasExercises,
-    excludeIds,
-    setExercises,
-    resetSession,
-    addExercise,
-    loadFromWorkout,
-    removeExercise,
-    updateExerciseNotes,
-    addSet,
-    updateSet,
-    deleteSet,
-  };
-}
+  )
+);

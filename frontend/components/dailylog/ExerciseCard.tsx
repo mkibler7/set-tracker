@@ -1,9 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import type { WorkoutExercise } from "@/types/workout";
 import SetForm, { SetFormValues } from "@/components/dailylog/SetForm";
 import ExercisePanel from "@/components/dailylog/ExercisePanel";
+import InfoIcon from "@/components/icons/info-icon";
 
 type ExerciseCardProps = {
   exercise: WorkoutExercise;
@@ -22,8 +24,13 @@ export default function ExerciseCard({
   onDeleteSet,
   onNotesChange,
 }: ExerciseCardProps) {
+  const router = useRouter();
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [isAddingSet, setIsAddingSet] = useState(false);
+
+  const handleOpenDetails = () => {
+    router.push(`/exercises/${exercise.id}?fromDailyLog=true`);
+  };
 
   let muscleLabel: string;
   if (!exercise.secondaryMuscleGroups) {
@@ -40,9 +47,18 @@ export default function ExerciseCard({
       {/* Header */}
       <div className="mb-3 flex items-start justify-between gap-2">
         <div>
-          <h2 className="mb-2 text-base font-semibold text-foreground">
-            {exercise.name}
-          </h2>
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-base font-semibold text-foreground">
+              {exercise.name}
+            </h2>
+            <button
+              type="button"
+              onClick={handleOpenDetails}
+              className="text-emerald-400 hover:text-emerald-500"
+            >
+              <InfoIcon />
+            </button>
+          </div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
             {muscleLabel}
           </p>

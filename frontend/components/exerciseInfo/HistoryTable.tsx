@@ -1,18 +1,25 @@
 import type { ExerciseHistoryEntry } from "@/types/exercise";
 import { format } from "date-fns";
 
-export default function HistoryTable({
-  history,
-}: {
+type HistoryTableProps = {
   history: ExerciseHistoryEntry[];
-}) {
+};
+
+/**
+ * Compact history table for an exercise.
+ * - One row per workout
+ * - Date, top set, total volume, and notes
+ */
+export default function HistoryTable({ history }: HistoryTableProps) {
+  const hasHistory = history.length > 0;
+
   return (
     <div className="rounded-2xl bg-slate-900/60 p-5 shadow-sm">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
         History
       </h2>
 
-      {history.length === 0 ? (
+      {!hasHistory ? (
         <p className="mt-3 text-sm text-slate-400">
           No history yet. Once you log sets for this exercise, they&apos;ll show
           up here.
@@ -37,15 +44,18 @@ export default function HistoryTable({
                   <td className="py-1 pr-4">
                     {format(new Date(row.workoutDate), "MMM d, yyyy")}
                   </td>
+
                   <td className="py-1 pr-4">
-                    {row.topSet
-                      ? `${row.topSet.weight} x ${row.topSet.reps}`
+                    {row.sets.length > 0
+                      ? `${row.sets[0].weight} x ${row.sets[0].reps}`
                       : "-"}
                   </td>
+
                   <td className="py-1 pr-4">
                     {row.totalVolume.toLocaleString()} lb
                   </td>
-                  <td className="py-1 pr-4 max-w-xs truncate text-slate-400">
+
+                  <td className="max-w-xs py-1 pr-4 truncate text-slate-400">
                     {row.notes ?? ""}
                   </td>
                 </tr>

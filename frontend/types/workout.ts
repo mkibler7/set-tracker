@@ -24,18 +24,16 @@ export type Workout = {
   exercises: WorkoutExercise[];
 };
 
-export interface CurrentSessionExerciseSet {
+/**
+ * Local, in-progress workout session.
+ * Lives in your client store (e.g., Zustand) until the user finishes
+ * and you persist it to the DB.
+ */
+export interface WorkoutSession {
   id: string;
-  setNumber: number;
-  reps: number;
-  weight: number;
-  rpe?: number;
-  tempo?: string;
+  split: string;
+  date: string;
+  exercises: WorkoutExercise[];
   notes?: string;
-}
-
-export interface CurrentSessionExercise {
-  exerciseId: string; // id from your Exercise model
-  exerciseName: string;
-  sets: CurrentSessionExerciseSet[];
+  isCompleted?: boolean;
 }

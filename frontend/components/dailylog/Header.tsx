@@ -3,7 +3,7 @@
 import React from "react";
 import { Button } from "../ui/Button";
 import { useRouter } from "next/navigation";
-import EditIcon from "./edit-icon";
+import EditIcon from "../icons/edit-icon";
 import PageBackButton from "@/components/shared/PageBackButton";
 
 type HeaderProps = {
@@ -78,6 +78,6 @@ export default function Header({
       </div>
 
       <p className="mb-6 text-sm text-muted-foreground">{formattedDate}</p>
-    </div>  
+    </div>
   );
 }
