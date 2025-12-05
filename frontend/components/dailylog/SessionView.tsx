@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ExercisePicker from "@/components/dailylog/ExercisePicker";
 import ExerciseCard from "@/components/dailylog/ExerciseCard";
 import DeleteExerciseModal from "./DeleteExerciseModal";
 import { useWorkoutSession } from "@/components/dailylog/useWorkoutSession";
-import { MOCK_WORKOUTS, Workout } from "@/data/mockWorkouts";
+import { MOCK_EXERCISES } from "@/data/mockExercises";
+import type { WorkoutExercise } from "@/types/workout";
 
 type SessionViewProps = {
   selectedMuscleGroups: string[];
-  fromWorkoutId?: string | null;
+  fromWorkoutId?: string | null; // we’ll keep this for now, even if unused
   isPickerOpen: boolean;
   onClosePicker: () => void;
   onOpenPicker: () => void;
@@ -17,40 +18,33 @@ type SessionViewProps = {
 
 export default function SessionView({
   selectedMuscleGroups,
-  fromWorkoutId,
+  // fromWorkoutId, // not used for now – we can reintroduce it later
   isPickerOpen,
   onClosePicker,
   onOpenPicker,
 }: SessionViewProps) {
   const {
-    exercises,
-    hasExercises,
-    excludeIds,
+    currentWorkout,
     addExercise,
     removeExercise,
     updateExerciseNotes,
     addSet,
     updateSet,
     deleteSet,
-    loadFromWorkout,
-    resetSession,
   } = useWorkoutSession();
 
-  useEffect(() => {
-    if (!fromWorkoutId) return;
-
-    const workout: Workout | undefined = MOCK_WORKOUTS.find(
-      (w) => w.id === fromWorkoutId
-    );
-    if (!workout) return;
-    resetSession();
-    loadFromWorkout(workout);
-  }, [fromWorkoutId, loadFromWorkout, resetSession]);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
+  // Always have an array so we don't blow up on .length or .map
+  const exercises = currentWorkout?.exercises ?? [];
 
   const exerciseToDelete = pendingDeleteId
     ? exercises.find((exercise) => exercise.id === pendingDeleteId)
     : undefined;
+
+  // Helpers that replaced the old store fields
+  const hasExercises = exercises.length > 0;
+  const excludedIds = exercises.map((ex) => ex.id);
 
   // Mini summary numbers
   const exerciseCount = exercises.length;
@@ -70,6 +64,27 @@ export default function SessionView({
       }, 0)
     );
   }, 0);
+
+  // Turn an exercise id from the picker into a WorkoutExercise for the session
+  const handleSelectExercise = (id: string) => {
+    const base = MOCK_EXERCISES.find((ex) => ex.id === id);
+    if (!base) return;
+
+    const workoutExercise: WorkoutExercise = {
+      id: base.id,
+      name: base.name,
+      primaryMuscleGroup: base.primaryMuscleGroup,
+      secondaryMuscleGroups: base.secondaryMuscleGroups ?? [],
+      notes: "",
+      sets: [],
+      // if your WorkoutExercise type has additional fields (e.g. volume),
+      // initialize them here as well:
+      volume: 0,
+    };
+
+    addExercise(workoutExercise);
+    onClosePicker();
+  };
 
   return (
     <>
@@ -113,7 +128,7 @@ export default function SessionView({
           {/* Bottom – Save button, always visible at bottom of window */}
           <div className="mt-2 shrink-0">
             {/* mini summary line */}
-            <div className="flex mb-2 items-center justify-between text-xs text-muted-foreground">
+            <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
               <span>
                 {exerciseCount} {exerciseCount === 1 ? "exercise" : "exercises"}{" "}
                 • {setCount} {setCount === 1 ? "set" : "sets"}
@@ -135,13 +150,11 @@ export default function SessionView({
       <ExercisePicker
         isOpen={isPickerOpen}
         onClose={onClosePicker}
-        onSelect={(id) => {
-          addExercise(id);
-          onClosePicker();
-        }}
-        excludeIds={excludeIds}
+        onSelect={handleSelectExercise}
+        excludeIds={excludedIds}
         split={selectedMuscleGroups}
       />
+
       {/* Delete exercise modal */}
       <DeleteExerciseModal
         open={pendingDeleteId !== null}

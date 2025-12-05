@@ -11,12 +11,17 @@ import { ExerciseFormValues, MuscleGroup } from "@/types/exercise";
 // Derive the Exercise type from your mock data
 type Exercise = (typeof MOCK_EXERCISES)[number];
 
+// Build a unique list of exercises by id
+const UNIQUE_EXERCISES: Exercise[] = Array.from(
+  new Map(MOCK_EXERCISES.map((ex) => [ex.id, ex])).values()
+);
+
 export default function ExercisesPage() {
   const [search, setSearch] = useState("");
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
 
-  // 🔹 This is the source of truth now (instead of using MOCK_EXERCISES directly)
-  const [exercises, setExercises] = useState<Exercise[]>(MOCK_EXERCISES);
+  // Use the de-duplicated list as the initial state
+  const [exercises, setExercises] = useState<Exercise[]>(UNIQUE_EXERCISES);
 
   // controls the Add Exercise modal
   const [isFormOpen, setIsFormOpen] = useState(false);

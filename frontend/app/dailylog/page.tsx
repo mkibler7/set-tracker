@@ -6,7 +6,8 @@ import Header from "@/components/dailylog/Header";
 import EmptyState from "@/components/dailylog/EmptyState";
 import SplitSelector from "@/components/dailylog/SplitSelector";
 import SessionView from "@/components/dailylog/SessionView";
-import { MOCK_WORKOUTS, Workout } from "@/data/mockWorkouts"; // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
+import { useWorkoutSession } from "@/components/dailylog/useWorkoutSession";
+import { MOCK_WORKOUTS, Workout } from "@/data/mockWorkouts";
 
 type WorkoutStep = "empty" | "split" | "session";
 
@@ -27,6 +28,17 @@ const ALL_SPLIT_GROUPS = [
 ];
 
 export default function DailyLogPage() {
+  const {
+    currentWorkout,
+    startWorkout,
+    addExercise,
+    removeExercise,
+    addSet,
+    updateSet,
+    deleteSet,
+    updateExerciseNotes,
+  } = useWorkoutSession();
+
   const searchParams = useSearchParams();
   const fromWorkoutId = searchParams.get("fromWorkout");
 
@@ -37,11 +49,10 @@ export default function DailyLogPage() {
   const [workoutDate, setWorkoutDate] = useState(new Date());
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  // 🔹 If we arrive with ?fromWorkout=123, auto-load that workout
+  // 1) If we arrive with ?fromWorkout=123, auto-load that workout
   useEffect(() => {
     if (!fromWorkoutId) return;
 
-    // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
     const workout: Workout | undefined = MOCK_WORKOUTS.find(
       (w) => w.id === fromWorkoutId
     );
@@ -54,8 +65,25 @@ export default function DailyLogPage() {
 
     setSelectedMuscleGroups(groups);
     setWorkoutDate(new Date(workout.date));
+
+    // Start a session seeded from this workout
+    startWorkout(workout.split, workout.date, workout.exercises);
     setStep("session");
-  }, [fromWorkoutId]);
+  }, [fromWorkoutId, startWorkout]);
+
+  // 2) If there is already a current workout in the store, auto-resume it
+  useEffect(() => {
+    if (fromWorkoutId || !currentWorkout || step !== "empty") return;
+
+    const groups = currentWorkout.split
+      .split("/")
+      .map((g) => g.trim())
+      .filter(Boolean);
+
+    setSelectedMuscleGroups(groups);
+    setWorkoutDate(new Date(currentWorkout.date));
+    setStep("session");
+  }, [fromWorkoutId, currentWorkout, step]);
 
   const splitLabel =
     selectedMuscleGroups.length > 0
@@ -72,6 +100,12 @@ export default function DailyLogPage() {
 
   const handleBeginSession = () => {
     if (selectedMuscleGroups.length === 0) return;
+
+    const splitName = selectedMuscleGroups.join(" / ");
+    const dateString = workoutDate.toISOString();
+
+    // 🔹 Make sure a workout session exists in the store
+    startWorkout(splitName, dateString);
     setStep("session");
   };
 
@@ -101,7 +135,7 @@ export default function DailyLogPage() {
           onBegin={handleBeginSession}
         />
       )}
-      
+
       {step === "session" && (
         <div className="flex-1 flex flex-col overflow-hidden scroll">
           <SessionView

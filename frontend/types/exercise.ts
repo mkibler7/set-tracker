@@ -40,14 +40,22 @@ export interface Exercise {
   primaryMuscleGroup: MuscleGroup;
   secondaryMuscleGroups?: MuscleGroup[];
   description?: string;
+  tips?: string;
 }
 
 export interface ExerciseHistoryEntry {
   workoutId: string;
-  workoutDate: string; // ISO string
-  topSet: { weight: number; reps: number } | null;
-  totalVolume: number; // e.g. sum(weight * reps)
-  notes?: string;
+  workoutDate: string;
+  // workoutName: string; // e.g., "Chest"
+  notes?: string; // notes for this exercise in that workout
+  sets: {
+    setNumber: number;
+    weight: number;
+    reps: number;
+    tempo?: string;
+    rpe?: number;
+  }[];
+  totalVolume: number;
 }
 
 export interface CurrentSessionExerciseSet {
