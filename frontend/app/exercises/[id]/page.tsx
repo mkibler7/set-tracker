@@ -100,3 +100,6 @@ export default async function ExerciseDetailPage({
     </main>
   );
 }
+// Note: The above code assumes that the global workout store's WorkoutExercise
+// structure includes an 'exerciseId' field to link back to the Exercise.
+// Adjust the matching logic as necessary based on your actual data structures.
