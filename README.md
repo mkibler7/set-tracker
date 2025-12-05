@@ -1,3 +1,8 @@
+### Status
+
+- Frontend: ✅ Next.js app deployed on Vercel
+- Backend: ⏳ In progress – current data is mock (no login, no real persistence yet).
+
 # RepTrack
 
 RepTrack is a full-stack workout logging app designed as a professional portfolio project.
