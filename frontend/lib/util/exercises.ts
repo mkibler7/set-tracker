@@ -16,10 +16,3 @@ export function formatExerciseMuscleLabel(exercise: Exercise): string {
     exercise.secondaryMuscleGroups
   );
 }
-
-export function getMuscleGroups(exercise: Exercise): MuscleGroup[] {
-  return [
-    exercise.primaryMuscleGroup,
-    ...(exercise.secondaryMuscleGroups ?? []),
-  ];
-}

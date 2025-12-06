@@ -42,3 +42,21 @@ export function exerciseVolume(exercise: WorkoutExercise): number {
     return total + weight * reps;
   }, 0);
 }
+
+/**
+ * Returns a new array of workouts sorted by date (newest → oldest).
+ */
+export function sortWorkoutsByDateDesc(workouts: Workout[]): Workout[] {
+  return [...workouts].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+}
+
+/**
+ * Returns a new array of workouts sorted by date (oldest → newest).
+ */
+export function sortWorkoutsByDateAsc(workouts: Workout[]): Workout[] {
+  return [...workouts].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+}

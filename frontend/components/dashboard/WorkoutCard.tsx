@@ -1,38 +1,46 @@
-import React from "react";
+"use client";
+
+import Link from "next/link";
+import type { Workout } from "@/types/workout";
+import { getSetCount, getTotalVolume } from "@/lib/workouts/stats";
+import { formatWorkoutDate } from "@/lib/util/date";
 import { Card } from "../ui/Card";
 
-export interface DashboardWorkout {
-  id: string;
-  date: string; // e.g., "Mon, Nov 24"
-  name: string; // e.g., "Push Day"
-  totalSets: number;
-  totalVolume: number; // in kg or lbs
-}
-
 interface WorkoutCardProps {
-  workout: DashboardWorkout;
+  workout: Workout;
 }
 
 export function WorkoutCard({ workout }: WorkoutCardProps) {
-  return (
-    <Card className="flex items-center justify-between gap-2">
-      <div>
-        <p className="text-sm font-semibold text-foreground">{workout.name}</p>
-        <p className="text-xs text-muted-foreground">{workout.date}</p>
-      </div>
+  const volume = getTotalVolume(workout).toLocaleString();
 
-      <div className="flex gap-6 text-xs text-muted-foreground">
-        <div className="flex flex-col items-end">
-          <span className="font-semibold">{workout.totalSets}</span>
-          <span className="text-[0.7rem] uppercase tracking-wide">Sets</span>
+  return (
+    <Link href={`/workouts/${workout.id}`}>
+      <Card className="flex items-center justify-between gap-2 hover:bg-accent/40 cursor-pointer">
+        {/* left side */}
+        <div>
+          <p className="mb-2 font-semibold">{workout.split}</p>
+
+          <p className="text-xs text-muted-foreground">
+            {formatWorkoutDate(workout.date)}
+          </p>
         </div>
-        <div className="flex flex-col items-end">
-          <span className="font-semibold">
-            {workout.totalVolume.toLocaleString()}
-          </span>
-          <span className="text-[0.7rem] uppercase tracking-wide">Volume</span>
+
+        {/* right side */}
+        <div className="text-right flex items-center gap-6">
+          <div className="flex-col items-center text-center">
+            <span className="font-semibold">{volume}</span>
+            <span className="block text-muted-foreground text-[0.7rem] uppercase tracking-wide">
+              Volume
+            </span>
+          </div>
+          <div className="flex-col items-center text-center">
+            <span className="font-semibold">{getSetCount(workout)}</span>
+            <span className="block text-muted-foreground text-[0.7rem] uppercase tracking-wide">
+              Sets
+            </span>
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </Link>
   );
 }
