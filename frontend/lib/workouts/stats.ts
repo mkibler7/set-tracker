@@ -1,4 +1,7 @@
 import type { Workout, WorkoutExercise } from "@/types/workout";
+import { parseLocalDate } from "@/lib/util/date";
+
+export type TimeRange = "7D" | "1M" | "1Y" | "ALL";
 
 /**
  * Returns the number of exercises in a workout.
@@ -80,7 +83,7 @@ export function getVolumeSeries(workouts: Workout[]) {
   // 2) Map each workout into a chart datapoint.
   return sorted.map((w) => ({
     // Short date label for x-axis (e.g. "Nov 26")
-    dateLabel: new Date(w.date).toLocaleDateString(undefined, {
+    dateLabel: parseLocalDate(w.date).toLocaleDateString(undefined, {
       month: "short",
       day: "numeric",
     }),
@@ -152,4 +155,37 @@ export function getWeeklyVolumeSeries(workouts: Workout[]) {
     })}`,
     volume: entry.totalVolume,
   }));
+}
+
+/**
+ * Filter workouts to a specific time range, relative to the *latest* workout.
+ * (Once we use real data, we can change this to use "today" instead.)
+ */
+export function filterWorkoutsByRange(
+  workouts: Workout[],
+  range: TimeRange
+): Workout[] {
+  if (range === "ALL" || workouts.length === 0) return workouts;
+
+  const sorted = [...workouts].sort(
+    (a, b) =>
+      parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime()
+  );
+
+  // Treat the last workout as the "end" of the range
+  const end = parseLocalDate(sorted[sorted.length - 1].date);
+  const start = new Date(end);
+
+  if (range === "7D") {
+    start.setDate(start.getDate() - 7);
+  } else if (range === "1M") {
+    start.setMonth(start.getMonth() - 1);
+  } else if (range === "1Y") {
+    start.setFullYear(start.getFullYear() - 1);
+  }
+
+  return sorted.filter((w) => {
+    const d = parseLocalDate(w.date);
+    return d >= start && d <= end;
+  });
 }
