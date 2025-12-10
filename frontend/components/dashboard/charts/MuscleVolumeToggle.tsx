@@ -29,7 +29,7 @@ export function MuscleVolumeToggle({
   };
 
   return (
-    <div className="mb-4 flex w-full flex-col items-center gap-2">
+    <div className="flex w-full flex-col items-center gap-2">
       {/* Primary / Secondary */}
       <div className="flex overflow-hidden rounded-lg border border-border mt-2">
         <button

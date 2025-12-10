@@ -10,7 +10,7 @@ type Props = {
 
 export function MuscleBreakdownSection({ workouts }: Props) {
   return (
-    <section className="mt-3">
+    <section>
       <h2 className="text-xl font-semibold mb-2">Muscle Group Breakdown</h2>
       <p className="text-sm text-muted-foreground mb-4">
         Visualize how your training work distributes across muscle groups.
