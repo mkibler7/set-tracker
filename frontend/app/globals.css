@@ -13,6 +13,11 @@
     --card: 222 47% 11%;
     --card-foreground: 210 40% 96%;
 
+    --chart-ring-full: 145 80% 50%; /* inner: bright emerald (matches line) */
+    --chart-ring-upper-lower: 145 70% 38%; /* darker emerald for upper/lower */
+    --chart-ring-groups: 199 84% 52%; /* mid cyan/blue for push/pull/legs */
+    --chart-ring-muscles: 199 82% 38%; /* outer: deeper blue for muscles */
+
     --input: 228 84% 5%;
     --input-foreground: 210 40% 96%;
 

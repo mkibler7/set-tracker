@@ -477,59 +477,59 @@ export const MOCK_WORKOUTS: Workout[] = [
       },
     ],
   },
-  {
-    id: "workout-8",
-    date: "2025-11-12",
-    split: "Legs",
-    exercises: [
-      {
-        ...findExercise("front-squat"),
-        notes: "Core worked hard.",
-        sets: [
-          { id: "set-1", reps: 6, weight: 225, volume: 1350, tempo: "3-1-1-1" },
-          { id: "set-2", reps: 6, weight: 235, volume: 1410, tempo: "3-1-1-1" },
-          { id: "set-3", reps: 5, weight: 245, volume: 1225, tempo: "3-1-1-1" },
-          { id: "set-4", reps: 4, weight: 255, volume: 1020, tempo: "3-1-1-1" },
-        ],
-        volume: 5005,
-      },
-      {
-        ...findExercise("leg-press"),
-        notes: "Quads smoked.",
-        sets: [
-          {
-            id: "set-1",
-            reps: 15,
-            weight: 360,
-            volume: 5400,
-            tempo: "2-0-2-0",
-          },
-          {
-            id: "set-2",
-            reps: 15,
-            weight: 405,
-            volume: 6075,
-            tempo: "2-0-2-0",
-          },
-          {
-            id: "set-3",
-            reps: 12,
-            weight: 450,
-            volume: 5400,
-            tempo: "2-0-2-0",
-          },
-          {
-            id: "set-4",
-            reps: 10,
-            weight: 495,
-            volume: 4950,
-            tempo: "2-0-2-0",
-          },
-        ],
-        volume: 21825,
-      },
-    ],
-  },
+  // {
+  //   id: "workout-8",
+  //   date: "2025-11-12",
+  //   split: "Legs",
+  //   exercises: [
+  //     {
+  //       ...findExercise("front-squat"),
+  //       notes: "Core worked hard.",
+  //       sets: [
+  //         { id: "set-1", reps: 6, weight: 225, volume: 1350, tempo: "3-1-1-1" },
+  //         { id: "set-2", reps: 6, weight: 235, volume: 1410, tempo: "3-1-1-1" },
+  //         { id: "set-3", reps: 5, weight: 245, volume: 1225, tempo: "3-1-1-1" },
+  //         { id: "set-4", reps: 4, weight: 255, volume: 1020, tempo: "3-1-1-1" },
+  //       ],
+  //       volume: 5005,
+  //     },
+  //     {
+  //       ...findExercise("leg-press"),
+  //       notes: "Quads smoked.",
+  //       sets: [
+  //         {
+  //           id: "set-1",
+  //           reps: 15,
+  //           weight: 360,
+  //           volume: 5400,
+  //           tempo: "2-0-2-0",
+  //         },
+  //         {
+  //           id: "set-2",
+  //           reps: 15,
+  //           weight: 405,
+  //           volume: 6075,
+  //           tempo: "2-0-2-0",
+  //         },
+  //         {
+  //           id: "set-3",
+  //           reps: 12,
+  //           weight: 450,
+  //           volume: 5400,
+  //           tempo: "2-0-2-0",
+  //         },
+  //         {
+  //           id: "set-4",
+  //           reps: 10,
+  //           weight: 495,
+  //           volume: 4950,
+  //           tempo: "2-0-2-0",
+  //         },
+  //       ],
+  //       volume: 21825,
+  //     },
+  //   ],
+  // },
   {
     id: "workout-9",
     date: "2025-11-10",
