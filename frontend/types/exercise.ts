@@ -25,6 +25,9 @@ export const ALL_MUSCLE_GROUPS: MuscleGroup[] = [
   "Shoulders",
   "Traps",
   "Triceps",
+  "Calves",
+  "Adductors",
+  "Abductors",
 ];
 
 export type ExerciseFormValues = {
