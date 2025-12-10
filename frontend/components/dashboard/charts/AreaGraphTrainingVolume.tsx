@@ -35,8 +35,8 @@ export default function AreaGraphTrainingVolume({
     const value = payload[0].value ?? 0;
 
     return (
-      <div className="rounded-md border border-border bg-slate-950/80 px-3 py-2 text-xs text-foreground shadow-lg">
-        <div className="font-semibold">{label}</div>
+      <div className="rounded-md border border-border bg-slate-950/90 px-3 py-2 text-xs text-foreground shadow-lg">
+        <div className="font-semibold mb-1">{label}</div>
         <div>volume : {value.toLocaleString()}</div>
       </div>
     );

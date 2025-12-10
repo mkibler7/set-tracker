@@ -53,10 +53,10 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
   // Radii per ring
   const RINGS = isSmallScreen
     ? {
-        FULL: { inner: 0, outer: 22 },
-        UPPER_LOWER: { inner: 26, outer: 56 },
-        GROUPS: { inner: 60, outer: 100 },
-        MUSCLES: { inner: 104, outer: 140 },
+        FULL: { inner: 0, outer: 18 },
+        UPPER_LOWER: { inner: 22, outer: 50 },
+        GROUPS: { inner: 54, outer: 90 },
+        MUSCLES: { inner: 94, outer: 130 },
       }
     : {
         FULL: { inner: 0, outer: 35 },
@@ -73,52 +73,55 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
     stroke: "hsl(var(--background))",
   };
 
-  const resetSelection = () => {
-    setHover(null);
-  };
-
+  const resetSelection = () => setHover(null);
   const clearHover = () => setHover(null);
 
-  // Called when the mouse is over an actual sector
-  const handlePieMouseMove = (data: any, _index: number, event: any) => {
-    if (!event) return;
-
-    const svg = event.currentTarget?.ownerSVGElement as SVGElement | null;
-    if (!svg) return;
-    const rect = svg.getBoundingClientRect();
-
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    const payload = (data && data.payload) || data;
+  /**
+   * Show tooltip for a given slice (hover on desktop, tap on mobile).
+   */
+  const handleSliceHighlight = (data: any, _index: number, e?: any) => {
+    const payload = data?.payload ?? data;
     const label: string = payload?.name ?? "";
-    const rawValue = payload?.value ?? data?.value;
+    const rawValue = payload?.value;
     const value = typeof rawValue === "number" ? rawValue : 0;
 
-    if (!label || value <= 0) return;
+    if (!label || value <= 0) {
+      setHover(null);
+      return;
+    }
 
-    setHover({
+    let x: number | undefined;
+    let y: number | undefined;
+
+    if (e) {
+      const native = (e.nativeEvent ?? e) as any;
+      const clientX = native?.clientX;
+      const clientY = native?.clientY;
+
+      if (typeof clientX === "number" && typeof clientY === "number") {
+        const target = (native.target as SVGElement | null) ?? null;
+        const svg =
+          target?.ownerSVGElement ??
+          (e.currentTarget as SVGElement | undefined) ??
+          null;
+
+        if (svg) {
+          const rect = svg.getBoundingClientRect();
+          x = clientX - rect.left;
+          y = clientY - rect.top;
+        }
+      }
+    }
+
+    const nextHover: HoverInfo = {
       label,
       value,
       percentOfTotal: percent(value, total),
       x,
       y,
-    });
-  };
+    };
 
-  // Parent-level mouse move: if we’re NOT over a sector anymore, hide tooltip
-  const handleWrapperMouseMove = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    const target = e.target as HTMLElement | null;
-    if (!target) return;
-
-    // Sectors are rendered as <path class="recharts-sector" ...>
-    const sector = target.closest(".recharts-sector");
-    if (!sector && hover) {
-      // We moved off any slice (onto labels or empty space) – clear tooltip
-      setHover(null);
-    }
+    setHover(nextHover);
   };
 
   // Outer muscle labels + connector lines
@@ -132,11 +135,12 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
     const sx = cx + outerRadius * Math.cos(angle);
     const sy = cy + outerRadius * Math.sin(angle);
 
-    const mx = cx + (outerRadius + 10) * Math.cos(angle);
-    const my = cy + (outerRadius + 10) * Math.sin(angle);
+    const mx = cx + (outerRadius + 8) * Math.cos(angle);
+    const my = cy + (outerRadius + 8) * Math.sin(angle);
 
     const isRightSide = mx >= cx;
-    const horizontalOffset = isSmallScreen ? 18 : 28;
+    // Slightly shorter elbow + smaller offset on mobile
+    const horizontalOffset = isSmallScreen ? 16 : 28;
 
     const ex = mx + (isRightSide ? horizontalOffset : -horizontalOffset);
     const ey = my;
@@ -144,9 +148,15 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
     const textAnchor = isRightSide ? "start" : "end";
 
     const p = percent(value, total);
-    const labelText = `${String(name).toUpperCase()} — ${fmt(
-      value
-    )} (${p.toFixed(0)}%)`;
+    const rawName = String(name).toUpperCase();
+
+    // Mobile: just show the muscle name.
+    // Desktop: full label with volume + %
+    const labelText = isSmallScreen
+      ? rawName
+      : `${rawName} — ${fmt(value)} (${p.toFixed(0)}%)`;
+
+    const fontSize = isSmallScreen ? 9 : 11;
 
     return (
       <g>
@@ -162,7 +172,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
           y={ey}
           textAnchor={textAnchor}
           dominantBaseline="middle"
-          fontSize={11}
+          fontSize={fontSize}
           fill="hsl(var(--foreground))"
         >
           {labelText}
@@ -183,7 +193,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
         onResetSelection={resetSelection}
       />
 
-      <div className="relative w-full max-w-[360px] sm:max-w-none mx-auto h-[360px] sm:h-[520px] md:h-[580px]">
+      <div className="relative mx-auto h-[360px] w-full sm:h-[520px] md:h-[580px]">
         <MuscleHoverOverlay
           hover={hover}
           metricLabel={metricLabel}
@@ -191,7 +201,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
         />
 
         <ResponsiveContainer className="reptracker-chart">
-          <PieChart>
+          <PieChart onMouseLeave={clearHover}>
             {/* LAYER 1 — FULL BODY */}
             <Pie
               data={fullBodyData}
@@ -203,7 +213,8 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
               startAngle={0}
               endAngle={-360}
               isAnimationActive={false}
-              onMouseMove={handlePieMouseMove}
+              onMouseMove={handleSliceHighlight}
+              onClick={handleSliceHighlight}
             >
               {fullBodyData.map((entry) => (
                 <Cell
@@ -225,7 +236,8 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
               startAngle={0}
               endAngle={-360}
               isAnimationActive={false}
-              onMouseMove={handlePieMouseMove}
+              onMouseMove={handleSliceHighlight}
+              onClick={handleSliceHighlight}
             >
               {upperLowerData.map((entry) => (
                 <Cell
@@ -236,7 +248,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
               ))}
             </Pie>
 
-            {/* LAYER 3 — ARMS / PUSH / PULL / LEGS */}
+            {/* LAYER 3 — PUSH / PULL / LEGS (groups) */}
             <Pie
               data={groupData}
               dataKey="value"
@@ -247,7 +259,8 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
               startAngle={0}
               endAngle={-360}
               isAnimationActive={false}
-              onMouseMove={handlePieMouseMove}
+              onMouseMove={handleSliceHighlight}
+              onClick={handleSliceHighlight}
             >
               {groupData.map((entry) => (
                 <Cell
@@ -269,9 +282,10 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
               startAngle={0}
               endAngle={-360}
               isAnimationActive={false}
-              label={isSmallScreen ? undefined : renderMuscleLabel}
+              label={renderMuscleLabel}
               labelLine={false}
-              onMouseMove={handlePieMouseMove}
+              onMouseMove={handleSliceHighlight}
+              onClick={handleSliceHighlight}
             >
               {muscleData.map((entry) => (
                 <Cell
