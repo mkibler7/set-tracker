@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
 export default function PageBackButton() {
   const router = useRouter();
@@ -8,9 +9,9 @@ export default function PageBackButton() {
       <button
         type="button"
         onClick={() => router.back()}
-        className="rounded-md border border-border text-xs hover:primary-button/80 primary-button"
+        className="text-primary  hover:text-primary/80 focus:outline-none"
       >
-        ← Back
+        <ArrowLeftIcon className="inline-block h-6 w-6" />
       </button>
     </div>
   );

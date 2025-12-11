@@ -8,11 +8,11 @@ import {
   type TimeRange,
 } from "@/lib/workouts/stats";
 
-import AreaGraphTrainingVolume from "@/components/dashboard/charts/AreaGraphTrainingVolume";
-import PieChartTrainingVolume from "@/components/dashboard/charts/PieChartTrainingVolume";
-import { TrainingVolumeHeader } from "@/components/dashboard/charts/TrainingVolumeHeader";
-import { TimeRangeToggle } from "@/components/dashboard/charts/TimeRangeToggle";
-import { MuscleBreakdownSection } from "@/components/dashboard/charts/MuscleBreakdownSection";
+import AreaGraphTrainingVolume from "@/components/charts/AreaGraphTrainingVolume";
+import PieChartTrainingVolume from "@/components/charts/PieChartTrainingVolume";
+import { TrainingVolumeHeader } from "@/components/charts/TrainingVolumeHeader";
+import { TimeRangeToggle } from "@/components/charts/TimeRangeToggle";
+import { MuscleBreakdownSection } from "@/components/charts/MuscleBreakdownSection";
 
 export default function ChartsPage() {
   const [range, setRange] = useState<TimeRange>("1M");

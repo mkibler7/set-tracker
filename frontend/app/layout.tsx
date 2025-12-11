@@ -39,6 +39,9 @@ export default function RootLayout({
               <Link href="/exercises" className="hover:text-primary">
                 Exercises
               </Link>
+              <Link href="/charts" className="hover:text-primary">
+                Charts
+              </Link>
             </nav>
 
             <div className="mt-auto">

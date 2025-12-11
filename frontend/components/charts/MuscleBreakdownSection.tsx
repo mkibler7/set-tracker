@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/Card";
-import PieChartTrainingVolume from "@/components/dashboard/charts/PieChartTrainingVolume";
+import PieChartTrainingVolume from "@/components/charts/PieChartTrainingVolume";
 import type { Workout } from "@/types/workout";
 
 type Props = {

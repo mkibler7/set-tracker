@@ -43,7 +43,7 @@ export default function AreaGraphTrainingVolume({
   };
 
   return (
-    <div className="reptracker-chart flex items-center justify-center text-sm text-muted-foreground rounded-2xl border border-border bg-gradient-to-b from-card/60 to-card/40 p-4 shadow-md">
+    <Card className="reptracker-chart ">
       <div className="w-full h-[190px] sm:h-[220px] md:h-[260px] lg:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
@@ -106,6 +106,6 @@ export default function AreaGraphTrainingVolume({
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Card>
   );
 }

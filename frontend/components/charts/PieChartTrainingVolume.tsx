@@ -12,11 +12,11 @@ import {
   shouldShowMuscleLabel,
   type Metric,
 } from "@/lib/charts/muscleVolume";
-import { MuscleVolumeToggle } from "@/components/dashboard/charts/MuscleVolumeToggle";
+import { MuscleVolumeToggle } from "@/components/charts/MuscleVolumeToggle";
 import {
   MuscleHoverOverlay,
   type HoverInfo,
-} from "@/components/dashboard/charts/MuscleHoverOverlay";
+} from "@/components/charts/MuscleHoverOverlay";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 
 type Props = {

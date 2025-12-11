@@ -15,9 +15,9 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
 
   return (
     <Link href={`/workouts/${workout.id}`}>
-      <Card className="flex items-center justify-between gap-2 hover:bg-accent/40 cursor-pointer">
+      <Card className="flex items-center justify-between gap-2 cursor-pointer hover:text-primary">
         {/* left side */}
-        <div>
+        <div className="ml-2">
           <p className="mb-2 font-semibold">{workout.split}</p>
 
           <p className="text-xs text-muted-foreground">
@@ -26,7 +26,7 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
         </div>
 
         {/* right side */}
-        <div className="text-right flex items-center gap-6">
+        <div className="text-right flex items-center gap-6 mr-2">
           <div className="flex-col items-center text-center">
             <span className="font-semibold">{volume}</span>
             <span className="block text-muted-foreground text-[0.7rem] uppercase tracking-wide">

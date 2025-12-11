@@ -1,3 +1,5 @@
+"use client";
+
 import { StatTile } from "@/components/ui/StatTile";
 import { Card } from "@/components/ui/Card";
 import { PageSectionTitle } from "@/components/ui/PageSectionTitle";
@@ -6,7 +8,14 @@ import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
 import { WorkoutCard } from "@/components/dashboard/WorkoutCard";
 import Link from "next/link";
 import PageBackButton from "@/components/shared/PageBackButton";
-import { sortWorkoutsByDateDesc } from "@/lib/workouts/stats";
+import {
+  sortWorkoutsByDateDesc,
+  getVolumeSeries,
+  filterWorkoutsByRange,
+  type TimeRange,
+} from "@/lib/workouts/stats";
+import { get } from "http";
+import AreaGraphTrainingVolume from "@/components/charts/AreaGraphTrainingVolume";
 
 const mockStats = [
   {
@@ -26,9 +35,13 @@ const mockStats = [
   },
 ];
 
-export default async function DashboardPage() {
+export default function DashboardPage() {
   // Later this will call the backend; for now it's all mock data.
   const userFirstName = "Michael"; // TODO: replace with real user data
+
+  const range: TimeRange = "1M";
+  const filteredWorkouts = filterWorkoutsByRange(MOCK_WORKOUTS, range);
+  const volumeData = getVolumeSeries(filteredWorkouts);
 
   const workouts = MOCK_WORKOUTS; // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
   const recentWorkouts = sortWorkoutsByDateDesc(workouts).slice(0, 5);
@@ -37,51 +50,59 @@ export default async function DashboardPage() {
     <main className="page">
       {/* Header */}
       <PageBackButton />
-      <section className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">
-            Welcome back, {userFirstName}
+      <section className="mt-8 flex flex-col items-center text-center justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="w-full flex text-center justify-center items-center">
+          <h1 className="text-2xl font-semibold text-primary w-60 sm:w-full">
+            Welcome back, {userFirstName}!
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Here&apos;s a snapshot of your recent training.
-          </p>
+          {/* <p className="mt-1 text-sm text-muted-foreground">
+            Here's a snapshot of your recent training.
+          </p> */}
         </div>
-        <Link href="/dailylog">
-          <Button
-            variant="primary"
-            className="whitespace-nowrap"
-            // Later: onClick → router.push("/start")
-          >
+        {/* <Link href="/dailylog">
+          <Button variant="primary" className="whitespace-nowrap">
             Start Workout
           </Button>
-        </Link>
+        </Link> */}
       </section>
 
       {/* Stat tiles */}
-      <section>
+      <section className="mt-2">
         <PageSectionTitle
           title="This week at a glance"
           subtitle="High-level summary of your recent work."
         />
+        {/* top row */}
+        <div className="mt-4 flex justify-center border-t border-muted-foreground/20 pt-4">
+          <StatTile
+            className="w-40 sm:w-60 border-r-1 border-muted-foreground/20 pr-4"
+            {...mockStats[0]}
+            asCard={false}
+          />
+          <StatTile
+            className="w-40 sm:w-60 pl-4"
+            {...mockStats[1]}
+            asCard={false}
+          />
+        </div>
 
-        <div className="grid gap-4 sm:grid-cols-3 text-center">
-          {mockStats.map((stat) => (
-            <StatTile key={stat.label} {...stat} />
-          ))}
+        {/* divider + PR */}
+        <div className="mt-4 border-t border-slate-800 pt-4">
+          <StatTile className="mb-2" {...mockStats[2]} asCard={false} />
         </div>
       </section>
 
-      {/* Chart placeholder */}
+      {/* Small embedded chart on the dashboard */}
       <section>
         <PageSectionTitle
           title="Training volume"
           subtitle="Charts and trends will live here."
         />
-        <Link href="/dashboard/charts">
-          {/* TODO: Replace with Recharts/Chart.js chart (Day 13) */}
-          <Card className="h-52 flex cursor-pointer items-center justify-center text-sm text-muted-foreground hover:border-primary/60 hover:bg-card/60">
-            Volume-over-time chart placeholder
-          </Card>
+
+        <Link href="/charts">
+          <div className="mt-4 cursor-pointer">
+            <AreaGraphTrainingVolume data={volumeData} />
+          </div>
         </Link>
       </section>
 
@@ -98,7 +119,7 @@ export default async function DashboardPage() {
           ))}
         </div>
         {workouts.length > 5 && (
-          <p className="mt-3 text-sm text-muted-foreground text-center">
+          <p className="mt-3 text-sm text-muted-foreground text-center hover:text-primary">
             <Link href="/workouts">View All Workouts</Link>
           </p>
         )}
