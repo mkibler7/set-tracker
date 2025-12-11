@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { Button } from "../ui/Button";
-import { useRouter } from "next/navigation";
 import EditIcon from "../icons/edit-icon";
 import PageBackButton from "@/components/shared/PageBackButton";
 
@@ -21,8 +19,6 @@ export default function Header({
   onEditSplit,
   onAddExercise,
 }: HeaderProps) {
-  const router = useRouter();
-
   const formattedDate = date.toLocaleDateString(undefined, {
     weekday: "short",
     month: "short",
@@ -30,30 +26,17 @@ export default function Header({
     year: "numeric",
   });
 
-  const isToday = date.toDateString() === new Date().toDateString();
-  const shortLabelDate = date.toLocaleDateString(undefined, {
-    month: "long",
-    day: "numeric",
-  });
-  const headerPrefix = isToday
-    ? "Today's Workout"
-    : `${shortLabelDate}'s Workout`;
-
   return (
-    // <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
     <div>
       <PageBackButton />
-      <p className="text-sm mb-2 tracking-tight text-muted-foreground">
-        {headerPrefix}
-      </p>
 
-      {/* Title + Edit button on one line */}
-      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        {/* left side: title + edit */}
-        <div className="flex min-w-0 items-center gap-2">
+      {/* Centered title + edit + add exercise */}
+      <div className="mb-4 mt-1 flex flex-col items-center gap-3">
+        {/* Title + edit */}
+        <div className="flex items-center gap-2">
           <h1
-            className="max-w-[70vw] truncate text-2xl font-semibold tracking-tight text-foreground sm:max-w-none"
-            title={title} // shows full string on hover / long-press
+            className="max-w-[80vw] truncate text-center text-2xl font-semibold tracking-tight text-foreground my-2"
+            title={title}
           >
             {title}
           </h1>
@@ -62,26 +45,29 @@ export default function Header({
             <button
               type="button"
               onClick={onEditSplit}
-              className="rounded border border-emerald-500 px-2 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10"
+              className="inline-flex w-auto items-center justify-center rounded border border-emerald-500 px-2 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10"
             >
               <EditIcon />
             </button>
           )}
         </div>
 
-        {/* 🔹 Right-aligned "+ Add Exercise" on session views */}
+        {/* Add Exercise – centered, with a sensible max width */}
         {isSession && onAddExercise && (
           <button
             type="button"
             onClick={onAddExercise}
-            className="primary-button min-w-[8rem] flex-shrink-0 whitespace-nowrap"
+            className="primary-button w-full max-w-xs sm:max-w-sm"
           >
             + Add Exercise
           </button>
         )}
       </div>
 
-      <p className="mb-6 text-sm text-muted-foreground">{formattedDate}</p>
+      {/* Centered date line */}
+      <p className="mb-6 text-center text-sm text-muted-foreground">
+        {formattedDate} • Workout
+      </p>
     </div>
   );
 }

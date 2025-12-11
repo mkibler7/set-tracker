@@ -1,7 +1,6 @@
 "use client";
 
 import { StatTile } from "@/components/ui/StatTile";
-import { Card } from "@/components/ui/Card";
 import { PageSectionTitle } from "@/components/ui/PageSectionTitle";
 import { Button } from "@/components/ui/Button";
 import { MOCK_WORKOUTS } from "@/data/mockWorkouts";

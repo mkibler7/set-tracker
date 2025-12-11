@@ -25,6 +25,7 @@ export default function ExerciseCard({
   onNotesChange,
 }: ExerciseCardProps) {
   const router = useRouter();
+  const hasSets = exercise.sets.length > 0;
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [isAddingSet, setIsAddingSet] = useState(false);
 
@@ -43,11 +44,18 @@ export default function ExerciseCard({
   }
 
   return (
-    <section className="rounded-lg border border-border bg-card/60 p-4 shadow-sm">
+    <section
+      className={[
+        "rounded-lg p-4 shadow-sm border",
+        hasSets
+          ? "border-border bg-card/70"
+          : "border-dashed border-border/70 bg-card/40",
+      ].join(" ")}
+    >
       {/* Header */}
-      <div className="mb-3 flex items-start justify-between gap-2">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="mb-1 flex items-center gap-2">
             <h2 className="text-base font-semibold text-foreground">
               {exercise.name}
             </h2>
@@ -59,14 +67,14 @@ export default function ExerciseCard({
               <InfoIcon />
             </button>
           </div>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+          <p className="text-[11px] sm:text-xs uppercase tracking-wide text-muted-foreground">
             {muscleLabel}
           </p>
         </div>
         <button
           type="button"
           onClick={onRemove}
-          className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-card/70"
+          className="self-start rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:bg-card/70"
         >
           Remove
         </button>
@@ -83,7 +91,7 @@ export default function ExerciseCard({
         {exercise.sets.map((set) => (
           <div
             key={set.id}
-            className="rounded-md border border-border bg-card/60 p-3 text-xs text-foreground"
+            className="rounded-md border border-border bg-card/60 p-2.5 sm:p-3 text-xs text-foreground"
           >
             {editingSetId === set.id ? (
               <SetForm
@@ -102,9 +110,11 @@ export default function ExerciseCard({
                 onCancel={() => setEditingSetId(null)}
               />
             ) : (
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <div className="flex flex-wrap gap-3">
+              <>
+                {/* stats + actions */}
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  {/* stats – wrap nicely on small screens */}
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
                     <span>
                       <span className="text-muted-foreground">Reps:</span>{" "}
                       {set.reps}
@@ -113,41 +123,46 @@ export default function ExerciseCard({
                       <span className="text-muted-foreground">Weight:</span>{" "}
                       {set.weight} lb
                     </span>
+
                     {set.rpe !== undefined && (
                       <span>
                         <span className="text-muted-foreground">RPE:</span>{" "}
                         {set.rpe}
                       </span>
                     )}
+
                     {set.tempo && (
                       <span>
                         <span className="text-muted-foreground">Tempo:</span>{" "}
                         {set.tempo}
                       </span>
                     )}
+
                     <span>
                       <span className="text-muted-foreground">Volume:</span>{" "}
                       {set.volume}
                     </span>
                   </div>
+
+                  {/* actions */}
+                  <div className="flex gap-2 self-end sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => setEditingSetId(set.id)}
+                      className="rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:bg-card/70"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteSet(set.id)}
+                      className="rounded-md border border-red-900/70 bg-red-950/50 px-2 py-1 text-[11px] text-red-200 hover:bg-red-900/70"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setEditingSetId(set.id)}
-                    className="rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:bg-card/70"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onDeleteSet(set.id)}
-                    className="rounded-md border border-red-900/70 bg-red-950/50 px-2 py-1 text-[11px] text-red-200 hover:bg-red-900/70"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
+              </>
             )}
           </div>
         ))}
@@ -172,7 +187,13 @@ export default function ExerciseCard({
             setEditingSetId(null);
             setIsAddingSet(true);
           }}
-          className="mt-3 inline-flex items-center rounded-md border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:bg-card/70"
+          className="
+      mt-3 inline-flex items-center justify-center
+      w-full rounded-md border border-dashed border-border
+      px-3 py-1.5 text-xs text-muted-foreground
+      hover:bg-card/70
+      sm:w-auto sm:justify-start
+    "
         >
           + Add set
         </button>
