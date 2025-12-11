@@ -189,7 +189,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
           y={ey}
           textAnchor={textAnchor}
           dominantBaseline="middle"
-          fontSize={isSmallScreen ? 11 : 15}
+          fontSize={isSmallScreen ? 8 : 15}
           fill="hsl(var(--foreground))"
         >
           {labelText}
