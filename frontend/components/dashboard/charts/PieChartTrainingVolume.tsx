@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 import type { Workout } from "@/types/workout";
@@ -50,13 +50,13 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
     [total, muscles]
   );
 
-  // Radii per ring
+  // Radii per ring – a bit smaller on mobile so we leave room around the chart
   const RINGS = isSmallScreen
     ? {
-        FULL: { inner: 0, outer: 18 },
-        UPPER_LOWER: { inner: 22, outer: 50 },
-        GROUPS: { inner: 54, outer: 90 },
-        MUSCLES: { inner: 94, outer: 130 },
+        FULL: { inner: 0, outer: 20 },
+        UPPER_LOWER: { inner: 24, outer: 52 },
+        GROUPS: { inner: 56, outer: 86 },
+        MUSCLES: { inner: 90, outer: 116 },
       }
     : {
         FULL: { inner: 0, outer: 35 },
@@ -77,7 +77,8 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
   const clearHover = () => setHover(null);
 
   /**
-   * Show tooltip for a given slice (hover on desktop, tap on mobile).
+   * Show tooltip for a given slice (hover on desktop, tap on mobile),
+   * positioned near the cursor/tap when possible.
    */
   const handleSliceHighlight = (data: any, _index: number, e?: any) => {
     const payload = data?.payload ?? data;
@@ -124,39 +125,55 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
     setHover(nextHover);
   };
 
-  // Outer muscle labels + connector lines
+  /**
+   * Custom label renderer.
+   * - On small screens:
+   *     * labels are OUTSIDE the chart (with connectors)
+   *     * text is just the muscle name (shorter, harder to clip)
+   *     * smaller offsets so they stay tight to the donut
+   * - On larger screens:
+   *     * labels are outside with connectors
+   *     * full "NAME — volume (xx%)" string
+   */
   const renderMuscleLabel = (props: any) => {
-    const { cx, cy, midAngle, outerRadius, value, name } = props;
+    const { cx, cy, midAngle, outerRadius, value, name, viewBox } = props;
+
     if (!shouldShowMuscleLabel(value, total)) return null;
 
     const RADIAN = Math.PI / 180;
     const angle = -midAngle * RADIAN;
 
+    const baseName = String(name).toUpperCase();
+    const p = percent(value, total);
+
+    // Base point on arc
     const sx = cx + outerRadius * Math.cos(angle);
     const sy = cy + outerRadius * Math.sin(angle);
 
-    const mx = cx + (outerRadius + 8) * Math.cos(angle);
-    const my = cy + (outerRadius + 8) * Math.sin(angle);
+    // First elbow a little outside the arc
+    const elbowRadius = outerRadius + (isSmallScreen ? 4 : 10);
+    const mx = cx + elbowRadius * Math.cos(angle);
+    const my = cy + elbowRadius * Math.sin(angle);
 
     const isRightSide = mx >= cx;
-    // Slightly shorter elbow + smaller offset on mobile
-    const horizontalOffset = isSmallScreen ? 16 : 28;
+    const horizontalOffset = isSmallScreen ? 12 : 28;
 
     const ex = mx + (isRightSide ? horizontalOffset : -horizontalOffset);
     const ey = my;
-    const textX = ex + (isRightSide ? 4 : -4);
-    const textAnchor = isRightSide ? "start" : "end";
 
-    const p = percent(value, total);
-    const rawName = String(name).toUpperCase();
+    // Clamp the text X position so it never goes beyond the SVG width
+    const chartWidth: number =
+      typeof viewBox?.width === "number" ? viewBox.width : cx * 2;
 
-    // Mobile: just show the muscle name.
-    // Desktop: full label with volume + %
+    let textX = ex + (isRightSide ? 2 : -2);
+    const padding = isSmallScreen ? 8 : 32;
+    if (textX < padding) textX = padding;
+    if (textX > chartWidth - padding) textX = chartWidth - padding;
+
     const labelText = isSmallScreen
-      ? rawName
-      : `${rawName} — ${fmt(value)} (${p.toFixed(0)}%)`;
-
-    const fontSize = isSmallScreen ? 9 : 11;
+      ? baseName
+      : `${baseName} — ${fmt(value)} (${p.toFixed(0)}%)`;
+    const textAnchor = isRightSide ? "start" : "end";
 
     return (
       <g>
@@ -172,7 +189,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
           y={ey}
           textAnchor={textAnchor}
           dominantBaseline="middle"
-          fontSize={fontSize}
+          fontSize={isSmallScreen ? 11 : 15}
           fill="hsl(var(--foreground))"
         >
           {labelText}
@@ -193,7 +210,8 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
         onResetSelection={resetSelection}
       />
 
-      <div className="relative mx-auto h-[360px] w-full sm:h-[520px] md:h-[580px]">
+      {/* On mobile we cap width and add horizontal padding so the chart never hugs the edge */}
+      <div className="relative w-full max-w-[420px] sm:max-w-none h-[340px] sm:h-[520px] md:h-[580px]">
         <MuscleHoverOverlay
           hover={hover}
           metricLabel={metricLabel}
@@ -201,7 +219,14 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
         />
 
         <ResponsiveContainer className="reptracker-chart">
-          <PieChart onMouseLeave={clearHover}>
+          <PieChart
+            onMouseLeave={clearHover}
+            margin={
+              isSmallScreen
+                ? { top: 8, right: 32, bottom: 8, left: 32 }
+                : { top: 0, right: 80, bottom: 0, left: 80 }
+            }
+          >
             {/* LAYER 1 — FULL BODY */}
             <Pie
               data={fullBodyData}
@@ -216,12 +241,8 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
               onMouseMove={handleSliceHighlight}
               onClick={handleSliceHighlight}
             >
-              {fullBodyData.map((entry) => (
-                <Cell
-                  key={entry.key}
-                  fill={COLORS.full}
-                  stroke="none" // no line through middle
-                />
+              {fullBodyData.map((entry: any) => (
+                <Cell key={entry.key} fill={COLORS.full} stroke="none" />
               ))}
             </Pie>
 
@@ -239,7 +260,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
               onMouseMove={handleSliceHighlight}
               onClick={handleSliceHighlight}
             >
-              {upperLowerData.map((entry) => (
+              {upperLowerData.map((entry: any) => (
                 <Cell
                   key={entry.key}
                   fill={COLORS.upperLower}
@@ -248,7 +269,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
               ))}
             </Pie>
 
-            {/* LAYER 3 — PUSH / PULL / LEGS (groups) */}
+            {/* LAYER 3 — GROUPS (Push / Pull / Legs) */}
             <Pie
               data={groupData}
               dataKey="value"
@@ -262,7 +283,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
               onMouseMove={handleSliceHighlight}
               onClick={handleSliceHighlight}
             >
-              {groupData.map((entry) => (
+              {groupData.map((entry: any) => (
                 <Cell
                   key={entry.key}
                   fill={COLORS.groups}
@@ -287,7 +308,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
               onMouseMove={handleSliceHighlight}
               onClick={handleSliceHighlight}
             >
-              {muscleData.map((entry) => (
+              {muscleData.map((entry: any) => (
                 <Cell
                   key={entry.key}
                   fill={COLORS.muscles}

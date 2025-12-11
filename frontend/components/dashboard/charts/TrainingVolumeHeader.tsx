@@ -8,7 +8,7 @@ type Props = {
 export function TrainingVolumeHeader({}: Props) {
   return (
     <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-      <div>
+      <div className="text-center">
         <h1 className="text-2xl font-semibold text-foreground">
           Training volume
         </h1>

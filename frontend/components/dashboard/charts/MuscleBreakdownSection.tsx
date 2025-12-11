@@ -10,9 +10,9 @@ type Props = {
 
 export function MuscleBreakdownSection({ workouts }: Props) {
   return (
-    <section>
+    <section className="text-center">
       <h2 className="text-xl font-semibold mb-2">Muscle Group Breakdown</h2>
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-muted-foreground mb-3">
         Visualize how your training work distributes across muscle groups.
       </p>
       <PieChartTrainingVolume workouts={workouts} />
