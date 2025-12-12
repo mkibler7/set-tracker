@@ -6,6 +6,7 @@ type SplitSelectorProps = {
   onToggleGroup: (group: string) => void;
   onCancel: () => void;
   onBegin: () => void;
+  primaryLabel?: string;
 };
 
 export default function SplitSelector({
@@ -14,17 +15,18 @@ export default function SplitSelector({
   onToggleGroup,
   onCancel,
   onBegin,
+  primaryLabel = "Begin Session",
 }: SplitSelectorProps) {
   return (
     <section className="mx-auto mt-10 max-w-xl rounded-lg border border-border bg-card/60 p-4 shadow-sm">
-      <h2 className="text-base font-semibold text-foreground">
+      <h2 className="text-base font-semibold text-foreground mb-4 mt-2 ml-2">
         Choose today&apos;s split
       </h2>
-      <p className="mt-1 text-xs text-muted-foreground">
+      <p className="mt-1 ml-2 text-xs text-muted-foreground ">
         Pick one or more muscle groups you plan to train.
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-6 mx-3 flex flex-wrap gap-2">
         {allGroups.map((group) => {
           const active = selected.includes(group);
           return (
@@ -58,7 +60,7 @@ export default function SplitSelector({
           onClick={onBegin}
           className="rounded-md bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Begin Session
+          {primaryLabel}
         </button>
       </div>
     </section>

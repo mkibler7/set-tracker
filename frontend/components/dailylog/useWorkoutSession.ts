@@ -24,6 +24,8 @@ type WorkoutSessionState = {
   updateSet: (exerciseId: string, setId: string, values: SetFormValues) => void;
   deleteSet: (exerciseId: string, setId: string) => void;
   updateExerciseNotes: (exerciseId: string, notes: string) => void;
+  updateSplit: (splitName: string) => void;
+  updateSessionMeta: (updates: Partial<WorkoutSession>) => void;
   endWorkout: () => void;
 };
 
@@ -199,6 +201,33 @@ export const useWorkoutSession = create<WorkoutSessionState>()(
             },
           };
         }),
+
+      /**
+       * Update the current workout's split label without
+       * resetting the session or its exercises.
+       */
+      updateSplit: (split) =>
+        set((state) => {
+          if (!state.currentWorkout) return state;
+          return {
+            currentWorkout: {
+              ...state.currentWorkout,
+              split,
+            },
+          };
+        }),
+
+      updateSessionMeta: (updates) =>
+        set((state) =>
+          state.currentWorkout
+            ? {
+                currentWorkout: {
+                  ...state.currentWorkout,
+                  ...updates,
+                },
+              }
+            : state
+        ),
 
       /**
        * Completely clear the active workout.

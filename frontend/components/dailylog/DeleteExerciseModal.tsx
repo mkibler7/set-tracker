@@ -3,19 +3,19 @@
 import React from "react";
 
 type DeleteExerciseModalProps = {
-  open: boolean;
+  isOpen: boolean;
   exerciseName?: string;
   onCancel: () => void;
   onConfirm: () => void;
 };
 
 export default function DeleteExerciseModal({
-  open,
+  isOpen,
   exerciseName,
   onCancel,
   onConfirm,
 }: DeleteExerciseModalProps) {
-  if (!open) return null;
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">

@@ -6,14 +6,15 @@ type EmptyStateProps = {
 
 export default function EmptyState({ onStart }: EmptyStateProps) {
   return (
-    <div className="mt-24 flex flex-col items-center justify-center">
+    <div className="w-full max-w-md rounded-lg border border-dashed border-border bg-card/40 p-6 text-center">
       <p className="mb-3 text-sm text-muted-foreground">
         Ready to log today&apos;s session?
       </p>
+
       <button
         type="button"
         onClick={onStart}
-        className="rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90"
+        className="primary-button w-full sm:w-auto"
       >
         Start Workout
       </button>

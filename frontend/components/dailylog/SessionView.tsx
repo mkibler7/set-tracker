@@ -1,3 +1,4 @@
+// SessionView.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -10,18 +11,19 @@ import type { WorkoutExercise } from "@/types/workout";
 
 type SessionViewProps = {
   selectedMuscleGroups: string[];
-  fromWorkoutId?: string | null; // we’ll keep this for now, even if unused
+  fromWorkoutId?: string | null;
   isPickerOpen: boolean;
   onClosePicker: () => void;
   onOpenPicker: () => void;
+  onSaveWorkout?: () => void; // 🔹 NEW
 };
 
 export default function SessionView({
   selectedMuscleGroups,
-  // fromWorkoutId, // not used for now – we can reintroduce it later
   isPickerOpen,
   onClosePicker,
   onOpenPicker,
+  onSaveWorkout,
 }: SessionViewProps) {
   const {
     currentWorkout,
@@ -35,25 +37,21 @@ export default function SessionView({
 
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
-  // Always have an array so we don't blow up on .length or .map
   const exercises = currentWorkout?.exercises ?? [];
 
   const exerciseToDelete = pendingDeleteId
     ? exercises.find((exercise) => exercise.id === pendingDeleteId)
     : undefined;
 
-  // Helpers that replaced the old store fields
   const hasExercises = exercises.length > 0;
   const excludedIds = exercises.map((ex) => ex.id);
 
-  // Mini summary numbers
   const exerciseCount = exercises.length;
   const setCount = exercises.reduce(
     (total, exercise) => total + exercise.sets.length,
     0
   );
 
-  // Total volume if your set has weight + reps
   const totalVolume = exercises.reduce((total, exercise) => {
     return (
       total +
@@ -65,7 +63,6 @@ export default function SessionView({
     );
   }, 0);
 
-  // Turn an exercise id from the picker into a WorkoutExercise for the session
   const handleSelectExercise = (id: string) => {
     const base = MOCK_EXERCISES.find((ex) => ex.id === id);
     if (!base) return;
@@ -77,8 +74,6 @@ export default function SessionView({
       secondaryMuscleGroups: base.secondaryMuscleGroups ?? [],
       notes: "",
       sets: [],
-      // if your WorkoutExercise type has additional fields (e.g. volume),
-      // initialize them here as well:
       volume: 0,
     };
 
@@ -95,6 +90,7 @@ export default function SessionView({
           <button
             type="button"
             onClick={onOpenPicker}
+            aria-label="Add exercise"
             className="font-medium text-foreground underline-offset-2 underline decoration-dotted hover:decoration-solid"
           >
             Add Exercise
@@ -103,62 +99,53 @@ export default function SessionView({
         </div>
       )}
 
-      {/* Session view with exercises */}
+      {/* Exercises list */}
       {hasExercises && (
-        <section className="flex h-full flex-col">
-          {/* Exercise cards */}
-          <div className="flex-1 overflow-y-auto pr-1 pb-4 space-y-6">
-            {exercises.map((exercise) => (
-              <ExerciseCard
-                key={exercise.id}
-                exercise={exercise}
-                onRemove={() => setPendingDeleteId(exercise.id)}
-                onAddSet={(values) => addSet(exercise.id, values)}
-                onUpdateSet={(setId, values) =>
-                  updateSet(exercise.id, setId, values)
-                }
-                onDeleteSet={(setId) => deleteSet(exercise.id, setId)}
-                onNotesChange={(notes) =>
-                  updateExerciseNotes(exercise.id, notes)
-                }
-              />
-            ))}
-          </div>
-
-          {/* Bottom – Save button, always visible at bottom of window */}
-          <div className="mt-2 shrink-0">
-            {/* mini summary line */}
-            <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-              <span>
-                {exerciseCount} {exerciseCount === 1 ? "exercise" : "exercises"}{" "}
-                • {setCount} {setCount === 1 ? "set" : "sets"}
-              </span>
-
-              {/* Show total volume only if > 0 */}
-              {totalVolume > 0 && (
-                <span>{totalVolume.toLocaleString()} total volume</span>
-              )}
+        <div className="space-y-4">
+          {exercises.map((exercise) => (
+            <ExerciseCard
+              key={exercise.id}
+              exercise={exercise}
+              onRemove={() => setPendingDeleteId(exercise.id)}
+              onAddSet={(values) => addSet(exercise.id, values)}
+              onUpdateSet={(setId, values) =>
+                updateSet(exercise.id, setId, values)
+              }
+              onDeleteSet={(setId) => deleteSet(exercise.id, setId)}
+              onNotesChange={(notes) => updateExerciseNotes(exercise.id, notes)}
+            />
+          ))}
+          {/* Bottom Add Exercise CTA */}
+          <button
+            type="button"
+            onClick={onOpenPicker}
+            aria-label="Add exercise"
+            className="w-full rounded-lg border border-dashed border-border/70 bg-card/30 hover:bg-card/45 transition-colors"
+          >
+            <div className="flex flex-col items-center justify-center gap-2 py-4 sm:py-6">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-background/20 text-lg text-muted-foreground">
+                +
+              </div>
             </div>
-            <button type="button" className="primary-button w-full">
-              Save Workout
-            </button>
-          </div>
-        </section>
+          </button>
+        </div>
       )}
 
-      {/* Exercise picker modal */}
-      <ExercisePicker
-        isOpen={isPickerOpen}
-        onClose={onClosePicker}
-        onSelect={handleSelectExercise}
-        excludeIds={excludedIds}
-        split={selectedMuscleGroups}
-      />
+      {/* Picker modal */}
+      {isPickerOpen && (
+        <ExercisePicker
+          isOpen={isPickerOpen}
+          onClose={onClosePicker}
+          onSelect={handleSelectExercise}
+          excludeIds={excludedIds}
+          split={selectedMuscleGroups}
+        />
+      )}
 
-      {/* Delete exercise modal */}
+      {/* Delete confirmation */}
       <DeleteExerciseModal
-        open={pendingDeleteId !== null}
-        exerciseName={exerciseToDelete?.name}
+        isOpen={!!pendingDeleteId}
+        exerciseName={exerciseToDelete?.name ?? ""}
         onCancel={() => setPendingDeleteId(null)}
         onConfirm={() => {
           if (pendingDeleteId) {
@@ -167,6 +154,29 @@ export default function SessionView({
           setPendingDeleteId(null);
         }}
       />
+
+      {/* Footer summary + Save */}
+      <div className="mt-2 shrink-0">
+        <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+          <span>
+            {exerciseCount} {exerciseCount === 1 ? "exercise" : "exercises"} •{" "}
+            {setCount} {setCount === 1 ? "set" : "sets"}
+          </span>
+
+          {/* Show total volume only if > 0 */}
+          {totalVolume > 0 && (
+            <span>{totalVolume.toLocaleString()} total volume</span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onSaveWorkout} // call handler from page
+          className="primary-button w-full "
+          disabled={!onSaveWorkout}
+        >
+          Save Workout
+        </button>
+      </div>
     </>
   );
 }
