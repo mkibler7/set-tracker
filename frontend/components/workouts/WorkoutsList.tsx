@@ -1,70 +1,72 @@
-import { Workout } from "@/types/workout";
+import type { Workout } from "@/types/workout";
 import Link from "next/link";
 import { AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { WorkoutCard } from "./WorkoutCard";
-import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronDoubleLeftIcon,
+  ChevronDoubleRightIcon,
+} from "@heroicons/react/24/solid";
 
 type WorkoutsListProps = {
   filteredWorkouts: Workout[];
+  pageWorkouts: Workout[];
+  page: number;
+  totalPages: number;
+  pageSize: number;
+  onPageChange: (nextPage: number) => void;
   setWorkouts: React.Dispatch<React.SetStateAction<Workout[]>>;
   setDeleteTarget: React.Dispatch<React.SetStateAction<Workout | null>>;
 };
-type WorkoutStep = "empty" | "split" | "session";
 
 export function WorkoutList({
   filteredWorkouts,
+  pageWorkouts,
+  page,
+  totalPages,
+  pageSize,
+  onPageChange,
   setWorkouts,
   setDeleteTarget,
 }: WorkoutsListProps) {
   const router = useRouter();
-  const useSearchParamss = useSearchParams();
-  const fromWorkoutId = useSearchParamss.get("fromWorkoutId");
+  const listRef = useRef<HTMLElement | null>(null);
 
-  const [activeMenuId, setActiveMenuId] = useState<string | null>(null); // To track which workout menu is open
-  const [step, setStep] = useState<WorkoutStep>("empty");
-  const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>(
-    []
-  );
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-  // If user arrives with ?fromWorkoutId, navigate to edit that workout
+  // Scroll list to top when user changes pages
   useEffect(() => {
-    if (!fromWorkoutId) return;
+    listRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
 
-    const workout: Workout | undefined = MOCK_WORKOUTS.find(
-      (w) => w.id === fromWorkoutId
-    );
-    if (!workout) return;
+  const rangeText = useMemo(() => {
+    if (filteredWorkouts.length === 0) return "";
+    const start = (page - 1) * pageSize + 1;
+    const end = Math.min(page * pageSize, filteredWorkouts.length);
+    return `Showing ${start}–${end} of ${filteredWorkouts.length}`;
+  }, [filteredWorkouts.length, page, pageSize]);
 
-    // Derive muscle groups from the split label
-    const groups = workout.split
-      .split("/")
-      .map((g) => g.trim())
-      .filter(Boolean);
+  const pageWindow = useMemo(() => {
+    if (totalPages <= 3)
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
 
-    setSelectedMuscleGroups(groups);
-    setStep("session");
-  }, [fromWorkoutId]);
+    if (page <= 1) return [1, 2, 3];
+    if (page >= totalPages) return [totalPages - 2, totalPages - 1, totalPages];
 
-  const splitLabel =
-    selectedMuscleGroups.length > 0
-      ? selectedMuscleGroups.join(" / ")
-      : "Start Workout";
+    return [page - 1, page, page + 1];
+  }, [page, totalPages]);
 
-  const headerTitle = step === "session" ? splitLabel : "Start Workout";
-
-  /* 
-    Handlers for workout actions 
-  */
   const handleDuplicate = (workoutId: string) => {
     setWorkouts((prev) => {
-      const original = prev.find((workout) => workout.id === workoutId);
+      const original = prev.find((w) => w.id === workoutId);
       if (!original) return prev;
 
       const copy: Workout = {
         ...original,
-        id: `${original.id}-copy-${Date.now()}`, // simple unique id
+        id: `${original.id}-copy-${Date.now()}`,
         date: new Date().toISOString().slice(0, 10),
       };
 
@@ -85,7 +87,10 @@ export function WorkoutList({
   };
 
   return (
-    <section className="mt-2 flex-1 overflow-y-auto scroll p-3">
+    <section
+      ref={listRef}
+      className="mt-2 min-h-0 flex-1 overflow-y-auto scroll px-3 pb-3"
+    >
       {filteredWorkouts.length === 0 ? (
         <div className="mt-8 rounded-lg border border-dashed border-border bg-card/40 p-6 text-center text-sm text-muted-foreground">
           No workouts found. Try adjusting your filters or{" "}
@@ -98,13 +103,13 @@ export function WorkoutList({
           .
         </div>
       ) : (
-        <div
-          className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 mr-3"
-          onClick={() => setActiveMenuId(null)}
-        >
-          <AnimatePresence>
-            {filteredWorkouts.map((workout, index) => {
-              return (
+        <>
+          <div
+            className="mx-auto grid w-full max-w-md gap-3 sm:max-w-none md:grid-cols-2 xl:grid-cols-3"
+            onClick={() => setActiveMenuId(null)}
+          >
+            <AnimatePresence>
+              {pageWorkouts.map((workout, index) => (
                 <WorkoutCard
                   key={workout.id}
                   workout={workout}
@@ -115,10 +120,90 @@ export function WorkoutList({
                   handleEdit={handleEdit}
                   handleDeleteClick={handleDeleteClick}
                 />
-              );
-            })}
-          </AnimatePresence>
-        </div>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {filteredWorkouts.length > pageSize && (
+            <div className="mt-5 flex flex-col items-center gap-2">
+              {/* Pager row */}
+              <div className="flex items-center justify-center gap-2">
+                {/* Jump to first */}
+                <button
+                  type="button"
+                  aria-label="First page"
+                  onClick={() => onPageChange(1)}
+                  disabled={page <= 1}
+                  className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground 
+                  hover:bg-accent/15 hover:text-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronDoubleLeftIcon className="h-5 w-5" />
+                </button>
+
+                {/* Previous page */}
+                <button
+                  type="button"
+                  aria-label="Previous page"
+                  onClick={() => onPageChange(Math.max(1, page - 1))}
+                  disabled={page <= 1}
+                  className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground 
+                  hover:bg-accent/15 hover:text-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronLeftIcon className="h-5 w-5" />
+                </button>
+
+                {/* 3 page numbers */}
+                <div className="flex items-center gap-1">
+                  {pageWindow.map((p) => {
+                    const active = p === page;
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => onPageChange(p)}
+                        className={
+                          active
+                            ? "min-w-[2.25rem] rounded-full bg-transparent px-3 py-1 text-base font-semibold text-foreground ring-1 ring-border"
+                            : "min-w-[2.25rem] rounded-full bg-transparent px-3 py-1 text-sm text-muted-foreground hover:bg-accent/15 hover:text-foreground"
+                        }
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Next page */}
+                <button
+                  type="button"
+                  aria-label="Next page"
+                  onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+                  disabled={page >= totalPages}
+                  className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground
+               hover:bg-accent/15 hover:text-emerald-400
+               disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronRightIcon className="h-5 w-5" />
+                </button>
+
+                {/* Jump to last */}
+                <button
+                  type="button"
+                  aria-label="Last page"
+                  onClick={() => onPageChange(totalPages)}
+                  disabled={page >= totalPages}
+                  className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground 
+                  hover:bg-accent/15 hover:text-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronDoubleRightIcon className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Range text below */}
+              <div className="text-xs text-muted-foreground">{rangeText}</div>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

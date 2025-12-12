@@ -22,7 +22,7 @@ export function WorkoutsFilters({
   return (
     <section className="mb-4 flex flex-wrap justify-between items-center gap-3">
       {/* Time filter pills */}
-      <div className="inline-flex flex-shrink-0 items-center gap-2 rounded-full border border-border bg-card/40 px-2 py-1">
+      <div className="mx-auto sm:mx-0 inline-flex flex-shrink-0 items-center gap-2 rounded-full border border-border bg-card/40 px-2 py-1 mb-3">
         {[
           { value: "all", label: "All" },
           { value: "7d", label: "Last 7 days" },
@@ -47,7 +47,7 @@ export function WorkoutsFilters({
       </div>
 
       {/* Search */}
-      <div className="flex-1 min-w-[150px] max-w-xs">
+      <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[150px] sm:max-w-xs">
         <input
           type="text"
           value={search}
