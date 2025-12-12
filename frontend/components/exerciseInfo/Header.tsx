@@ -15,10 +15,12 @@ export default function Header({ exercise }: HeaderProps) {
   return (
     <section className="mb-5 max-w-3xl">
       {/* Exercise name */}
-      <h1 className="text-2xl font-semibold text-slate-50">{exercise.name}</h1>
+      <h1 className="text-2xl font-semibold text-slate-50 w-full text-center sm:text-left">
+        {exercise.name}
+      </h1>
 
       {/* Muscle group pills */}
-      <div className="mt-2 flex flex-wrap gap-2 text-xs">
+      <div className="mt-4 flex flex-wrap gap-2 text-xs justify-center sm:justify-start">
         <span className="rounded-full bg-primary px-3 py-1 text-foreground">
           {exercise.primaryMuscleGroup}
         </span>

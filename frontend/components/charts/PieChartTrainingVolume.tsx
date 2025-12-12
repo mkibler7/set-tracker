@@ -29,6 +29,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
   const [hover, setHover] = useState<HoverInfo | null>(null);
 
   const isSmallScreen = useMediaQuery("(max-width: 640px)");
+  const isXsScreen = useMediaQuery("(max-width: 390px)"); // or 400px if you prefer
 
   // Aggregate data (volume or sets)
   const { total, muscles } = useMemo(
@@ -51,7 +52,14 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
   );
 
   // Radii per ring – a bit smaller on mobile so we leave room around the chart
-  const RINGS = isSmallScreen
+  const RINGS = isXsScreen
+    ? {
+        FULL: { inner: 0, outer: 18 },
+        UPPER_LOWER: { inner: 22, outer: 46 },
+        GROUPS: { inner: 50, outer: 76 },
+        MUSCLES: { inner: 80, outer: 102 }, // smaller outer radius
+      }
+    : isSmallScreen
     ? {
         FULL: { inner: 0, outer: 20 },
         UPPER_LOWER: { inner: 24, outer: 52 },
@@ -151,7 +159,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
     const sy = cy + outerRadius * Math.sin(angle);
 
     // First elbow a little outside the arc
-    const elbowRadius = outerRadius + (isSmallScreen ? 4 : 10);
+    const elbowRadius = outerRadius + (isXsScreen ? 2 : isSmallScreen ? 4 : 10);
     const mx = cx + elbowRadius * Math.cos(angle);
     const my = cy + elbowRadius * Math.sin(angle);
 
@@ -189,7 +197,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
           y={ey}
           textAnchor={textAnchor}
           dominantBaseline="middle"
-          fontSize={isSmallScreen ? 8 : 15}
+          fontSize={isXsScreen ? 7 : isSmallScreen ? 8 : 15}
           fill="hsl(var(--foreground))"
         >
           {labelText}
@@ -211,7 +219,7 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
       />
 
       {/* On mobile we cap width and add horizontal padding so the chart never hugs the edge */}
-      <div className="relative w-full max-w-[420px] sm:max-w-none h-[340px] sm:h-[520px] md:h-[580px]">
+      <div className="relative w-full h-[340px] sm:h-[520px] md:h-[580px] px-2 sm:px-0 overflow-visible">
         <MuscleHoverOverlay
           hover={hover}
           metricLabel={metricLabel}
@@ -222,7 +230,9 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
           <PieChart
             onMouseLeave={clearHover}
             margin={
-              isSmallScreen
+              isXsScreen
+                ? { top: 8, right: 18, bottom: 8, left: 18 }
+                : isSmallScreen
                 ? { top: 8, right: 32, bottom: 8, left: 32 }
                 : { top: 0, right: 80, bottom: 0, left: 80 }
             }

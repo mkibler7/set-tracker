@@ -15,36 +15,38 @@ export default function ExercisesHeader({
     <div>
       <PageBackButton />
 
-      <header className="mt-6 space-y-4">
+      <header className="mt-6 space-y-4 lg:max-w-2xl lg:mx-auto">
         {/* Row 1: Title + CTA */}
-        <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground text-center sm:text-left">
-            Exercises
-          </h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground text-center w-full text-centersm:text-left">
+          Exercises
+        </h1>
 
-          <button
-            className="primary-button w-full sm:w-auto"
-            onClick={onAddExercise}
-          >
-            + Add Exercise
-          </button>
-        </div>
-
-        {/* Row 2: Description + Search */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-muted-foreground text-center sm:text-left sm:max-w-xl">
+        {/* Mobile: stacked/centered. Desktop: two-column. */}
+        <div className="flex flex-col items-center gap-3 lg:grid lg:grid-cols-[1fr_320px] lg:items-start lg:gap-6">
+          {/* Description */}
+          <p className="text-sm text-muted-foreground text-center lg:text-left">
             Browse and manage your exercise library. Click an exercise to view
             details and history.
           </p>
 
-          <div className="w-full max-w-xs mx-auto sm:mx-0">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search exercises..."
-              className="w-full rounded-md border border-border bg-card/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/60"
-            />
+          {/* Controls: right column, right-aligned */}
+          <div className="w-full flex flex-col gap-3 lg:items-end">
+            <button
+              className="primary-button w-full lg:w-auto"
+              onClick={onAddExercise}
+            >
+              + Add Exercise
+            </button>
+
+            <div className="w-full lg:w-[320px]">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Search exercises..."
+                className="w-full rounded-md border border-border bg-card/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/60"
+              />
+            </div>
           </div>
         </div>
       </header>

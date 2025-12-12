@@ -22,20 +22,23 @@ export default function ChartsPage() {
   const data = getVolumeSeries(filteredWorkouts);
 
   return (
-    <main className="page space-y-6">
-      {/* Header + range selector */}
-      <TrainingVolumeHeader />
+    <main className="">
+      <div className="page space-y-6">
+        {/* Header + range selector */}
+        <TrainingVolumeHeader />
 
-      {/* Area graph (volume over time) */}
-      <AreaGraphTrainingVolume data={data} />
+        {/* Area graph (volume over time) */}
+        <AreaGraphTrainingVolume data={data} />
 
-      {/* Global time filter */}
-      <div className="flex justify-center">
-        <TimeRangeToggle range={range} onChange={setRange} />
+        {/* Global time filter */}
+        <div className="flex justify-center">
+          <TimeRangeToggle range={range} onChange={setRange} />
+        </div>
       </div>
-
       {/* Muscle breakdown sunburst (same filtered workouts) */}
-      <MuscleBreakdownSection workouts={filteredWorkouts} />
+      <div className="w-full">
+        <MuscleBreakdownSection workouts={filteredWorkouts} />
+      </div>
     </main>
   );
 }

@@ -77,6 +77,12 @@
     outline: none !important;
     box-shadow: none !important;
   }
+  .reptracker-chart,
+  .reptracker-chart .recharts-responsive-container,
+  .reptracker-chart .recharts-wrapper,
+  .reptracker-chart svg {
+    overflow: visible !important;
+  }
 }
 
 @layer components {
