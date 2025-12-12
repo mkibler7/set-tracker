@@ -174,7 +174,7 @@ export default function ExercisesPage() {
             <div key={letter} className="mb-3">
               <div className="sticky top-0 z-20 -mx-4 bg-slate-950">
                 <div className="flex items-end px-4 py-2">
-                  <h2 className="text-[1rem] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <h2 className="text-[1rem] font-semibold uppercase tracking-wide text-foreground">
                     {letter}
                   </h2>
                 </div>
