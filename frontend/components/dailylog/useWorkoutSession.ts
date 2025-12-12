@@ -12,6 +12,7 @@ import type { SetFormValues } from "@/components/dailylog/SetForm";
  */
 type WorkoutSessionState = {
   currentWorkout: WorkoutSession | null;
+  stashedWorkout?: WorkoutSession | null; // optional saved state
   // actions
   startWorkout: (
     name: string,
@@ -27,6 +28,8 @@ type WorkoutSessionState = {
   updateSplit: (splitName: string) => void;
   updateSessionMeta: (updates: Partial<WorkoutSession>) => void;
   endWorkout: () => void;
+  stashCurrentWorkout: () => void;
+  restoreStashedWorkout: () => void;
 };
 
 /**
@@ -228,6 +231,21 @@ export const useWorkoutSession = create<WorkoutSessionState>()(
               }
             : state
         ),
+
+      stashedWorkout: null,
+
+      stashCurrentWorkout: () =>
+        set((state) => {
+          if (!state.currentWorkout) return state;
+          if (state.stashedWorkout) return state; // already stashed
+          return { stashedWorkout: state.currentWorkout };
+        }),
+
+      restoreStashedWorkout: () =>
+        set((state) => {
+          if (!state.stashedWorkout) return state;
+          return { currentWorkout: state.stashedWorkout, stashedWorkout: null };
+        }),
 
       /**
        * Completely clear the active workout.

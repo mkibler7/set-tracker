@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/components/dailylog/Header";
 import EmptyState from "@/components/dailylog/EmptyState";
 import SplitSelector from "@/components/dailylog/SplitSelector";
@@ -30,11 +30,17 @@ const ALL_SPLIT_GROUPS = [
 export default function DailyLogClientPage() {
   const {
     currentWorkout,
+    stashedWorkout,
+    stashCurrentWorkout,
+    restoreStashedWorkout,
     startWorkout,
     endWorkout,
     updateSplit, // ✅ add this
   } = useWorkoutSession();
 
+  const router = useRouter();
+  const loadedFromWorkoutRef = useRef<string | null>(null);
+  const closingHistoryRef = useRef(false);
   const searchParams = useSearchParams();
   const fromWorkoutId = searchParams.get("fromWorkout");
 
@@ -49,12 +55,27 @@ export default function DailyLogClientPage() {
 
   // 1) If we arrive with ?fromWorkout=123, auto-load that workout
   useEffect(() => {
-    if (!fromWorkoutId) return;
+    // While we are closing an edit-history flow, ignore fromWorkout loads
+    if (closingHistoryRef.current && fromWorkoutId) return;
+    // If the param is cleared, allow future history-loads again.
+    if (!fromWorkoutId) {
+      loadedFromWorkoutRef.current = null;
+      closingHistoryRef.current = false;
+      return;
+    }
+
+    // Prevent re-loading the same history workout after startWorkout() updates store state.
+    if (loadedFromWorkoutRef.current === fromWorkoutId) return;
 
     const workout: Workout | undefined = MOCK_WORKOUTS.find(
       (w) => w.id === fromWorkoutId
     );
     if (!workout) return;
+
+    // Stash today's in-progress session so we can restore later
+    if (currentWorkout && !stashedWorkout) {
+      stashCurrentWorkout();
+    }
 
     const groups = workout.split
       .split("/")
@@ -63,10 +84,21 @@ export default function DailyLogClientPage() {
 
     setSelectedMuscleGroups(groups);
     setWorkoutDate(new Date(workout.date));
+    setIsEditingSplit(false);
+    setIsPickerOpen(false);
 
     startWorkout(workout.split, workout.date, workout.exercises);
     setStep("session");
-  }, [fromWorkoutId, startWorkout]);
+
+    // Mark as loaded so we don't run again for this same id.
+    loadedFromWorkoutRef.current = fromWorkoutId;
+  }, [
+    fromWorkoutId,
+    startWorkout,
+    currentWorkout,
+    stashedWorkout,
+    stashCurrentWorkout,
+  ]);
 
   // 2) If there is already a current workout in the store, auto-resume it
   useEffect(() => {
@@ -144,12 +176,49 @@ export default function DailyLogClientPage() {
   };
 
   const handleSaveWorkout = () => {
+    const isEditingHistory = !!fromWorkoutId;
+
+    // Ends whatever is currently loaded in the session view (today OR the history workout)
     endWorkout();
 
-    setSelectedMuscleGroups([]);
-    setStep("empty");
     setIsPickerOpen(false);
     setIsEditingSplit(false);
+
+    if (isEditingHistory) {
+      // Clear query param so refresh doesn't re-load the history workout
+      closingHistoryRef.current = true;
+
+      // Keep the current id “locked” until the query param is actually gone
+      loadedFromWorkoutRef.current = fromWorkoutId;
+
+      router.replace("/dailylog");
+
+      // If we had a session before editing history, restore it
+      if (stashedWorkout) {
+        restoreStashedWorkout();
+
+        const groups = stashedWorkout.split
+          .split("/")
+          .map((g) => g.trim())
+          .filter(Boolean);
+
+        setSelectedMuscleGroups(groups);
+        setWorkoutDate(new Date(stashedWorkout.date));
+        setStep("session");
+        return;
+      }
+
+      // No stashed session → return to today's empty state
+      setSelectedMuscleGroups([]);
+      setWorkoutDate(new Date()); //  reset to current date
+      setStep("empty");
+      return;
+    }
+
+    // Normal save (ending today's session)
+    setSelectedMuscleGroups([]);
+    setWorkoutDate(new Date()); //  reset to current date
+    setStep("empty");
   };
 
   return (
