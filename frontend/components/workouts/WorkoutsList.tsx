@@ -39,14 +39,24 @@ export function WorkoutList({
 
   // Scroll list to top when user changes pages
   useEffect(() => {
-    listRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    // useEffect only runs client-side, but keep it explicit anyway
+    if (typeof window === "undefined") return;
+
+    const isCoarse = window.matchMedia("(pointer: coarse)").matches;
+    const behavior: ScrollBehavior = isCoarse ? "auto" : "smooth";
+
+    window.scrollTo({ top: 0, left: 0, behavior });
+
+    // Optional: if your list is also independently scrollable, reset it too
+    const el = listRef.current;
+    if (el) el.scrollTop = 0;
   }, [page]);
 
   const rangeText = useMemo(() => {
     if (filteredWorkouts.length === 0) return "";
     const start = (page - 1) * pageSize + 1;
     const end = Math.min(page * pageSize, filteredWorkouts.length);
-    return `Showing ${start}–${end} of ${filteredWorkouts.length}`;
+    return `Showing ${start} – ${end} of ${filteredWorkouts.length}`;
   }, [filteredWorkouts.length, page, pageSize]);
 
   const pageWindow = useMemo(() => {
@@ -96,7 +106,7 @@ export function WorkoutList({
           No workouts found. Try adjusting your filters or{" "}
           <Link
             href="/dailylog"
-            className="font-medium text-foreground underline-offset-2 underline decoration-dotted hover:decoration-solid"
+            className="primary-button font-medium text-foreground underline-offset-2 underline decoration-dotted "
           >
             Start a new workout
           </Link>
@@ -135,7 +145,7 @@ export function WorkoutList({
                   onClick={() => onPageChange(1)}
                   disabled={page <= 1}
                   className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground 
-                  hover:bg-accent/15 hover:text-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+                  hover:bg-accent/15 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <ChevronDoubleLeftIcon className="h-5 w-5" />
                 </button>
@@ -147,7 +157,7 @@ export function WorkoutList({
                   onClick={() => onPageChange(Math.max(1, page - 1))}
                   disabled={page <= 1}
                   className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground 
-                  hover:bg-accent/15 hover:text-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+                  hover:bg-accent/15 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <ChevronLeftIcon className="h-5 w-5" />
                 </button>
@@ -164,7 +174,7 @@ export function WorkoutList({
                         className={
                           active
                             ? "min-w-[2.25rem] rounded-full bg-transparent px-3 py-1 text-base font-semibold text-foreground ring-1 ring-border"
-                            : "min-w-[2.25rem] rounded-full bg-transparent px-3 py-1 text-sm text-muted-foreground hover:bg-accent/15 hover:text-foreground"
+                            : "min-w-[2.25rem] rounded-full bg-transparent px-3 py-1 text-sm text-muted-foreground hover:bg-accent/15 hover:text-primary"
                         }
                       >
                         {p}
@@ -179,9 +189,8 @@ export function WorkoutList({
                   aria-label="Next page"
                   onClick={() => onPageChange(Math.min(totalPages, page + 1))}
                   disabled={page >= totalPages}
-                  className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground
-               hover:bg-accent/15 hover:text-emerald-400
-               disabled:cursor-not-allowed disabled:opacity-40"
+                  className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground 
+                  hover:bg-accent/15 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <ChevronRightIcon className="h-5 w-5" />
                 </button>
@@ -193,14 +202,16 @@ export function WorkoutList({
                   onClick={() => onPageChange(totalPages)}
                   disabled={page >= totalPages}
                   className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground 
-                  hover:bg-accent/15 hover:text-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+                  hover:bg-accent/15 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <ChevronDoubleRightIcon className="h-5 w-5" />
                 </button>
               </div>
 
               {/* Range text below */}
-              <div className="text-xs text-muted-foreground">{rangeText}</div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                {rangeText}
+              </div>
             </div>
           )}
         </>

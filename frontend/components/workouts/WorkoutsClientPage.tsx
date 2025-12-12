@@ -1,7 +1,7 @@
 "use client";
 
 import React, { use } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
 import type { Workout, TimeFilter } from "@/types/workout";
 import DeleteWorkoutModal from "@/components/workouts/DeleteWorkoutModal";
@@ -94,9 +94,14 @@ export default function WorkoutsClientPage() {
     setDeleteTarget(null);
   };
 
+  const handlePageChange = (nextPage: number) => {
+    setPage(nextPage);
+  };
+
   return (
     <main className="page flex min-h-0 flex-1 flex-col overflow-hidden">
       {/* Header */}
+
       <div className="shrink-0">
         <PageBackButton />
         <Header />
@@ -117,7 +122,7 @@ export default function WorkoutsClientPage() {
         page={page}
         totalPages={totalPages}
         pageSize={pageSize}
-        onPageChange={setPage}
+        onPageChange={handlePageChange}
         setWorkouts={setWorkouts}
         setDeleteTarget={setDeleteTarget}
       />
