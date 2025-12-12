@@ -102,15 +102,17 @@ export function WorkoutList({
       className="mt-2 min-h-0 flex-1 overflow-y-auto scroll px-3 pb-3"
     >
       {filteredWorkouts.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-border bg-card/40 p-6 text-center text-sm text-muted-foreground">
-          No workouts found. Try adjusting your filters or{" "}
-          <Link
-            href="/dailylog"
-            className="primary-button font-medium text-foreground underline-offset-2 underline decoration-dotted "
-          >
-            Start a new workout
-          </Link>
-          .
+        <div className="mt-8 rounded-lg border border-dashed border-border bg-card/40 p-6 text-sm text-muted-foreground">
+          <div className="flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:text-left">
+            <span>No workouts found. Try adjusting your filters or</span>
+
+            <Link
+              href="/dailylog"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+            >
+              Start a new workout
+            </Link>
+          </div>
         </div>
       ) : (
         <>
