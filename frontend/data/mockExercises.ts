@@ -34,6 +34,14 @@ export const MOCK_EXERCISES: Exercise[] = [
       "The machine chest press is a strength training exercise that targets the chest muscles (pectoralis major) using a specialized machine. It is designed to mimic the motion of a traditional bench press while providing added stability and support. This exercise primarily works the chest, shoulders, and triceps.",
   },
   {
+    id: "adductor-machine",
+    name: "Adductor Machine",
+    primaryMuscleGroup: "Adductors",
+    secondaryMuscleGroups: [],
+    description:
+      "The adductor machine is a strength training exercise that targets the inner thigh muscles (adductors) using a specialized machine. It is designed to isolate and strengthen the adductor muscles while providing added stability and support. This exercise primarily works the adductors.",
+  },
+  {
     id: "incline-dumbbell-bench-press",
     name: "Incline Dumbbell Bench Press",
     primaryMuscleGroup: "Chest",
@@ -164,7 +172,6 @@ export const MOCK_EXERCISES: Exercise[] = [
     name: "Single Arm Row",
     primaryMuscleGroup: "Back",
     secondaryMuscleGroups: ["Biceps", "Shoulders"],
-
   },
   {
     id: "lat-pulldown-wide",

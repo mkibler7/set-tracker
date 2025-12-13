@@ -13,6 +13,7 @@ import PieChartTrainingVolume from "@/components/charts/PieChartTrainingVolume";
 import { TrainingVolumeHeader } from "@/components/charts/TrainingVolumeHeader";
 import { TimeRangeToggle } from "@/components/charts/TimeRangeToggle";
 import { MuscleBreakdownSection } from "@/components/charts/MuscleBreakdownSection";
+import PageBackButton from "@/components/shared/PageBackButton";
 
 export default function ChartsPage() {
   const [range, setRange] = useState<TimeRange>("1M");
@@ -24,6 +25,7 @@ export default function ChartsPage() {
   return (
     <main className="">
       <div className="page space-y-6">
+        <PageBackButton />
         {/* Header + range selector */}
         <TrainingVolumeHeader />
 
