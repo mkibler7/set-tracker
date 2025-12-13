@@ -1,6 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
+const connectDB = require("./src/config/db");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,6 +22,23 @@ app.get("/health", (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Backend API is listening on http://localhost:${PORT}`);
+async function startServer() {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Backend API is listening on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+}
+
+startServer();
+
+// Graceful shutdown
+process.on("SIGINT", async () => {
+  console.log("Closing MongoDB connection...");
+  await mongoose.connection.close();
+  process.exit(0);
 });
