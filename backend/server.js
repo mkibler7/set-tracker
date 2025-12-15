@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const connectDB = require("./src/config/db");
+const workoutsRouter = require("./src/routes/workouts");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,6 +16,9 @@ app.use(
   })
 );
 app.use(express.json());
+
+// Routes
+app.use("/api/workouts", workoutsRouter);
 
 // Simple health check
 app.get("/health", (req, res) => {
