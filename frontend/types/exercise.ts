@@ -57,7 +57,6 @@ export interface ExerciseHistoryEntry {
   workoutId: string;
   workoutDate: string; // ISO string
   workoutName: string;
-  totalVolume: number;
   notes?: string;
   sets: ExerciseHistorySet[];
 }

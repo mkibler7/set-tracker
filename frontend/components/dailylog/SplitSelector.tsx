@@ -1,9 +1,10 @@
 import React from "react";
+import { MuscleGroup } from "@/types/exercise";
 
 type SplitSelectorProps = {
-  allGroups: string[];
-  selected: string[];
-  onToggleGroup: (group: string) => void;
+  allGroups: MuscleGroup[];
+  selected: MuscleGroup[];
+  onToggleGroup: (group: MuscleGroup) => void;
   onCancel: () => void;
   onBegin: () => void;
   primaryLabel?: string;

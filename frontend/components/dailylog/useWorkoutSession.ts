@@ -2,8 +2,15 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { WorkoutExercise, WorkoutSession } from "@/types/workout";
+import type {
+  WorkoutExercise,
+  WorkoutSession,
+  WorkoutSet,
+} from "@/types/workout";
 import type { SetFormValues } from "@/components/dailylog/SetForm";
+import type { MuscleGroup } from "@/types/exercise";
+
+const newId = () => globalThis.crypto.randomUUID();
 
 /**
  * Shape of the workout session store.
@@ -13,21 +20,32 @@ import type { SetFormValues } from "@/components/dailylog/SetForm";
 type WorkoutSessionState = {
   currentWorkout: WorkoutSession | null;
   stashedWorkout?: WorkoutSession | null; // optional saved state
+
+  // derived UI helper
+  getSplitLabel: () => string;
+
   // actions
   startWorkout: (
-    name: string,
+    muscleGroups: MuscleGroup[],
     date: string,
     exercises?: WorkoutExercise[]
   ) => void;
+
   addExercise: (exercise: WorkoutExercise) => void;
   removeExercise: (exerciseId: string) => void;
+
   addSet: (exerciseId: string, values: SetFormValues) => void;
   updateSet: (exerciseId: string, setId: string, values: SetFormValues) => void;
   deleteSet: (exerciseId: string, setId: string) => void;
+
   updateExerciseNotes: (exerciseId: string, notes: string) => void;
-  updateSplit: (splitName: string) => void;
+
+  updateMuscleGroups: (muscleGroups: MuscleGroup[]) => void;
+
   updateSessionMeta: (updates: Partial<WorkoutSession>) => void;
+
   endWorkout: () => void;
+
   stashCurrentWorkout: () => void;
   restoreStashedWorkout: () => void;
 };
@@ -41,6 +59,14 @@ export const useWorkoutSession = create<WorkoutSessionState>()(
     (set, get) => ({
       // No active workout by default
       currentWorkout: null,
+      stashedWorkout: null,
+
+      getSplitLabel: () => {
+        const workout = get().currentWorkout;
+        if (!workout || workout.muscleGroups.length === 0)
+          return "Start Workout";
+        return workout.muscleGroups.join(" / ");
+      },
 
       /**
        * Start a new workout session.
@@ -48,11 +74,11 @@ export const useWorkoutSession = create<WorkoutSessionState>()(
        * - date -> ISO string or similar
        * - exercises -> optional seed list (e.g. when loading from a saved workout)
        */
-      startWorkout: (name, date, exercises = []) =>
+      startWorkout: (muscleGroups, date, exercises = []) =>
         set({
           currentWorkout: {
             id: "session-" + Date.now(),
-            split: name,
+            muscleGroups,
             date,
             exercises,
           },
@@ -84,7 +110,7 @@ export const useWorkoutSession = create<WorkoutSessionState>()(
                 currentWorkout: {
                   ...state.currentWorkout,
                   exercises: state.currentWorkout.exercises.filter(
-                    (exercise) => exercise.id !== exerciseId
+                    (exercise) => exercise.exerciseId !== exerciseId
                   ),
                 },
               }
@@ -104,24 +130,23 @@ export const useWorkoutSession = create<WorkoutSessionState>()(
           const weight = values.weight ?? 0;
           const reps = values.reps ?? 0;
 
+          const newSet: WorkoutSet = {
+            id: newId(),
+            reps,
+            weight,
+            tempo: values.tempo,
+            rpe: values.rpe,
+            isWarmup: values.isWarmup ?? false,
+          };
+
           return {
             currentWorkout: {
               ...session,
               exercises: session.exercises.map((exercise) =>
-                exercise.id === exerciseId
+                exercise.exerciseId === exerciseId
                   ? {
                       ...exercise,
-                      sets: [
-                        ...exercise.sets,
-                        {
-                          id: "set-" + Date.now(),
-                          reps,
-                          weight,
-                          tempo: values.tempo,
-                          rpe: values.rpe,
-                          volume: weight * reps,
-                        },
-                      ],
+                      sets: [...exercise.sets, newSet],
                     }
                   : exercise
               ),
@@ -143,17 +168,18 @@ export const useWorkoutSession = create<WorkoutSessionState>()(
             currentWorkout: {
               ...session,
               exercises: session.exercises.map((exercise) =>
-                exercise.id === exerciseId
+                exercise.exerciseId === exerciseId
                   ? {
                       ...exercise,
                       sets: exercise.sets.map((set) =>
                         set.id === setId
                           ? {
                               ...set,
-                              ...values,
-                              volume:
-                                (values.reps ?? set.reps) *
-                                (values.weight ?? set.weight),
+                              reps: values.reps ?? set.reps,
+                              weight: values.weight ?? set.weight,
+                              tempo: values.tempo ?? set.tempo,
+                              rpe: values.rpe ?? set.rpe,
+                              isWarmup: values.isWarmup ?? set.isWarmup,
                             }
                           : set
                       ),
@@ -176,7 +202,7 @@ export const useWorkoutSession = create<WorkoutSessionState>()(
             currentWorkout: {
               ...session,
               exercises: session.exercises.map((exercise) =>
-                exercise.id === exerciseId
+                exercise.exerciseId === exerciseId
                   ? {
                       ...exercise,
                       sets: exercise.sets.filter((set) => set.id !== setId),
@@ -199,8 +225,22 @@ export const useWorkoutSession = create<WorkoutSessionState>()(
             currentWorkout: {
               ...session,
               exercises: session.exercises.map((exercise) =>
-                exercise.id === exerciseId ? { ...exercise, notes } : exercise
+                exercise.exerciseId === exerciseId
+                  ? { ...exercise, notes }
+                  : exercise
               ),
+            },
+          };
+        }),
+
+      updateMuscleGroups: (groups) =>
+        set((state) => {
+          if (!state.currentWorkout) return state;
+
+          return {
+            currentWorkout: {
+              ...state.currentWorkout,
+              muscleGroups: groups,
             },
           };
         }),
@@ -209,16 +249,16 @@ export const useWorkoutSession = create<WorkoutSessionState>()(
        * Update the current workout's split label without
        * resetting the session or its exercises.
        */
-      updateSplit: (split) =>
-        set((state) => {
-          if (!state.currentWorkout) return state;
-          return {
-            currentWorkout: {
-              ...state.currentWorkout,
-              split,
-            },
-          };
-        }),
+      // updateSplit: (split) =>
+      //   set((state) => {
+      //     if (!state.currentWorkout) return state;
+      //     return {
+      //       currentWorkout: {
+      //         ...state.currentWorkout,
+      //         split,
+      //       },
+      //     };
+      //   }),
 
       updateSessionMeta: (updates) =>
         set((state) =>
@@ -231,8 +271,6 @@ export const useWorkoutSession = create<WorkoutSessionState>()(
               }
             : state
         ),
-
-      stashedWorkout: null,
 
       stashCurrentWorkout: () =>
         set((state) => {

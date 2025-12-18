@@ -55,8 +55,12 @@ export default function WorkoutsClientPage() {
       }
 
       if (lowerSearch) {
-        const exerciseNames = workout.exercises.map((ex) => ex.name).join(" ");
-        const haystack = `${workout.split} ${exerciseNames}`.toLowerCase();
+        const exerciseNames = workout.exercises
+          .map((exercise) => exercise.exerciseName)
+          .join(" ");
+        const haystack = `${workout.muscleGroups.join(
+          " / "
+        )} ${exerciseNames}`.toLowerCase();
         if (!haystack.includes(lowerSearch)) return false;
       }
 
@@ -129,7 +133,7 @@ export default function WorkoutsClientPage() {
 
       <DeleteWorkoutModal
         isOpen={!!deleteTarget}
-        workoutName={deleteTarget?.split}
+        workoutName={deleteTarget?.muscleGroups.join(" / ") || ""}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />

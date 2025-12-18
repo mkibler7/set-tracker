@@ -1,7 +1,7 @@
-// export type IsoDateString = `${number}-${number}-${number}`; // "YYYY-MM-DD"
+// format: 2025-12-10T00:00:00.000Z
 
 export function parseLocalDate(isoDate: string): Date {
-  const [year, month, day] = isoDate.split("-").map(Number);
+  const [year, month, day] = isoDate.substring(0, 10).split("-").map(Number);
   return new Date(year, month - 1, day); // local midnight
 }
 

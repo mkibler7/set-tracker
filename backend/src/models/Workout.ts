@@ -1,21 +1,29 @@
 import mongoose, { type InferSchemaType, type Model } from "mongoose";
+import crypto from "crypto";
 
 const WorkoutSetSchema = new mongoose.Schema(
   {
+    id: {
+      type: String,
+      trim: true,
+      required: true,
+      default: () => crypto.randomUUID(),
+    },
     reps: { type: Number, required: true, min: 0 },
     weight: { type: Number, required: true, min: 0 },
-    volume: { type: Number, required: true, min: 0 },
     tempo: { type: String },
     rpe: { type: Number, min: 0, max: 10 },
+    isWarmup: { type: Boolean, default: false },
   },
   { _id: false }
 );
 
 const WorkoutExerciseSchema = new mongoose.Schema(
   {
-    id: { type: String, required: true, trim: true },
-    name: { type: String, required: true, trim: true },
+    exerciseId: { type: String, required: true, trim: true },
+    exerciseName: { type: String, required: true, trim: true },
     sets: { type: [WorkoutSetSchema], default: [] },
+    notes: { type: String },
   },
   { _id: false }
 );
@@ -23,14 +31,15 @@ const WorkoutExerciseSchema = new mongoose.Schema(
 const WorkoutSchema = new mongoose.Schema(
   {
     date: { type: Date, default: Date.now, required: true },
-    primaryMuscleGroup: { type: String, required: true, trim: true },
-    secondaryMuscleGroups: {
+    muscleGroups: {
       type: [String],
+      required: true,
       validate: {
         validator: (arr: unknown) =>
           Array.isArray(arr) &&
+          arr.length > 0 &&
           arr.every((s) => typeof s === "string" && s.trim().length > 0),
-        message: "secondaryMuscleGroups must be an array of non-empty strings",
+        message: "muscleGroups must be an array of non-empty strings",
       },
     },
     exercises: { type: [WorkoutExerciseSchema], default: [] },

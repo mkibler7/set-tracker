@@ -10,7 +10,7 @@ interface WorkoutState {
   // actions
   startWorkout: () => void;
   setExercises: (exercises: WorkoutExercise[]) => void;
-  updateExercise: (exercise: WorkoutExercise) => void;
+  upsertExercise: (exercise: WorkoutExercise) => void;
   resetWorkout: () => void;
 }
 
@@ -20,20 +20,22 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
 
   startWorkout: () =>
     set(() => ({
-      currentWorkoutId: crypto.randomUUID(), // temp; backend will override later
+      currentWorkoutId: crypto.randomUUID(),
       exercises: [],
     })),
 
   setExercises: (exercises) => set(() => ({ exercises })),
 
-  updateExercise: (exercise) =>
+  upsertExercise: (exercise) =>
     set((state) => {
-      const exists = state.exercises.some((e) => e.id === (exercise as any).id);
+      const exists = state.exercises.some(
+        (e) => e.exerciseId === exercise.exerciseId
+      );
 
       return {
         exercises: exists
           ? state.exercises.map((e) =>
-              e.id === (exercise as any).id ? exercise : e
+              e.exerciseId === exercise.exerciseId ? exercise : e
             )
           : [...state.exercises, exercise],
       };

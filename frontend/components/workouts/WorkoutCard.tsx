@@ -31,6 +31,7 @@ export function WorkoutCard({
   const exerciseCount = getExerciseCount(workout);
   const setCount = getSetCount(workout);
   const totalVolume = getTotalVolume(workout);
+  const workoutTitle = workout.muscleGroups.join(" / ");
 
   const isMenuOpen = activeMenuId === workout.id;
 
@@ -52,7 +53,7 @@ export function WorkoutCard({
         <div className="mb-2 flex items-start justify-between gap-2">
           <div>
             <h2 className="text-sm font-semibold text-foreground mb-1">
-              {workout.split}
+              {workoutTitle}
             </h2>
             <p className="text-xs text-muted-foreground">
               {formatWorkoutDate(workout.date)}
