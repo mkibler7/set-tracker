@@ -7,6 +7,7 @@ import type { Workout, WorkoutExercise } from "@/types/workout";
 import { formatWorkoutDate } from "@/lib/util/date";
 import { exerciseVolume } from "@/lib/workouts/stats";
 import PageBackButton from "@/components/shared/PageBackButton";
+import { getExerciseMusclesById } from "@/lib/exercises";
 
 export default function WorkoutDetailPage() {
   const params = useParams();
@@ -45,21 +46,25 @@ export default function WorkoutDetailPage() {
     0
   );
 
-  const totalVolume = workout.exercises.reduce((total, exercise) => {
-    if (typeof (exercise as any).volume === "number") {
-      return total + (exercise as any).volume;
-    }
-    if (!exercise.sets) return total;
+  const totalVolume = workout.exercises.reduce(
+    (total, ex) => total + exerciseVolume(ex),
+    0
+  );
+  // const totalVolume = workout.exercises.reduce((total, exercise) => {
+  //   if (typeof (exercise as any).volume === "number") {
+  //     return total + (exercise as any).volume;
+  //   }
+  //   if (!exercise.sets) return total;
 
-    const fromSets = exercise.sets.reduce((acc, set: any) => {
-      if (typeof set.volume === "number") return acc + set.volume;
-      const weight = set.weight ?? 0;
-      const reps = set.reps ?? 0;
-      return acc + weight * reps;
-    }, 0);
+  //   const fromSets = exercise.sets.reduce((acc, set: any) => {
+  //     if (typeof set.volume === "number") return acc + set.volume;
+  //     const weight = set.weight ?? 0;
+  //     const reps = set.reps ?? 0;
+  //     return acc + weight * reps;
+  //   }, 0);
 
-    return total + fromSets;
-  }, 0);
+  //   return total + fromSets;
+  // }, 0);
 
   return (
     <main className="page">
@@ -74,7 +79,7 @@ export default function WorkoutDetailPage() {
         </p>
         <div className="flex items-center justify-between">
           <h1 className="mb-1 text-2xl font-semibold tracking-tight text-foreground">
-            {workout.split}
+            {workout.muscleGroups.join(" / ")}
           </h1>
           <button type="button" onClick={handleEdit} className="primary-button">
             Edit workout
@@ -102,29 +107,26 @@ export default function WorkoutDetailPage() {
       <section className="flex-1 overflow-y-auto space-y-4 scroll pb-6">
         {workout.exercises.length > 0 ? (
           workout.exercises.map((exercise, index) => {
+            const { muscleGroups } = getExerciseMusclesById(
+              exercise.exerciseId
+            );
+
             const exVolume = exerciseVolume(exercise as WorkoutExercise);
 
             return (
               <div
-                key={exercise.id}
+                key={exercise.exerciseId || index}
                 className="rounded-lg border border-border bg-card/70 p-4 text-sm shadow-sm mr-2"
               >
                 {/* Top row: name + volume */}
                 <div className="mb-2 flex items-start justify-between gap-2">
                   <div>
                     <h2 className="mb-2 text-sm font-semibold text-foreground">
-                      {exercise.name}
+                      {exercise.exerciseName}
                     </h2>
-                    {!exercise.secondaryMuscleGroups ? (
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                        {exercise.primaryMuscleGroup}
-                      </p>
-                    ) : (
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                        {exercise.primaryMuscleGroup} /{" "}
-                        {exercise.secondaryMuscleGroups.join(" / ")}
-                      </p>
-                    )}
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      {muscleGroups.join(" / ")}
+                    </p>
                   </div>
 
                   {/* top-right volume display */}

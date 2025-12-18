@@ -289,7 +289,7 @@ export const MOCK_WORKOUTS: Workout[] = [
     muscleGroups: ["Hamstrings", "Glutes"],
     exercises: [
       {
-        exerciseId: "rdl",
+        exerciseId: "romanian-deadlift",
         exerciseName: "Romanian Deadlift",
         sets: [
           {
@@ -382,30 +382,6 @@ export const MOCK_WORKOUTS: Workout[] = [
           },
         ],
       },
-      {
-        exerciseId: "shrug",
-        exerciseName: "Shrug",
-        sets: [
-          {
-            id: "90abcdef-1234-4e56-f789-0abcdef12345",
-            reps: 12,
-            weight: 185,
-            isWarmup: false,
-          },
-          {
-            id: "0abcdef1-2345-4f67-890a-bcdef1234567",
-            reps: 12,
-            weight: 185,
-            isWarmup: false,
-          },
-          {
-            id: "bcdef123-4567-4890-a1b2-cdef12345678",
-            reps: 11,
-            weight: 195,
-            isWarmup: false,
-          },
-        ],
-      },
     ],
     createdAt: "2025-12-17T23:25:10.569Z",
     updatedAt: "2025-12-17T23:25:10.569Z",
@@ -417,8 +393,8 @@ export const MOCK_WORKOUTS: Workout[] = [
     muscleGroups: ["Chest", "Shoulders"],
     exercises: [
       {
-        exerciseId: "incline-dumbbell-press",
-        exerciseName: "Incline Dumbbell Press",
+        exerciseId: "dumbbell-bench-press",
+        exerciseName: "Dumbbell Bench Press",
         sets: [
           {
             id: "cdef1234-5678-4a90-bcde-f1234567890a",

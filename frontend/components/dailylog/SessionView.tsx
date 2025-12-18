@@ -1,4 +1,3 @@
-// SessionView.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -15,7 +14,7 @@ type SessionViewProps = {
   isPickerOpen: boolean;
   onClosePicker: () => void;
   onOpenPicker: () => void;
-  onSaveWorkout?: () => void; // 🔹 NEW
+  onSaveWorkout?: () => void;
 };
 
 export default function SessionView({
@@ -40,11 +39,11 @@ export default function SessionView({
   const exercises = currentWorkout?.exercises ?? [];
 
   const exerciseToDelete = pendingDeleteId
-    ? exercises.find((exercise) => exercise.id === pendingDeleteId)
+    ? exercises.find((exercise) => exercise.exerciseId === pendingDeleteId)
     : undefined;
 
   const hasExercises = exercises.length > 0;
-  const excludedIds = exercises.map((ex) => ex.id);
+  const excludedIds = exercises.map((exercise) => exercise.exerciseId);
 
   const exerciseCount = exercises.length;
   const setCount = exercises.reduce(
@@ -68,13 +67,11 @@ export default function SessionView({
     if (!base) return;
 
     const workoutExercise: WorkoutExercise = {
-      id: base.id,
-      name: base.name,
-      primaryMuscleGroup: base.primaryMuscleGroup,
-      secondaryMuscleGroups: base.secondaryMuscleGroups ?? [],
+      exerciseId: base.id,
+      exerciseName: base.name,
+      // muscleGroups: base.primaryMuscleGroup,
       notes: "",
       sets: [],
-      volume: 0,
     };
 
     addExercise(workoutExercise);
@@ -102,19 +99,21 @@ export default function SessionView({
       {/* Exercises list */}
       {hasExercises && (
         <div className="space-y-4">
-          {exercises.map((exercise) => (
-            <ExerciseCard
-              key={exercise.id}
-              exercise={exercise}
-              onRemove={() => setPendingDeleteId(exercise.id)}
-              onAddSet={(values) => addSet(exercise.id, values)}
-              onUpdateSet={(setId, values) =>
-                updateSet(exercise.id, setId, values)
-              }
-              onDeleteSet={(setId) => deleteSet(exercise.id, setId)}
-              onNotesChange={(notes) => updateExerciseNotes(exercise.id, notes)}
-            />
-          ))}
+          {exercises.map((exercise) => {
+            const id = exercise.exerciseId;
+
+            return (
+              <ExerciseCard
+                key={id}
+                exercise={exercise}
+                onRemove={() => setPendingDeleteId(id)}
+                onAddSet={(values) => addSet(id, values)}
+                onUpdateSet={(setId, values) => updateSet(id, setId, values)}
+                onDeleteSet={(setId) => deleteSet(id, setId)}
+                onNotesChange={(notes) => updateExerciseNotes(id, notes)}
+              />
+            );
+          })}
           {/* Bottom Add Exercise CTA */}
           <button
             type="button"
@@ -145,7 +144,7 @@ export default function SessionView({
       {/* Delete confirmation */}
       <DeleteExerciseModal
         isOpen={!!pendingDeleteId}
-        exerciseName={exerciseToDelete?.name ?? ""}
+        exerciseName={exerciseToDelete?.exerciseName ?? ""}
         onCancel={() => setPendingDeleteId(null)}
         onConfirm={() => {
           if (pendingDeleteId) {

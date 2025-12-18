@@ -32,7 +32,7 @@ export default function ActiveLogExerciseCard({
 
   // Find this exercise within the active session
   const sessionExercise = currentWorkout.exercises.find(
-    (exercise) => exercise.id === exerciseId
+    (exercise) => exercise.exerciseId === exerciseId
   );
 
   // The user may view an exercise that isn't part of the current workout

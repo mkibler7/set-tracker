@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { ExerciseHistoryEntry } from "@/types/exercise";
+import { exerciseVolume } from "@/lib/workouts/stats";
 
 type ExerciseHistoryCardProps = {
   entry: ExerciseHistoryEntry;
@@ -36,7 +37,7 @@ export default function ExerciseHistoryCard({
             <p className="text-xs font-light">• {entry.workoutDate}</p>
           </div>
           <h3 className="text-xs text-muted-foreground">
-            {entry.totalVolume.toLocaleString()} volume
+            {exerciseVolume(entry).toLocaleString()} volume
           </h3>
         </div>
 

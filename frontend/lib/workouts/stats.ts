@@ -1,5 +1,6 @@
 import type { Workout, WorkoutExercise } from "@/types/workout";
 import { parseLocalDate } from "@/lib/util/date";
+import { ExerciseHistoryEntry } from "@/types/exercise";
 
 export type TimeRange = "7D" | "1M" | "1Y" | "ALL";
 
@@ -32,11 +33,12 @@ export function getTotalVolume(workout: Workout): number {
 /**
  * Returns the total volume for a specific exercise within a workout.
  */
-export function exerciseVolume(exercise: WorkoutExercise): number {
+export function exerciseVolume(
+  exercise: WorkoutExercise | ExerciseHistoryEntry
+): number {
   if (!exercise.sets) return 0;
 
   return exercise.sets.reduce((total: number, set: any) => {
-    if (typeof set.volume === "number") return total + set.volume;
     const weight = set.weight ?? 0;
     const reps = set.reps ?? 0;
     return total + weight * reps;

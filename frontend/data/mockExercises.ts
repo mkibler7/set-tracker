@@ -106,6 +106,14 @@ export const MOCK_EXERCISES: Exercise[] = [
       "The barbell overhead press is a vertical pressing movement that targets the shoulders and triceps while requiring strong core and upper-back stability.",
   },
   {
+    id: "hangling-leg-raise",
+    name: "Hanging Leg Raise",
+    primaryMuscleGroup: "Abs",
+    secondaryMuscleGroups: [],
+    description:
+      "The hanging leg raise is an abdominal exercise that targets the rectus abdominis and hip flexors by lifting the legs while hanging from a bar.",
+  },
+  {
     id: "lateral-raise",
     name: "Lateral Raise",
     primaryMuscleGroup: "Shoulders",
@@ -220,6 +228,14 @@ export const MOCK_EXERCISES: Exercise[] = [
     secondaryMuscleGroups: ["Glutes", "Hamstrings"],
     description:
       "The leg press is a machine-based compound movement that primarily targets the quadriceps while also working the glutes and hamstrings.",
+  },
+  {
+    id: "calf-raise",
+    name: "Calf Raise",
+    primaryMuscleGroup: "Calves",
+    secondaryMuscleGroups: [],
+    description:
+      "The calf raise targets the calf muscles by lifting the heels against resistance, typically using a machine or bodyweight.",
   },
   {
     id: "leg-curl",
