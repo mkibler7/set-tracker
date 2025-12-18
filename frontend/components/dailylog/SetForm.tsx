@@ -9,6 +9,7 @@ export type SetFormValues = {
   rpe?: number;
   tempo?: string;
   notes?: string;
+  isWarmup?: boolean;
 };
 
 type SetFormProps = {

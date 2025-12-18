@@ -1,4 +1,4 @@
-import type { Exercise } from "@/types/exercise";
+import type { Exercise, MuscleGroup } from "@/types/exercise";
 
 export type TimeFilter = "all" | "7d" | "30d";
 
@@ -6,21 +6,22 @@ export type WorkoutSet = {
   id: string;
   reps: number;
   weight: number;
-  volume: number;
   rpe?: number;
   tempo?: string;
+  isWarmup?: boolean;
 };
 
-export type WorkoutExercise = Exercise & {
+export type WorkoutExercise = {
+  exerciseId: string;
+  exerciseName: string;
   notes?: string;
   sets: WorkoutSet[];
-  volume: number;
 };
 
 export type Workout = {
   id: string;
   date: string;
-  split: string;
+  muscleGroups: MuscleGroup[];
   exercises: WorkoutExercise[];
 };
 
@@ -31,7 +32,7 @@ export type Workout = {
  */
 export interface WorkoutSession {
   id: string;
-  split: string;
+  muscleGroups: MuscleGroup[];
   date: string;
   exercises: WorkoutExercise[];
   notes?: string;

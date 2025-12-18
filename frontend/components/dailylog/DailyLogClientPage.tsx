@@ -8,24 +8,10 @@ import SplitSelector from "@/components/dailylog/SplitSelector";
 import SessionView from "@/components/dailylog/SessionView";
 import { useWorkoutSession } from "@/components/dailylog/useWorkoutSession";
 import { MOCK_WORKOUTS, Workout } from "@/data/mockWorkouts";
+import type { MuscleGroup } from "@/types/exercise";
+import { ALL_MUSCLE_GROUPS } from "@/types/exercise";
 
 type WorkoutStep = "empty" | "split" | "session";
-
-const ALL_SPLIT_GROUPS = [
-  "Chest",
-  "Back",
-  "Shoulders",
-  "Quads",
-  "Hamstrings",
-  "Glutes",
-  "Traps",
-  "Biceps",
-  "Triceps",
-  "Calves",
-  "Adductors",
-  "Abductors",
-  "Abs",
-];
 
 export default function DailyLogClientPage() {
   const {
@@ -35,7 +21,7 @@ export default function DailyLogClientPage() {
     restoreStashedWorkout,
     startWorkout,
     endWorkout,
-    updateSplit, // ✅ add this
+    updateMuscleGroups, // ✅ add this
   } = useWorkoutSession();
 
   const router = useRouter();
@@ -45,9 +31,9 @@ export default function DailyLogClientPage() {
   const fromWorkoutId = searchParams.get("fromWorkout");
 
   const [step, setStep] = useState<WorkoutStep>("empty");
-  const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>(
-    []
-  );
+  const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<
+    MuscleGroup[]
+  >([]);
   const [workoutDate, setWorkoutDate] = useState(new Date());
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
@@ -77,17 +63,14 @@ export default function DailyLogClientPage() {
       stashCurrentWorkout();
     }
 
-    const groups = workout.split
-      .split("/")
-      .map((g) => g.trim())
-      .filter(Boolean);
+    const groups = workout.muscleGroups;
 
     setSelectedMuscleGroups(groups);
     setWorkoutDate(new Date(workout.date));
     setIsEditingSplit(false);
     setIsPickerOpen(false);
 
-    startWorkout(workout.split, workout.date, workout.exercises);
+    startWorkout(workout.muscleGroups, workout.date, workout.exercises);
     setStep("session");
 
     // Mark as loaded so we don't run again for this same id.
@@ -104,10 +87,7 @@ export default function DailyLogClientPage() {
   useEffect(() => {
     if (fromWorkoutId || !currentWorkout || step !== "empty") return;
 
-    const groups = currentWorkout.split
-      .split("/")
-      .map((g) => g.trim())
-      .filter(Boolean);
+    const groups = currentWorkout.muscleGroups;
 
     setSelectedMuscleGroups(groups);
     setWorkoutDate(new Date(currentWorkout.date));
@@ -126,7 +106,7 @@ export default function DailyLogClientPage() {
       ? "Edit Workout"
       : "Start Workout";
 
-  const handleToggleMuscleGroup = (group: string) => {
+  const handleToggleMuscleGroup = (group: MuscleGroup) => {
     setSelectedMuscleGroups((prev) =>
       prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]
     );
@@ -139,7 +119,7 @@ export default function DailyLogClientPage() {
 
     // EDIT EXISTING SESSION (do NOT restart)
     if (isEditingSplit && currentWorkout) {
-      updateSplit(splitName);
+      updateMuscleGroups(selectedMuscleGroups);
       setStep("session");
       setIsEditingSplit(false);
       return;
@@ -147,7 +127,7 @@ export default function DailyLogClientPage() {
 
     // START NEW SESSION
     const dateString = workoutDate.toISOString();
-    startWorkout(splitName, dateString);
+    startWorkout(selectedMuscleGroups, dateString);
     setStep("session");
   };
 
@@ -165,10 +145,7 @@ export default function DailyLogClientPage() {
   const handleEditSplit = () => {
     if (!currentWorkout) return;
 
-    const groups = currentWorkout.split
-      .split("/")
-      .map((g) => g.trim())
-      .filter(Boolean);
+    const groups = currentWorkout.muscleGroups;
 
     setSelectedMuscleGroups(groups);
     setIsEditingSplit(true);
@@ -197,10 +174,7 @@ export default function DailyLogClientPage() {
       if (stashedWorkout) {
         restoreStashedWorkout();
 
-        const groups = stashedWorkout.split
-          .split("/")
-          .map((g) => g.trim())
-          .filter(Boolean);
+        const groups = stashedWorkout.muscleGroups;
 
         setSelectedMuscleGroups(groups);
         setWorkoutDate(new Date(stashedWorkout.date));
@@ -242,7 +216,7 @@ export default function DailyLogClientPage() {
 
         {step === "split" && (
           <SplitSelector
-            allGroups={ALL_SPLIT_GROUPS}
+            allGroups={ALL_MUSCLE_GROUPS}
             selected={selectedMuscleGroups}
             onToggleGroup={handleToggleMuscleGroup}
             onCancel={handleCancelSplit}

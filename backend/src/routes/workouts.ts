@@ -1,13 +1,37 @@
 import { Router, type Request, type Response } from "express";
 import Workout from "../models/Workout.js";
 
+// Helpers
+function toWorkoutDTO(doc: any) {
+  const obj = doc.toObject?.() ?? doc;
+  return {
+    id: String(obj._id),
+    date: obj.date instanceof Date ? obj.date.toISOString() : obj.date,
+    muscleGroups: obj.muscleGroups ?? [],
+    exercises: obj.exercises ?? [],
+    createdAt: obj.createdAt,
+    updatedAt: obj.updatedAt,
+  };
+}
+
+function canonicalizeMuscleGroup(value: string) {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+
+  return trimmed
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 const router = Router();
 
-// Example
-router.get("/", async (_req: Request, res: Response) => {
+// Get all workouts
+router.get("/", async (req: Request, res: Response) => {
   try {
     const workouts = await Workout.find().sort({ date: -1 });
-    res.json(workouts);
+    res.json(workouts.map(toWorkoutDTO));
   } catch (err) {
     res
       .status(500)
@@ -15,47 +39,42 @@ router.get("/", async (_req: Request, res: Response) => {
   }
 });
 
-router.post("/", async (_req: Request, res: Response) => {
-  function canonicalizeMuscleGroup(value: string) {
-    const trimmed = value?.trim();
-    if (!trimmed) return null;
-
-    return trimmed
-      .toLowerCase()
-      .split(/\s+/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  }
-
+// Get workout by ID
+router.get("/:id", async (req, res) => {
   try {
-    const { date, primaryMuscleGroup, secondaryMuscleGroups, exercises } =
-      _req.body;
-    const normalizedPrimary = String(primaryMuscleGroup ?? "").trim();
-    if (!normalizedPrimary || normalizedPrimary.length > 30) {
-      return res.status(400).json({
-        message:
-          "primaryMuscleGroup is required and must be at most 30 characters",
-      });
+    const doc = await Workout.findById(req.params.id);
+    if (!doc) return res.status(404).json({ message: "Not found" });
+    res.json(toWorkoutDTO(doc));
+  } catch {
+    res.status(400).json({ message: "Invalid id" });
+  }
+});
+
+// Create new workout
+router.post("/", async (req: Request, res: Response) => {
+  try {
+    const { date, muscleGroups, exercises } = req.body;
+
+    const normalized = (Array.isArray(muscleGroups) ? muscleGroups : [])
+      .map((s) => canonicalizeMuscleGroup(String(s)))
+      .filter((s): s is string => Boolean(s))
+      .filter((s) => s.length <= 30);
+
+    // de-dupe muscleGroups
+    const uniqueMuscleGroups = Array.from(new Set(normalized));
+
+    const payload: any = {
+      muscleGroups: uniqueMuscleGroups,
+      exercises: Array.isArray(exercises) ? exercises : [],
+    };
+
+    if (date) {
+      const d = new Date(date);
+      if (!Number.isNaN(d.getTime())) payload.date = d;
     }
 
-    const normalizedSecondary = (
-      Array.isArray(secondaryMuscleGroups) ? secondaryMuscleGroups : []
-    )
-      .map((s) => String(s).trim())
-      .filter(Boolean) // remove empty strings
-      .filter((s) => s.length <= 30) // enforce max length
-      .filter((s) => s !== normalizedPrimary); // remove duplicates of primary
-
-    // de-dupe secondaryMuscleGroups
-    const uniqueSecondary = Array.from(new Set(normalizedSecondary));
-
-    const newWorkout = await Workout.create({
-      date: new Date(date),
-      primaryMuscleGroup: normalizedPrimary,
-      secondaryMuscleGroups: uniqueSecondary,
-      exercises: Array.isArray(exercises) ? exercises : [],
-    });
-    res.status(201).json(newWorkout);
+    const newWorkout = await Workout.create(payload);
+    res.status(201).json(toWorkoutDTO(newWorkout));
   } catch (err) {
     res
       .status(400)
@@ -63,67 +82,22 @@ router.post("/", async (_req: Request, res: Response) => {
   }
 });
 
+// DEV ONLY — delete all workouts
+router.delete("/__dev__/all", async (req: Request, res: Response) => {
+  if (process.env.NODE_ENV === "production") {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
+  try {
+    const result = await Workout.deleteMany({});
+    res.json({
+      deletedCount: result.deletedCount,
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 export default router;
-
-// const express = require("express");
-// const router = express.Router();
-// const Workout = require("../models/Workout");
-
-// // GET /api/workouts - Get all workouts in descending order by date
-// router.get("/", async (req, res) => {
-//   try {
-//     const workouts = await Workout.find().sort({ date: -1 });
-//     res.json(workouts);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
-
-// // POST /api/workouts - Create a new workout
-// router.post("/", async (req, res) => {
-//   function canonicalizeMuscleGroup(value: string) {
-//     const trimmed = value?.trim();
-//     if (!trimmed) return null;
-
-//     return trimmed
-//       .toLowerCase()
-//       .split(/\s+/)
-//       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-//       .join(" ");
-//   }
-
-//   try {
-//     const { date, primaryMuscleGroup, secondaryMuscleGroups, exercises } =
-//       req.body;
-//     const normalizedPrimary = String(primaryMuscleGroup ?? "").trim();
-//     if (!normalizedPrimary || normalizedPrimary.length > 30) {
-//       return res.status(400).json({
-//         message:
-//           "primaryMuscleGroup is required and must be at most 30 characters",
-//       });
-//     }
-
-//     const normalizedSecondary = (
-//       Array.isArray(secondaryMuscleGroups) ? secondaryMuscleGroups : []
-//     )
-//       .map((s) => String(s).trim())
-//       .filter(Boolean) // remove empty strings
-//       .filter((s) => s.length <= 30) // enforce max length
-//       .filter((s) => s !== normalizedPrimary); // remove duplicates of primary
-
-//     // de-dupe secondaryMuscleGroups
-//     const uniqueSecondary = Array.from(new Set(normalizedSecondary));
-
-//     const newWorkout = await Workout.create({
-//       date: new Date(date),
-//       primaryMuscleGroup: normalizedPrimary,
-//       secondaryMuscleGroups: uniqueSecondary,
-//       exercises: Array.isArray(exercises) ? exercises : [],
-//     });
-//     res.status(201).json(newWorkout);
-//   } catch (err) {
-//     res.status(400).json({ message: err.message });
-//   }
-// });
-
-// module.exports = router;
