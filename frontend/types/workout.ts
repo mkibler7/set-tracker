@@ -23,6 +23,8 @@ export type Workout = {
   date: string;
   muscleGroups: MuscleGroup[];
   exercises: WorkoutExercise[];
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 /**

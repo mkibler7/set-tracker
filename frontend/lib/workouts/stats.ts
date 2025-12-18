@@ -25,7 +25,7 @@ export function getSetCount(workout: Workout): number {
  */
 export function getTotalVolume(workout: Workout): number {
   return workout.exercises.reduce((total, exercise) => {
-    return total + exercise.volume;
+    return total + exerciseVolume(exercise);
   }, 0);
 }
 
@@ -33,9 +33,6 @@ export function getTotalVolume(workout: Workout): number {
  * Returns the total volume for a specific exercise within a workout.
  */
 export function exerciseVolume(exercise: WorkoutExercise): number {
-  if (typeof (exercise as any).volume === "number") {
-    return (exercise as any).volume;
-  }
   if (!exercise.sets) return 0;
 
   return exercise.sets.reduce((total: number, set: any) => {

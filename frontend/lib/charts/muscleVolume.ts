@@ -1,5 +1,7 @@
 // lib/charts/muscleVolume.ts
 import type { Workout } from "@/types/workout";
+import { MOCK_EXERCISES } from "@/data/mockExercises";
+import type { Exercise } from "@/types/exercise";
 
 // ------------------------------
 // Types & muscle config
@@ -49,6 +51,10 @@ export type LayerDatum = {
   value: number;
 };
 
+const EXERCISE_BY_ID: Record<string, Exercise> = Object.fromEntries(
+  MOCK_EXERCISES.map((e) => [e.id, e])
+);
+
 // ------------------------------
 // Aggregation
 // ------------------------------
@@ -70,7 +76,8 @@ export function initMuscleVolume(): MuscleVolumeMap {
   };
 }
 
-export function mapGroupToMuscle(group: string): MuscleKey | null {
+export function mapGroupToMuscle(group?: string): MuscleKey | null {
+  if (!group) return null;
   switch (group.toLowerCase()) {
     case "triceps":
       return "triceps";
@@ -117,27 +124,31 @@ export function computeMuscleStats(
   const volumes = initMuscleVolume();
 
   for (const workout of workouts) {
-    for (const exercise of workout.exercises) {
-      for (const set of exercise.sets) {
+    for (const logged of workout.exercises) {
+      const def = EXERCISE_BY_ID[logged.exerciseId];
+      if (!def) continue; // unknown exerciseId, skip safely
+
+      const primary = def.primaryMuscleGroup;
+      const secondary = def.secondaryMuscleGroups ?? [];
+
+      for (const set of logged.sets) {
         const reps = set.reps ?? 0;
         const weight = set.weight ?? 0;
 
         let contribution = 0;
-
         if (metric === "volume") {
           contribution = reps * weight;
           if (contribution <= 0) continue;
         } else {
-          // metric === "sets"
           if (reps <= 0 && weight <= 0) continue;
           contribution = 1;
         }
 
         if (mode === "primary") {
-          const muscleKey = mapGroupToMuscle(exercise.primaryMuscleGroup);
+          const muscleKey = mapGroupToMuscle(primary);
           if (muscleKey) volumes[muscleKey] += contribution;
         } else {
-          for (const group of exercise.secondaryMuscleGroups ?? []) {
+          for (const group of secondary) {
             const muscleKey = mapGroupToMuscle(group);
             if (muscleKey) volumes[muscleKey] += contribution;
           }

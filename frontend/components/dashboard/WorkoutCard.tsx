@@ -12,13 +12,14 @@ interface WorkoutCardProps {
 
 export function WorkoutCard({ workout }: WorkoutCardProps) {
   const volume = getTotalVolume(workout).toLocaleString();
+  const workoutTitle = workout.muscleGroups.join(" / ");
 
   return (
     <Link href={`/workouts/${workout.id}`}>
       <Card className="flex items-center justify-between gap-2 cursor-pointer hover:text-primary">
         {/* left side */}
         <div className="ml-2">
-          <p className="mb-2 font-semibold">{workout.split}</p>
+          <p className="mb-2 font-semibold">{workoutTitle}</p>
 
           <p className="text-xs text-muted-foreground">
             {formatWorkoutDate(workout.date)}

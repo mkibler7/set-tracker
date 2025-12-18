@@ -7,7 +7,8 @@ import EmptyState from "@/components/dailylog/EmptyState";
 import SplitSelector from "@/components/dailylog/SplitSelector";
 import SessionView from "@/components/dailylog/SessionView";
 import { useWorkoutSession } from "@/components/dailylog/useWorkoutSession";
-import { MOCK_WORKOUTS, Workout } from "@/data/mockWorkouts";
+import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
+import { Workout } from "@/types/workout";
 import type { MuscleGroup } from "@/types/exercise";
 import { ALL_MUSCLE_GROUPS } from "@/types/exercise";
 
@@ -95,7 +96,7 @@ export default function DailyLogClientPage() {
   }, [fromWorkoutId, currentWorkout, step]);
 
   const splitLabel =
-    selectedMuscleGroups.length > 0
+    (selectedMuscleGroups?.length ?? 0) > 0
       ? selectedMuscleGroups.join(" / ")
       : "Start Workout";
 
