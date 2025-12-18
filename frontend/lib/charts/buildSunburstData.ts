@@ -1,4 +1,5 @@
 import type { Workout } from "@/types/workout";
+import { getExerciseById } from "../exercises";
 
 export type MuscleKey =
   | "chest"
@@ -103,14 +104,16 @@ export function buildSunburstData(
     for (const ex of workout.exercises) {
       for (const set of ex.sets) {
         const volume = (set.reps ?? 0) * (set.weight ?? 0);
+        const exercise = getExerciseById(ex.exerciseId);
+        if (!exercise) continue;
 
         if (volume <= 0) continue;
 
         if (mode === "primary") {
-          const primary = mapPrimaryToMuscle(ex.primaryMuscleGroup);
+          const primary = mapPrimaryToMuscle(exercise.primaryMuscleGroup);
           if (primary) muscleVolume[primary] += volume;
         } else {
-          for (const g of ex.secondaryMuscleGroups ?? []) {
+          for (const g of exercise.secondaryMuscleGroups ?? []) {
             const m = mapPrimaryToMuscle(g);
             if (m) muscleVolume[m] += volume;
           }

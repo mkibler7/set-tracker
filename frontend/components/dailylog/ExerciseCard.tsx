@@ -6,6 +6,7 @@ import type { WorkoutExercise } from "@/types/workout";
 import SetForm, { SetFormValues } from "@/components/dailylog/SetForm";
 import ExercisePanel from "@/components/dailylog/ExercisePanel";
 import InfoIcon from "@/components/icons/info-icon";
+import { getExerciseMusclesById } from "@/lib/exercises";
 
 type ExerciseCardProps = {
   exercise: WorkoutExercise;
@@ -30,18 +31,14 @@ export default function ExerciseCard({
   const [isAddingSet, setIsAddingSet] = useState(false);
 
   const handleOpenDetails = () => {
-    router.push(`/exercises/${exercise.id}?fromDailyLog=true`);
+    router.push(`/exercises/${exercise.exerciseId}?fromDailyLog=true`);
   };
 
   let muscleLabel: string;
-  if (!exercise.secondaryMuscleGroups) {
-    muscleLabel = exercise.primaryMuscleGroup;
-  } else {
-    muscleLabel =
-      exercise.primaryMuscleGroup +
-      " / " +
-      exercise.secondaryMuscleGroups.join(" / ");
-  }
+
+  const ex = getExerciseMusclesById(exercise.exerciseId);
+
+  muscleLabel = ex.muscleGroups.join(" / ");
 
   return (
     <section
@@ -57,7 +54,7 @@ export default function ExerciseCard({
         <div>
           <div className="mb-1 flex items-center gap-2">
             <h2 className="text-base font-semibold text-foreground">
-              {exercise.name}
+              {exercise.exerciseName}
             </h2>
             <button
               type="button"
@@ -98,7 +95,7 @@ export default function ExerciseCard({
                 initialValues={{
                   reps: set.reps,
                   weight: set.weight,
-                  volume: set.volume,
+                  volume: set.reps * set.weight,
                   rpe: set.rpe,
                   tempo: set.tempo,
                 }}
@@ -140,7 +137,7 @@ export default function ExerciseCard({
 
                     <span>
                       <span className="text-muted-foreground">Volume:</span>{" "}
-                      {set.volume}
+                      {set.reps * set.weight}
                     </span>
                   </div>
 

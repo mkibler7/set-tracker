@@ -1,3 +1,4 @@
+import { exerciseVolume } from "@/lib/workouts/stats";
 import type { ExerciseHistoryEntry } from "@/types/exercise";
 import { format } from "date-fns";
 
@@ -44,7 +45,7 @@ export default function HistoryTable({
                       {topSet ? `${topSet.weight} x ${topSet.reps}` : "-"}
                     </td>
                     <td className="py-1 pr-4">
-                      {row.totalVolume.toLocaleString()} lb
+                      {exerciseVolume(row).toLocaleString()} lb
                     </td>
                     <td className="py-1 pr-4 max-w-xs truncate text-slate-400">
                       {row.notes ?? ""}

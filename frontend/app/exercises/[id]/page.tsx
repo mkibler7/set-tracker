@@ -5,6 +5,7 @@ import ActiveLogExerciseCard from "@/components/exerciseInfo/ActiveLogExerciseCa
 import { MOCK_EXERCISES } from "@/data/mockExercises";
 import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
 import { ExerciseHistoryEntry } from "@/types/exercise";
+import { formatWorkoutDate } from "@/lib/util/date";
 
 type PageProps = {
   // Next.js 16 passes these as Promises in server components
@@ -35,10 +36,10 @@ export default async function ExerciseDetailPage({
 
   // Build a flat "history per workout" list for this exercise
   const historyEntries: ExerciseHistoryEntry[] = MOCK_WORKOUTS.filter(
-    (workout) => workout.exercises.some((ex) => ex.id === id)
+    (workout) => workout.exercises.some((ex) => ex.exerciseId === id)
   ).map((workout) => {
     // The specific exercise instance within this workout
-    const target = workout.exercises.find((ex) => ex.id === id)!;
+    const target = workout.exercises.find((ex) => ex.exerciseId === id)!;
 
     const sets = target.sets.map((s, index) => ({
       setNumber: index + 1,
@@ -52,8 +53,8 @@ export default async function ExerciseDetailPage({
 
     return {
       workoutId: workout.id,
-      workoutDate: workout.date,
-      workoutName: workout.split,
+      workoutDate: formatWorkoutDate(workout.date),
+      workoutName: workout.muscleGroups.join(" / "),
       notes: target.notes,
       sets,
       totalVolume,

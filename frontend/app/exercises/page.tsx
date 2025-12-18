@@ -168,11 +168,11 @@ export default function ExercisesPage() {
       </div>
 
       {/* exercise list viewer */}
-      <section className="mt-4 flex-1 overflow-y-auto rounded-xl bg-slate-950 scroll">
+      <section className="mt-4 flex-1 overflow-y-auto rounded-xl bg-background-dark scroll">
         <div className="max-w-2xl mx-auto w-full pb-10 px-4 pr-2">
           {groupedExercises.map(({ letter, exercises }) => (
             <div key={letter} className="mb-3">
-              <div className="sticky top-0 z-20 bg-slate-950">
+              <div className="sticky top-0 z-20 bg-background-dark">
                 <div className="flex items-end px-4 py-2">
                   <h2 className="text-[1rem] font-semibold uppercase tracking-wide text-foreground">
                     {letter}
