@@ -4,7 +4,6 @@
   "description": "",
   "main": "server.js",
   "type": "module",
-  
   "scripts": {
     "dev": "tsx watch server.ts",
     "build": "tsc -p tsconfig.json",
@@ -19,7 +18,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.20.2"
+    "mongoose": "^8.20.2",
+    "@reptracker/shared": "file:../packages/shared"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

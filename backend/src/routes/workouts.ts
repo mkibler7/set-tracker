@@ -27,6 +27,24 @@ function canonicalizeMuscleGroup(value: string) {
 
 const router = Router();
 
+// DEV TESTING ONLY — delete all workouts
+router.delete("/__dev__/all", async (req: Request, res: Response) => {
+  if (process.env.NODE_ENV === "production") {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
+  try {
+    const result = await Workout.deleteMany({});
+    res.json({
+      deletedCount: result.deletedCount,
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 // Get all workouts
 router.get("/", async (req: Request, res: Response) => {
   try {
@@ -78,24 +96,6 @@ router.post("/", async (req: Request, res: Response) => {
   } catch (err) {
     res
       .status(400)
-      .json({ message: err instanceof Error ? err.message : String(err) });
-  }
-});
-
-// DEV ONLY — delete all workouts
-router.delete("/__dev__/all", async (req: Request, res: Response) => {
-  if (process.env.NODE_ENV === "production") {
-    return res.status(403).json({ message: "Forbidden" });
-  }
-
-  try {
-    const result = await Workout.deleteMany({});
-    res.json({
-      deletedCount: result.deletedCount,
-    });
-  } catch (err) {
-    res
-      .status(500)
       .json({ message: err instanceof Error ? err.message : String(err) });
   }
 });
