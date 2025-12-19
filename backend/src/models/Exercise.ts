@@ -24,6 +24,7 @@ const ExerciseSchema = new mongoose.Schema({
     default: [],
     validate: {
       validator: (arr: unknown) => {
+        if (arr == null) return true; // allow undefined/null to use default
         if (!Array.isArray(arr)) return false;
         // all valid muscle groups, no duplicates, and not the same as primary handled below
         const allValid = arr.every((string) =>

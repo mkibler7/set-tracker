@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import type { ExerciseFormValues, MuscleGroup } from "@/types/exercise";
-import { ALL_MUSCLE_GROUPS } from "@/types/exercise";
-
+import type { ExerciseFormValues } from "@/types/exercise";
+import {
+  ALL_MUSCLE_GROUPS,
+  type MuscleGroup,
+} from "@reptracker/shared/muscles";
 type ExerciseFormModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -46,13 +48,14 @@ export default function ExerciseFormModal({
 
   const handleSecondaryChange = (group: MuscleGroup) => {
     setValues((prev) => {
-      const alreadySelected = prev.secondaryMuscleGroups.includes(group);
+      const current = prev.secondaryMuscleGroups ?? [];
+      const next = current.includes(group)
+        ? current.filter((g) => g !== group)
+        : [...current, group];
 
       return {
         ...prev,
-        secondaryMuscleGroups: alreadySelected
-          ? prev.secondaryMuscleGroups.filter((g) => g !== group)
-          : [...prev.secondaryMuscleGroups, group],
+        secondaryMuscleGroups: next.length ? next : undefined,
       };
     });
   };
@@ -135,7 +138,8 @@ export default function ExerciseFormModal({
 
             <div className="flex flex-wrap gap-2 rounded-md bg-slate-850 px-3 py-2">
               {ALL_MUSCLE_GROUPS.map((group) => {
-                const isSelected = values.secondaryMuscleGroups.includes(group);
+                const selectedSecondary = values.secondaryMuscleGroups ?? [];
+                const isSelected = selectedSecondary.includes(group);
 
                 return (
                   <button

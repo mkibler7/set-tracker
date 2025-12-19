@@ -2,10 +2,11 @@ import PageBackButton from "@/components/shared/PageBackButton";
 import Header from "@/components/exerciseInfo/Header";
 import ExerciseHistoryCard from "@/components/exerciseInfo/ExerciseHistoryCard";
 import ActiveLogExerciseCard from "@/components/exerciseInfo/ActiveLogExerciseCard";
-import { MOCK_EXERCISES } from "@/data/mockExercises";
 import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
-import { ExerciseHistoryEntry } from "@/types/exercise";
+import { Exercise, ExerciseHistoryEntry } from "@/types/exercise";
 import { formatWorkoutDate } from "@/lib/util/date";
+// import { ExerciseAPI } from "@/services/exercises";
+import { apiServer } from "@/lib/apiServer";
 
 type PageProps = {
   // Next.js 16 passes these as Promises in server components
@@ -32,7 +33,7 @@ export default async function ExerciseDetailPage({
   const fromDailyLog = query.fromDailyLog === "true";
 
   // Look up the exercise definition by id
-  const exercise = MOCK_EXERCISES.find((ex) => ex.id === id);
+  const exercise = await apiServer<Exercise>(`/exercises/${id}`);
 
   // Build a flat "history per workout" list for this exercise
   const historyEntries: ExerciseHistoryEntry[] = MOCK_WORKOUTS.filter(

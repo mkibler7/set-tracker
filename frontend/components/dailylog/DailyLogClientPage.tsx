@@ -9,8 +9,10 @@ import SessionView from "@/components/dailylog/SessionView";
 import { useWorkoutSession } from "@/components/dailylog/useWorkoutSession";
 import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
 import { Workout } from "@/types/workout";
-import type { MuscleGroup } from "@/types/exercise";
-import { ALL_MUSCLE_GROUPS } from "@/types/exercise";
+import {
+  ALL_MUSCLE_GROUPS,
+  type MuscleGroup,
+} from "@reptracker/shared/muscles";
 
 type WorkoutStep = "empty" | "split" | "session";
 

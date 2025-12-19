@@ -1,0 +1,9 @@
+{
+  "name": "rep-tracker",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "packages/*"
+  ]
+}

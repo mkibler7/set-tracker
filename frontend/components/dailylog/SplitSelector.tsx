@@ -1,8 +1,8 @@
 import React from "react";
-import { MuscleGroup } from "@/types/exercise";
+import { MuscleGroup } from "@reptracker/shared/muscles";
 
 type SplitSelectorProps = {
-  allGroups: MuscleGroup[];
+  allGroups: readonly MuscleGroup[];
   selected: MuscleGroup[];
   onToggleGroup: (group: MuscleGroup) => void;
   onCancel: () => void;

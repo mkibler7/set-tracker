@@ -1,30 +1,50 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { MOCK_EXERCISES } from "@/data/mockExercises";
+import { ExerciseAPI } from "@/services/exercises";
 import ExercisesHeader from "@/components/exercises/ExercisesHeader";
 import { formatExerciseMuscleLabel } from "@/lib/util/exercises";
 import ExerciseFormModal from "@/components/exercises/ExerciseFormModal";
-import { ExerciseFormValues, MuscleGroup } from "@/types/exercise";
-
-// Derive the Exercise type from your mock data
-type Exercise = (typeof MOCK_EXERCISES)[number];
-
-// Build a unique list of exercises by id
-const UNIQUE_EXERCISES: Exercise[] = Array.from(
-  new Map(MOCK_EXERCISES.map((ex) => [ex.id, ex])).values()
-);
+import { Exercise, ExerciseFormValues } from "@/types/exercise";
+import { MuscleGroup } from "@reptracker/shared/muscles";
 
 export default function ExercisesPage() {
   const [search, setSearch] = useState("");
-  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-
-  // Use the de-duplicated list as the initial state
-  const [exercises, setExercises] = useState<Exercise[]>(UNIQUE_EXERCISES);
-
+  const [selectedGroups, setSelectedGroups] = useState<MuscleGroup[]>([]);
   // controls the Add Exercise modal
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  // Backend-Loaded exercises
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load exercises on mount
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadExercises() {
+      try {
+        setLoading(true);
+        setError(null);
+        const list = await ExerciseAPI.list();
+        if (cancelled) return;
+        setExercises(list);
+      } catch (err) {
+        if (cancelled) return;
+        setError("Failed to load exercises.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadExercises();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // All distinct muscle groups from current exercises
   const muscleGroupFilters = useMemo<MuscleGroup[]>(() => {
@@ -85,31 +105,21 @@ export default function ExercisesPage() {
 
   const totalCount = filteredExercises.length;
 
-  const handleCreateExercise = (values: ExerciseFormValues) => {
-    const id = toExerciseId(values.name);
-
-    // 1) only add if no exercise already uses this id
-    const exists = exercises.some((ex) => ex.id === id);
-    if (exists) {
-      alert("An exercise with that name already exists.");
-      return;
+  async function handleCreateExercise(values: ExerciseFormValues) {
+    try {
+      const created = await ExerciseAPI.create({
+        name: values.name.trim(),
+        primaryMuscleGroup: values.primaryMuscleGroup,
+        secondaryMuscleGroups: values.secondaryMuscleGroups,
+        description: values.description?.trim() || undefined,
+      });
+      // Add it to local list
+      setExercises((prev) => [...prev, created]);
+      setIsFormOpen(false);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : String(err));
     }
-
-    // 3) create the new exercise using that id
-    const newExercise: Exercise = {
-      id,
-      name: values.name.trim(),
-      primaryMuscleGroup: values.primaryMuscleGroup,
-      secondaryMuscleGroups:
-        values.secondaryMuscleGroups.length > 0
-          ? values.secondaryMuscleGroups
-          : undefined,
-      description: values.description?.trim() || undefined,
-    };
-
-    setExercises((prev) => [...prev, newExercise]);
-    setIsFormOpen(false);
-  };
+  }
 
   // turn "Barbell Bench Press" → "barbell-bench-press"
   function toExerciseId(name: string): string {

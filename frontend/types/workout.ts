@@ -1,4 +1,5 @@
-import type { Exercise, MuscleGroup } from "@/types/exercise";
+import type { Exercise } from "@/types/exercise";
+import type { MuscleGroup } from "../../packages/shared/src/muscles";
 
 export type TimeFilter = "all" | "7d" | "30d";
 

@@ -1,39 +1,9 @@
-// export default ALL_MUSCLE_GROUPS;
-export type MuscleGroup =
-  | "Chest"
-  | "Back"
-  | "Shoulders"
-  | "Quads"
-  | "Hamstrings"
-  | "Glutes"
-  | "Traps"
-  | "Biceps"
-  | "Triceps"
-  | "Calves"
-  | "Adductors"
-  | "Abductors"
-  | "Abs";
-
-export const ALL_MUSCLE_GROUPS: MuscleGroup[] = [
-  "Abs",
-  "Back",
-  "Biceps",
-  "Chest",
-  "Glutes",
-  "Hamstrings",
-  "Quads",
-  "Shoulders",
-  "Traps",
-  "Triceps",
-  "Calves",
-  "Adductors",
-  "Abductors",
-];
+import { MuscleGroup } from "@reptracker/shared/muscles";
 
 export type ExerciseFormValues = {
   name: string;
   primaryMuscleGroup: MuscleGroup;
-  secondaryMuscleGroups: MuscleGroup[];
+  secondaryMuscleGroups?: MuscleGroup[];
   description?: string;
 };
 

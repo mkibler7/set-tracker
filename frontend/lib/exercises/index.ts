@@ -1,9 +1,10 @@
-import type { Exercise, MuscleGroup } from "@/types/exercise";
+import type { Exercise } from "@/types/exercise";
+import type { MuscleGroup } from "../../../packages/shared/src/muscles";
 import { MOCK_EXERCISES } from "@/data/mockExercises";
 
 // Build once at module load
 const EXERCISE_BY_ID: Record<string, Exercise> = Object.fromEntries(
-  MOCK_EXERCISES.map((e) => [e.id, e])
+  MOCK_EXERCISES.map((exercise) => [exercise.id, exercise])
 );
 
 export function getExerciseById(id: string): Exercise | undefined {
