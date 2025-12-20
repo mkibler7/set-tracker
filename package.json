@@ -6,6 +6,9 @@
     "frontend",
     "packages/*"
   ],
+  "devDependencies": {
+    "next": "^16.1.0"
+  },
   "scripts": {
     "build": "npm run build --workspace frontend",
     "dev": "npm run dev --workspace frontend"
