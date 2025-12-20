@@ -6,8 +6,15 @@
     "frontend",
     "packages/*"
   ],
+  "devDependencies": {
+    "next": "^16.1.0"
+  },
   "scripts": {
-    "build": "npm --prefix packages/shared run build && npm --prefix frontend run build",
-    "dev": "npm --prefix packages/shared run build && npm --prefix frontend run dev"
+    "build": "npm run build --workspace frontend",
+    "dev": "npm run dev --workspace frontend"
+  },
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "1.30.2",
+    "@tailwindcss/oxide-linux-x64-gnu": "4.1.17"
   }
 }
