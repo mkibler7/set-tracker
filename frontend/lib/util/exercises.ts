@@ -1,4 +1,5 @@
-import type { Exercise, MuscleGroup } from "@/types/exercise";
+import type { Exercise } from "@/types/exercise";
+import type { MuscleGroup } from "@reptracker/shared/muscles";
 
 /** Format primary + secondary muscle groups into a single label. */
 export function formatMuscleGroups(

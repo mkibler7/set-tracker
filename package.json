@@ -1,0 +1,13 @@
+{
+  "name": "rep-tracker",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm --prefix packages/shared run build && npm --prefix frontend run build",
+    "dev": "npm --prefix packages/shared run build && npm --prefix frontend run dev"
+  }
+}

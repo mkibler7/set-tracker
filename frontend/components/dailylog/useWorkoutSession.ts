@@ -8,7 +8,7 @@ import type {
   WorkoutSet,
 } from "@/types/workout";
 import type { SetFormValues } from "@/components/dailylog/SetForm";
-import type { MuscleGroup } from "@/types/exercise";
+import type { MuscleGroup } from "@reptracker/shared/muscles";
 
 const newId = () => globalThis.crypto.randomUUID();
 

@@ -1,5 +1,5 @@
 import type { WorkoutSession, WorkoutExercise } from "@/types/workout";
-import type { MuscleGroup } from "@/types/exercise";
+import type { MuscleGroup } from "@reptracker/shared/muscles";
 
 export type CreateWorkoutPayload = {
   date?: string;
