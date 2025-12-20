@@ -12,5 +12,9 @@
   "scripts": {
     "build": "npm run build --workspace frontend",
     "dev": "npm run dev --workspace frontend"
+  },
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "1.30.2",
+    "lightningcss-linux-x64-musl": "1.30.2"
   }
 }
