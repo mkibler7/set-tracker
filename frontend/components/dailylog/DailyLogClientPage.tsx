@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/components/dailylog/Header";
 import EmptyState from "@/components/dailylog/EmptyState";
 import SplitSelector from "@/components/dailylog/SplitSelector";
 import SessionView from "@/components/dailylog/SessionView";
 import { useWorkoutSession } from "@/components/dailylog/useWorkoutSession";
-import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
-import { Workout } from "@/types/workout";
+import { WorkoutsAPI } from "@/lib/api/workouts";
 import {
   ALL_MUSCLE_GROUPS,
   type MuscleGroup,
@@ -17,19 +16,25 @@ import {
 type WorkoutStep = "empty" | "split" | "session";
 
 export default function DailyLogClientPage() {
-  const {
-    currentWorkout,
-    stashedWorkout,
-    stashCurrentWorkout,
-    restoreStashedWorkout,
-    startWorkout,
-    endWorkout,
-    updateMuscleGroups, // ✅ add this
-  } = useWorkoutSession();
+  // Zustand workout session store
+  // Use individual selectors to avoid unnecessary re-renders
+  const currentWorkout = useWorkoutSession((state) => state.currentWorkout);
+  const stashedWorkout = useWorkoutSession((state) => state.stashedWorkout);
+  const startWorkout = useWorkoutSession((state) => state.startWorkout);
+  const updateMuscleGroups = useWorkoutSession(
+    (state) => state.updateMuscleGroups
+  );
+  const endWorkout = useWorkoutSession((state) => state.endWorkout);
+  const stashCurrentWorkout = useWorkoutSession(
+    (state) => state.stashCurrentWorkout
+  );
+  const restoreStashedWorkout = useWorkoutSession(
+    (state) => state.restoreStashedWorkout
+  );
 
   const router = useRouter();
   const loadedFromWorkoutRef = useRef<string | null>(null);
-  const closingHistoryRef = useRef(false);
+
   const searchParams = useSearchParams();
   const fromWorkoutId = searchParams.get("fromWorkout");
 
@@ -39,52 +44,93 @@ export default function DailyLogClientPage() {
   >([]);
   const [workoutDate, setWorkoutDate] = useState(new Date());
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  const [isEditingSplit, setIsEditingSplit] = useState(false); // ✅ NEW
+  const [isEditingSplit, setIsEditingSplit] = useState(false);
 
+  console.log("DailyLog render fromWorkoutId:", fromWorkoutId);
   // 1) If we arrive with ?fromWorkout=123, auto-load that workout
   useEffect(() => {
-    // While we are closing an edit-history flow, ignore fromWorkout loads
-    if (closingHistoryRef.current && fromWorkoutId) return;
-    // If the param is cleared, allow future history-loads again.
-    if (!fromWorkoutId) {
-      loadedFromWorkoutRef.current = null;
-      closingHistoryRef.current = false;
-      return;
-    }
+    if (!fromWorkoutId) return;
 
-    // Prevent re-loading the same history workout after startWorkout() updates store state.
-    if (loadedFromWorkoutRef.current === fromWorkoutId) return;
+    let cancelled = false;
 
-    const workout: Workout | undefined = MOCK_WORKOUTS.find(
-      (w) => w.id === fromWorkoutId
-    );
-    if (!workout) return;
+    WorkoutsAPI.get(fromWorkoutId).then((workout) => {
+      if (cancelled) return;
 
-    // Stash today's in-progress session so we can restore later
-    if (currentWorkout && !stashedWorkout) {
-      stashCurrentWorkout();
-    }
+      const {
+        currentWorkout,
+        stashedWorkout,
+        stashCurrentWorkout,
+        startWorkout,
+      } = useWorkoutSession.getState();
 
-    const groups = workout.muscleGroups;
+      if (currentWorkout && !stashedWorkout) stashCurrentWorkout();
+      startWorkout(workout.muscleGroups, workout.date, workout.exercises);
+      setStep("session");
+      setSelectedMuscleGroups(workout.muscleGroups);
+      setWorkoutDate(new Date(workout.date));
+    });
 
-    setSelectedMuscleGroups(groups);
-    setWorkoutDate(new Date(workout.date));
-    setIsEditingSplit(false);
-    setIsPickerOpen(false);
+    return () => {
+      cancelled = true;
+    };
+  }, [fromWorkoutId]);
 
-    startWorkout(workout.muscleGroups, workout.date, workout.exercises);
-    setStep("session");
+  // useEffect(() => {
+  //   let cancelled = false;
 
-    // Mark as loaded so we don't run again for this same id.
-    loadedFromWorkoutRef.current = fromWorkoutId;
-  }, [
-    fromWorkoutId,
-    startWorkout,
-    currentWorkout,
-    stashedWorkout,
-    stashCurrentWorkout,
-  ]);
+  //   // If the param is cleared, allow future history-loads again.
+  //   if (!fromWorkoutId) {
+  //     loadedFromWorkoutRef.current = null;
+  //     return;
+  //   }
+
+  //   // Prevent re-loading the same history workout after startWorkout() updates store state.
+  //   if (loadedFromWorkoutRef.current === fromWorkoutId) return;
+
+  //   //  Mark as loaded so we don't run again for this same id.
+  //   loadedFromWorkoutRef.current = fromWorkoutId;
+
+  //   WorkoutsAPI.get(fromWorkoutId)
+  //     .then((workout) => {
+  //       console.log("GET workout response:", workout);
+  //       console.log("Loading workout into session:", {
+  //         muscles: workout.muscleGroups,
+  //         date: workout.date,
+  //         exercises: workout.exercises,
+  //       });
+  //       if (cancelled) return;
+
+  //       // Stash today's in-progress session so we can restore later
+  //       if (currentWorkout && !stashedWorkout) {
+  //         stashCurrentWorkout();
+  //       }
+  //       setSelectedMuscleGroups(workout.muscleGroups);
+  //       setWorkoutDate(new Date(workout.date));
+  //       setIsEditingSplit(false);
+  //       setIsPickerOpen(false);
+  //       setStep("session");
+  //       try {
+  //         startWorkout(workout.muscleGroups, workout.date, workout.exercises);
+  //       } catch (error) {
+  //         console.error("Failed to start workout:", error);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       if (cancelled) return;
+  //       console.error("Failed to load workout:", error);
+
+  //       loadedFromWorkoutRef.current = null;
+
+  //       router.replace("/dailylog");
+  //     });
+
+  //   return () => {
+  //     cancelled = true;
+  //   };
+  // }, [fromWorkoutId]);
 
   // 2) If there is already a current workout in the store, auto-resume it
   useEffect(() => {
@@ -155,47 +201,71 @@ export default function DailyLogClientPage() {
     setStep("split");
   };
 
-  const handleSaveWorkout = () => {
+  const handleSaveWorkout = async () => {
+    if (!currentWorkout) return;
+
+    // Prevent multiple saves
+    if (isSaving) return;
+    setIsSaving(true);
+    setSaveError(null);
+
+    // Check if we are editing an existing history workout
     const isEditingHistory = !!fromWorkoutId;
 
-    // Ends whatever is currently loaded in the session view (today OR the history workout)
-    endWorkout();
+    // Build the payload from current session in Zustand
+    const payload = {
+      date: currentWorkout.date,
+      muscleGroups: currentWorkout.muscleGroups,
+      exercises: currentWorkout.exercises,
+    };
 
-    setIsPickerOpen(false);
-    setIsEditingSplit(false);
+    try {
+      if (isEditingHistory && fromWorkoutId) {
+        // Update existing workout
+        await WorkoutsAPI.update(fromWorkoutId, payload);
+      } else {
+        // Create new workout
+        await WorkoutsAPI.create(payload);
+      }
 
-    if (isEditingHistory) {
-      // Clear query param so refresh doesn't re-load the history workout
-      closingHistoryRef.current = true;
+      endWorkout();
+      setIsPickerOpen(false);
+      setIsEditingSplit(false);
 
-      // Keep the current id “locked” until the query param is actually gone
-      loadedFromWorkoutRef.current = fromWorkoutId;
+      if (isEditingHistory) {
+        // Keep the current id “locked” until the query param is actually gone
+        loadedFromWorkoutRef.current = fromWorkoutId;
+        router.replace("/dailylog");
 
-      router.replace("/dailylog");
+        if (stashedWorkout) {
+          restoreStashedWorkout();
 
-      // If we had a session before editing history, restore it
-      if (stashedWorkout) {
-        restoreStashedWorkout();
+          setSelectedMuscleGroups(stashedWorkout.muscleGroups);
+          setWorkoutDate(new Date(stashedWorkout.date));
+          setStep("session");
+          return;
+        }
 
-        const groups = stashedWorkout.muscleGroups;
-
-        setSelectedMuscleGroups(groups);
-        setWorkoutDate(new Date(stashedWorkout.date));
-        setStep("session");
+        setSelectedMuscleGroups([]);
+        setWorkoutDate(new Date());
+        setStep("empty");
         return;
       }
 
-      // No stashed session → return to today's empty state
+      // Normal save (ending today's session)
       setSelectedMuscleGroups([]);
-      setWorkoutDate(new Date()); //  reset to current date
+      setWorkoutDate(new Date());
       setStep("empty");
-      return;
+    } catch (error) {
+      console.error("Failed to save workout:", error);
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "An unknown error occurred while saving."
+      );
+    } finally {
+      setIsSaving(false);
     }
-
-    // Normal save (ending today's session)
-    setSelectedMuscleGroups([]);
-    setWorkoutDate(new Date()); //  reset to current date
-    setStep("empty");
   };
 
   return (

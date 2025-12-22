@@ -5,8 +5,8 @@ import ActiveLogExerciseCard from "@/components/exerciseInfo/ActiveLogExerciseCa
 import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
 import { Exercise, ExerciseHistoryEntry } from "@/types/exercise";
 import { formatWorkoutDate } from "@/lib/util/date";
-// import { ExerciseAPI } from "@/services/exercises";
-import { apiServer } from "@/lib/apiServer";
+import { ExerciseAPI } from "@/lib/api/exercises";
+// import { apiServer } from "@/lib/api/apiServer";
 
 type PageProps = {
   // Next.js 16 passes these as Promises in server components
@@ -33,7 +33,7 @@ export default async function ExerciseDetailPage({
   const fromDailyLog = query.fromDailyLog === "true";
 
   // Look up the exercise definition by id
-  const exercise = await apiServer<Exercise>(`/exercises/${id}`);
+  const exercise = await ExerciseAPI.get(id);
 
   // Build a flat "history per workout" list for this exercise
   const historyEntries: ExerciseHistoryEntry[] = MOCK_WORKOUTS.filter(

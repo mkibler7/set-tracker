@@ -2,7 +2,7 @@
 
 import React, { use } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
+import { WorkoutsAPI } from "@/lib/api/workouts";
 import type { Workout, TimeFilter } from "@/types/workout";
 import DeleteWorkoutModal from "@/components/workouts/DeleteWorkoutModal";
 import { WorkoutsFilters } from "@/components/workouts/WorkoutFilters";
@@ -30,10 +30,40 @@ export default function WorkoutsClientPage() {
   const pageSize = useResponsivePageSize();
 
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
-  const [workouts, setWorkouts] = useState<Workout[]>(MOCK_WORKOUTS);
   const [deleteTarget, setDeleteTarget] = useState<Workout | null>(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+
+  // Backend-Loaded workouts
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load workouts on mount
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadWorkouts() {
+      try {
+        setLoading(true);
+        setError(null);
+        const list = await WorkoutsAPI.list();
+        if (cancelled) return;
+        setWorkouts(list);
+      } catch (err) {
+        if (cancelled) return;
+        setError("Failed to load workouts.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadWorkouts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredWorkouts = useMemo(() => {
     const now = new Date();
@@ -90,6 +120,8 @@ export default function WorkoutsClientPage() {
 
   const handleConfirmDelete = () => {
     if (!deleteTarget) return;
+    if (!workouts.find((w) => w.id === deleteTarget.id)) return;
+    WorkoutsAPI.delete(deleteTarget.id);
     setWorkouts((prev) => prev.filter((w) => w.id !== deleteTarget.id));
     setDeleteTarget(null);
   };

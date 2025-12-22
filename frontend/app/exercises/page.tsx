@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ExerciseAPI } from "@/services/exercises";
+import { ExerciseAPI } from "@/lib/api/exercises";
 import ExercisesHeader from "@/components/exercises/ExercisesHeader";
 import { formatExerciseMuscleLabel } from "@/lib/util/exercises";
 import ExerciseFormModal from "@/components/exercises/ExerciseFormModal";

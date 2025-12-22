@@ -100,4 +100,49 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
+// Update workout by ID
+router.put("/:id", async (req: Request, res: Response) => {
+  try {
+    const { date, muscleGroups, exercises } = req.body;
+    const updateData: any = {};
+    if (date) {
+      const d = new Date(date);
+      if (!Number.isNaN(d.getTime())) updateData.date = d;
+    }
+    if (muscleGroups) {
+      const normalized = (Array.isArray(muscleGroups) ? muscleGroups : [])
+        .map((s) => canonicalizeMuscleGroup(String(s)))
+        .filter((s): s is string => Boolean(s))
+        .filter((s) => s.length <= 30);
+      // de-dupe muscleGroups
+      updateData.muscleGroups = Array.from(new Set(normalized));
+    }
+    if (exercises) {
+      updateData.exercises = Array.isArray(exercises) ? exercises : [];
+    }
+    const updated = await Workout.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+    });
+    if (!updated) return res.status(404).json({ message: "Not found" });
+    res.json(toWorkoutDTO(updated));
+  } catch (err) {
+    res
+      .status(400)
+      .json({ message: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// Delete workout by ID
+router.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    const deleted = await Workout.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Not found" });
+    res.json({ success: true });
+  } catch (err) {
+    res
+      .status(400)
+      .json({ message: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 export default router;

@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/apiClient";
+import { apiClient } from "@/lib/api/apiClient";
 import type { Exercise, ExerciseFormValues } from "@/types/exercise";
 
 export const ExerciseAPI = {

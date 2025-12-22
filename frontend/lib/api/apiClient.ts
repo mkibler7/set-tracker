@@ -1,6 +1,4 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-
-if (!BASE) throw new Error("API base URL is not defined");
+const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export async function apiClient<T>(
   path: string,
