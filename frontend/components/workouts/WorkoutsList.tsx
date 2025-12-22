@@ -10,6 +10,7 @@ import {
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
 } from "@heroicons/react/24/solid";
+import { set } from "date-fns";
 
 type WorkoutsListProps = {
   filteredWorkouts: Workout[];
@@ -19,7 +20,8 @@ type WorkoutsListProps = {
   pageSize: number;
   onPageChange: (nextPage: number) => void;
   setWorkouts: React.Dispatch<React.SetStateAction<Workout[]>>;
-  setDeleteTarget: React.Dispatch<React.SetStateAction<Workout | null>>;
+  onDuplicate: (workoutId: string) => void;
+  onRequestDelete: (workout: Workout) => void;
 };
 
 export function WorkoutList({
@@ -30,7 +32,8 @@ export function WorkoutList({
   pageSize,
   onPageChange,
   setWorkouts,
-  setDeleteTarget,
+  onDuplicate,
+  onRequestDelete,
 }: WorkoutsListProps) {
   const router = useRouter();
   const listRef = useRef<HTMLElement | null>(null);
@@ -70,19 +73,7 @@ export function WorkoutList({
   }, [page, totalPages]);
 
   const handleDuplicate = (workoutId: string) => {
-    setWorkouts((prev) => {
-      const original = prev.find((w) => w.id === workoutId);
-      if (!original) return prev;
-
-      const copy: Workout = {
-        ...original,
-        id: `${original.id}-copy-${Date.now()}`,
-        date: new Date().toISOString().slice(0, 10),
-      };
-
-      return [copy, ...prev];
-    });
-
+    onDuplicate(workoutId);
     setActiveMenuId(null);
   };
 
@@ -93,7 +84,7 @@ export function WorkoutList({
 
   const handleDeleteClick = (workout: Workout) => {
     setActiveMenuId(null);
-    setDeleteTarget(workout);
+    onRequestDelete(workout);
   };
 
   return (

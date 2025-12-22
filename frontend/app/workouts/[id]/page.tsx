@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { MOCK_WORKOUTS } from "@/data/mockWorkouts"; // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
+// import { MOCK_WORKOUTS } from "@/data/mockWorkouts"; // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
+import { WorkoutsAPI } from "@/lib/api/workouts";
 import type { Workout, WorkoutExercise } from "@/types/workout";
 import { formatWorkoutDate } from "@/lib/util/date";
 import { exerciseVolume } from "@/lib/workouts/stats";
@@ -14,10 +15,28 @@ export default function WorkoutDetailPage() {
   const router = useRouter();
   const id = params?.id as string;
 
-  const workout: Workout | undefined = useMemo(
-    () => MOCK_WORKOUTS.find((w) => w.id === id), // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
-    [id]
-  );
+  const [workout, setWorkout] = useState<Workout | undefined>(undefined);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadWorkout() {
+      try {
+        const data = await WorkoutsAPI.get(id);
+        if (cancelled) return;
+        setWorkout(data);
+      } catch (err) {
+        if (cancelled) return;
+        console.error("Failed to load workout:", err);
+      }
+    }
+
+    loadWorkout();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   // Safe edit handler – does nothing if workout isn't loaded
   const handleEdit = () => {
@@ -50,21 +69,6 @@ export default function WorkoutDetailPage() {
     (total, ex) => total + exerciseVolume(ex),
     0
   );
-  // const totalVolume = workout.exercises.reduce((total, exercise) => {
-  //   if (typeof (exercise as any).volume === "number") {
-  //     return total + (exercise as any).volume;
-  //   }
-  //   if (!exercise.sets) return total;
-
-  //   const fromSets = exercise.sets.reduce((acc, set: any) => {
-  //     if (typeof set.volume === "number") return acc + set.volume;
-  //     const weight = set.weight ?? 0;
-  //     const reps = set.reps ?? 0;
-  //     return acc + weight * reps;
-  //   }, 0);
-
-  //   return total + fromSets;
-  // }, 0);
 
   return (
     <main className="page">
