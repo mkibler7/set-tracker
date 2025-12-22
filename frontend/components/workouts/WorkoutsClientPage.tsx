@@ -126,6 +126,19 @@ export default function WorkoutsClientPage() {
     setDeleteTarget(null);
   };
 
+  const handleDuplicate = (workoutId: string) => {
+    const payloadWorkout = workouts.find((w) => w.id === workoutId);
+    if (!payloadWorkout) return;
+
+    WorkoutsAPI.create({
+      date: new Date().toISOString().slice(0, 10),
+      muscleGroups: payloadWorkout.muscleGroups,
+      exercises: payloadWorkout.exercises,
+    }).then((newWorkout) => {
+      setWorkouts((prev) => [newWorkout, ...prev]);
+    });
+  };
+
   const handleCancelDelete = () => {
     setDeleteTarget(null);
   };
@@ -160,7 +173,8 @@ export default function WorkoutsClientPage() {
         pageSize={pageSize}
         onPageChange={handlePageChange}
         setWorkouts={setWorkouts}
-        setDeleteTarget={setDeleteTarget}
+        onDuplicate={handleDuplicate}
+        onRequestDelete={setDeleteTarget}
       />
 
       <DeleteWorkoutModal
