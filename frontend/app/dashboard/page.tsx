@@ -37,7 +37,12 @@ export default async function DashboardPage() {
   const userFirstName = "Michael"; // TODO: replace with real user data
 
   // Fetch workouts from the API
-  const workouts = await apiServer<Workout[]>("/api/workouts");
+  let workouts: Workout[] = [];
+  try {
+    workouts = await apiServer<Workout[]>("/api/workouts");
+  } catch (error) {
+    console.error("Error fetching workouts:", error);
+  }
 
   const range: TimeRange = "1M";
   const filteredWorkouts = filterWorkoutsByRange(workouts, range);
