@@ -6,10 +6,10 @@ import type { WorkoutExercise } from "@/types/workout";
 import SetForm, { SetFormValues } from "@/components/dailylog/SetForm";
 import ExercisePanel from "@/components/dailylog/ExercisePanel";
 import InfoIcon from "@/components/icons/info-icon";
+import { getExerciseMusclesById } from "@/lib/exercises";
 
 type ExerciseCardProps = {
   exercise: WorkoutExercise;
-  muscleLabel?: string;
   onRemove: () => void;
   onAddSet: (values: SetFormValues) => void;
   onUpdateSet: (setId: string, values: SetFormValues) => void;
@@ -19,7 +19,6 @@ type ExerciseCardProps = {
 
 export default function ExerciseCard({
   exercise,
-  muscleLabel,
   onRemove,
   onAddSet,
   onUpdateSet,
@@ -31,29 +30,15 @@ export default function ExerciseCard({
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [isAddingSet, setIsAddingSet] = useState(false);
 
-  // Handle Open Details safely
-  const isMongoObjectId = (v: string) => /^[a-fA-F0-9]{24}$/.test(v);
-
   const handleOpenDetails = () => {
-    const id = exercise.exerciseId;
-
-    console.log("Navigating to exercise details:", {
-      exerciseId: id,
-      exerciseName: exercise.exerciseName,
-      isMongoObjectId: isMongoObjectId(id),
-    });
-
-    if (!isMongoObjectId(id)) {
-      // Prevent hard crash + confirms the true value in console
-      return;
-    }
-
-    router.push(`/exercises/${id}?fromDailyLog=true`);
+    router.push(`/exercises/${exercise.exerciseId}?fromDailyLog=true`);
   };
 
-  // const handleOpenDetails = () => {
-  //   router.push(`/exercises/${exercise.exerciseId}?fromDailyLog=true`);
-  // };
+  let muscleLabel: string;
+
+  const ex = getExerciseMusclesById(exercise.exerciseId);
+
+  muscleLabel = ex.muscleGroups.join(" / ");
 
   return (
     <section
@@ -79,11 +64,9 @@ export default function ExerciseCard({
               <InfoIcon />
             </button>
           </div>
-          {muscleLabel ? (
-            <p className="text-[11px] sm:text-xs uppercase tracking-wide text-muted-foreground">
-              {muscleLabel}
-            </p>
-          ) : null}
+          <p className="text-[11px] sm:text-xs uppercase tracking-wide text-muted-foreground">
+            {muscleLabel}
+          </p>
         </div>
         <button
           type="button"

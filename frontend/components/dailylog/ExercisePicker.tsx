@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { MOCK_EXERCISES } from "@/data/mockExercises";
 import type { Exercise } from "@/types/exercise";
 import { formatExerciseMuscleLabel } from "@/lib/util/exercises";
 
@@ -11,9 +12,12 @@ type ExercisePickerProps = {
   onCreateExercise?: () => void;
   excludeIds?: string[];
   split?: string[];
-  exercises: Exercise[];
-  loading?: boolean;
 };
+
+// De-duplicated list
+const UNIQUE_EXERCISES = Array.from(
+  new Map(MOCK_EXERCISES.map((exercise) => [exercise.id, exercise])).values()
+);
 
 export default function ExercisePicker({
   isOpen,
@@ -22,15 +26,13 @@ export default function ExercisePicker({
   onCreateExercise,
   excludeIds = [],
   split = [],
-  exercises,
-  loading,
 }: ExercisePickerProps) {
   const [search, setSearch] = useState("");
 
   const filteredExercises = useMemo(() => {
     const lowerSearch = search.toLowerCase();
 
-    return exercises.filter((exercise) => {
+    return UNIQUE_EXERCISES.filter((exercise) => {
       if (excludeIds.includes(exercise.id)) return false;
 
       if (split.length > 0) {
@@ -51,7 +53,7 @@ export default function ExercisePicker({
 
       return true;
     });
-  }, [exercises, excludeIds, search, split]);
+  }, [excludeIds, search, split]);
 
   if (!isOpen) return null;
 
@@ -86,9 +88,7 @@ export default function ExercisePicker({
         <div className="px-4 pb-3 text-[13px] sm:text-sm scroll">
           <div className="rounded-lg border border-border bg-background/40 px-1 sm:px-1.5">
             <div className="max-h-[45vh] overflow-y-auto sm:max-h-[55vh] pr-2 pt-1 pb-1 sm:pt-2 sm:pb-2">
-              {loading ? (
-                <p>Loading exercises..</p>
-              ) : filteredExercises.length === 0 ? (
+              {filteredExercises.length === 0 ? (
                 <p className="px-2 py-3 text-[11px] text-muted-foreground sm:text-xs">
                   No exercises match your filters.
                 </p>
