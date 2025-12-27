@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/components/dailylog/Header";
 import EmptyState from "@/components/dailylog/EmptyState";
@@ -48,6 +48,8 @@ export default function DailyLogClientPage() {
   const [workoutDate, setWorkoutDate] = useState(new Date());
 
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
