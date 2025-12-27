@@ -2,13 +2,14 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-// import { MOCK_WORKOUTS } from "@/data/mockWorkouts"; // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
 import { WorkoutsAPI } from "@/lib/api/workouts";
+import { ExerciseAPI } from "@/lib/api/exercises";
+import type { Exercise } from "@/types/exercise";
+import { formatExerciseMuscleLabel } from "@/lib/util/exercises";
 import type { Workout, WorkoutExercise } from "@/types/workout";
 import { formatWorkoutDate } from "@/lib/util/date";
 import { exerciseVolume } from "@/lib/workouts/stats";
 import PageBackButton from "@/components/shared/PageBackButton";
-import { getExerciseMusclesById } from "@/lib/exercises";
 
 export default function WorkoutDetailPage() {
   const params = useParams();
@@ -16,29 +17,52 @@ export default function WorkoutDetailPage() {
   const id = params?.id as string;
 
   const [workout, setWorkout] = useState<Workout | undefined>(undefined);
+  const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
 
+  // Load exercise catalog
   useEffect(() => {
     let cancelled = false;
 
-    async function loadWorkout() {
+    (async () => {
+      try {
+        setCatalogLoading(true);
+        const list = await ExerciseAPI.list();
+        if (!cancelled) setExerciseCatalog(list);
+      } catch (e) {
+        console.error("Failed to load exercise catalog:", e);
+      } finally {
+        if (!cancelled) setCatalogLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const catalogById = useMemo(() => {
+    return Object.fromEntries(exerciseCatalog.map((e) => [e.id, e]));
+  }, [exerciseCatalog]);
+
+  // Load workout data
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
       try {
         const data = await WorkoutsAPI.get(id);
-        if (cancelled) return;
-        setWorkout(data);
+        if (!cancelled) setWorkout(data);
       } catch (err) {
-        if (cancelled) return;
-        console.error("Failed to load workout:", err);
+        if (!cancelled) console.error("Failed to load workout:", err);
       }
-    }
-
-    loadWorkout();
+    })();
 
     return () => {
       cancelled = true;
     };
   }, [id]);
 
-  // Safe edit handler – does nothing if workout isn't loaded
   const handleEdit = () => {
     if (!workout) return;
     router.push(`/dailylog?fromWorkout=${workout.id}`);
@@ -49,7 +73,6 @@ export default function WorkoutDetailPage() {
       <main className="flex h-full flex-col px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-4xl">
           <PageBackButton />
-
           <div className="rounded-lg border border-border bg-card/60 p-6 text-sm text-muted-foreground">
             Workout not found.
           </div>
@@ -72,7 +95,6 @@ export default function WorkoutDetailPage() {
 
   return (
     <main className="page">
-      {/* Header */}
       <header className="mb-6">
         <div className="flex items-center justify-between gap-2">
           <PageBackButton />
@@ -81,6 +103,7 @@ export default function WorkoutDetailPage() {
         <p className="mb-2 text-sm tracking-tight text-muted-foreground">
           Completed workout:
         </p>
+
         <div className="flex items-center justify-between">
           <h1 className="mb-1 text-2xl font-semibold tracking-tight text-foreground">
             {workout.muscleGroups.join(" / ")}
@@ -89,11 +112,11 @@ export default function WorkoutDetailPage() {
             Edit workout
           </button>
         </div>
+
         <p className="text-sm text-muted-foreground">
           {formatWorkoutDate(workout.date)}
         </p>
 
-        {/* Summary chips */}
         <div className="mt-4 flex flex-wrap gap-2 text-xs">
           <span className="rounded-full bg-card/70 px-3 py-1 text-muted-foreground">
             {exerciseCount} {exerciseCount === 1 ? "exercise" : "exercises"}
@@ -107,13 +130,11 @@ export default function WorkoutDetailPage() {
         </div>
       </header>
 
-      {/* Exercises + sets */}
       <section className="flex-1 overflow-y-auto space-y-4 scroll pb-6">
         {workout.exercises.length > 0 ? (
           workout.exercises.map((exercise, index) => {
-            const { muscleGroups } = getExerciseMusclesById(
-              exercise.exerciseId
-            );
+            const meta = catalogById[exercise.exerciseId];
+            const muscleLabel = meta ? formatExerciseMuscleLabel(meta) : "";
 
             const exVolume = exerciseVolume(exercise as WorkoutExercise);
 
@@ -122,24 +143,22 @@ export default function WorkoutDetailPage() {
                 key={exercise.exerciseId || index}
                 className="rounded-lg border border-border bg-card/70 p-4 text-sm shadow-sm mr-2"
               >
-                {/* Top row: name + volume */}
                 <div className="mb-2 flex items-start justify-between gap-2">
                   <div>
                     <h2 className="mb-2 text-sm font-semibold text-foreground">
                       {exercise.exerciseName}
                     </h2>
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      {muscleGroups.join(" / ")}
+                      {muscleLabel ||
+                        (catalogLoading ? "Loading muscles..." : "—")}
                     </p>
                   </div>
 
-                  {/* top-right volume display */}
                   <span className="text-xs text-muted-foreground">
                     {exVolume.toLocaleString()} volume
                   </span>
                 </div>
 
-                {/* Sets table */}
                 {exercise.sets && exercise.sets.length > 0 && (
                   <div className="mt-3 overflow-x-auto">
                     <table className="w-full border-collapse text-xs">
@@ -190,7 +209,6 @@ export default function WorkoutDetailPage() {
                   </div>
                 )}
 
-                {/* Notes */}
                 {exercise.notes && (
                   <p className="mt-3 text-xs text-muted-foreground">
                     {exercise.notes}
