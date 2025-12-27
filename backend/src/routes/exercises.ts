@@ -1,7 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import Exercise from "../models/Exercise.js";
 import mongoose from "mongoose";
-import Workout from "../models/Workout.js";
 
 // Helpers
 function toExerciseDTO(doc: any) {
@@ -64,44 +63,6 @@ router.get("/:id", async (req, res) => {
   } catch (err) {
     return res
       .status(500)
-      .json({ message: err instanceof Error ? err.message : String(err) });
-  }
-});
-
-// Get exercise history by ID
-router.get("/history/exercise/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Find workouts that include this exercise
-    const workouts = await Workout.find({ "exercises.id": id }).sort({
-      date: -1,
-    });
-
-    // Reduce to only the matching exercise per workout (small payload)
-    const entries = workouts.map((workoutDoc: any) => {
-      const w = workoutDoc.toObject?.() ?? workoutDoc;
-      const target = (w.exercises ?? []).find((ex: any) => ex.id === id);
-
-      return {
-        workoutId: String(w._id),
-        workoutDate: w.date instanceof Date ? w.date.toISOString() : w.date,
-        workoutName: (w.muscleGroups ?? []).join(" / "),
-        notes: target?.notes ?? "",
-        sets: (target?.sets ?? []).map((s: any, i: number) => ({
-          setNumber: i + 1,
-          weight: s.weight,
-          reps: s.reps,
-          tempo: s.tempo,
-          rpe: s.rpe,
-        })),
-      };
-    });
-
-    res.json(entries);
-  } catch (err) {
-    res
-      .status(400)
       .json({ message: err instanceof Error ? err.message : String(err) });
   }
 });

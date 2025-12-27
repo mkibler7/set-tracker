@@ -1,5 +1,6 @@
+// lib/charts/muscleVolume.ts
 import type { Workout } from "@/types/workout";
-// import { apiServer } from "../apiServer";
+import { MOCK_EXERCISES } from "@/data/mockExercises";
 import type { Exercise } from "@/types/exercise";
 
 // ------------------------------
@@ -50,22 +51,9 @@ export type LayerDatum = {
   value: number;
 };
 
-// Fetch exercise definitions from the API server
-// const exercises = await apiServer<Exercise[]>("/api/exercises");
-
-// Helper type for fast lookup
-export type ExercisesById = Record<string, Exercise>;
-
-// Build a lookup map of exerciseId -> Exercise
-export function buildExercisesById(exercises: Exercise[]): ExercisesById {
-  return Object.fromEntries(
-    exercises.map((exercise) => [exercise.id, exercise])
-  );
-}
-
-// const EXERCISE_BY_ID: Record<string, Exercise> = Object.fromEntries(
-//   exercises.map((e) => [e.id, e])
-// );
+const EXERCISE_BY_ID: Record<string, Exercise> = Object.fromEntries(
+  MOCK_EXERCISES.map((e) => [e.id, e])
+);
 
 // ------------------------------
 // Aggregation
@@ -130,7 +118,6 @@ export function mapGroupToMuscle(group?: string): MuscleKey | null {
  */
 export function computeMuscleStats(
   workouts: Workout[],
-  exercisesById: ExercisesById,
   mode: "primary" | "secondary",
   metric: Metric
 ): { total: number; muscles: MuscleVolumeMap } {
@@ -138,7 +125,7 @@ export function computeMuscleStats(
 
   for (const workout of workouts) {
     for (const logged of workout.exercises) {
-      const def = exercisesById[logged.exerciseId];
+      const def = EXERCISE_BY_ID[logged.exerciseId];
       if (!def) continue; // unknown exerciseId, skip safely
 
       const primary = def.primaryMuscleGroup;

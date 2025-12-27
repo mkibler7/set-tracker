@@ -1,21 +1,16 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
-import type { Exercise } from "@/types/exercise";
-import { initMuscleVolume } from "@/lib/charts/muscleVolume";
-import { apiClient } from "@/lib/apiClient";
+import React, { useMemo, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 import type { Workout } from "@/types/workout";
 import {
   buildMuscleRings,
-  buildExercisesById,
   computeMuscleStats,
   fmt,
   percent,
   shouldShowMuscleLabel,
   type Metric,
-  type ExercisesById,
 } from "@/lib/charts/muscleVolume";
 import { MuscleVolumeToggle } from "@/components/charts/MuscleVolumeToggle";
 import {
@@ -32,53 +27,14 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
   const [mode, setMode] = useState<"primary" | "secondary">("primary");
   const [metric, setMetric] = useState<Metric>("volume");
   const [hover, setHover] = useState<HoverInfo | null>(null);
-  const [exercisesById, setExercisesById] = useState<ExercisesById>({});
-  const [exercisesLoading, setExercisesLoading] = useState(false);
-  const [exercisesError, setExercisesError] = useState<string | null>(null);
 
   const isSmallScreen = useMediaQuery("(max-width: 640px)");
   const isXsScreen = useMediaQuery("(max-width: 390px)"); // or 400px if you prefer
 
-  // Load exercise definitions to map exerciseId -> muscle groups
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      try {
-        setExercisesLoading(true);
-        setExercisesError(null);
-
-        const list = await apiClient<Exercise[]>("/api/exercises");
-        const map = buildExercisesById(list);
-
-        if (!cancelled) setExercisesById(map);
-      } catch (e) {
-        console.error(e);
-        if (!cancelled) setExercisesError("Failed to load exercises.");
-      } finally {
-        if (!cancelled) setExercisesLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const { total, muscles } = useMemo(() => {
-    // If we haven't loaded exercises yet, treat as no data (prevents crashes)
-    if (!exercisesById || Object.keys(exercisesById).length === 0) {
-      return { total: 0, muscles: initMuscleVolume() };
-    }
-
-    return computeMuscleStats(workouts, exercisesById, mode, metric);
-  }, [workouts, exercisesById, mode, metric]);
-
-  // Build ring layers from muscle totals
-  // IMPORTANT: This hook must run on every render (no conditional hook calls).
-  const { fullBodyData, upperLowerData, groupData, muscleData } = useMemo(
-    () => buildMuscleRings(total, muscles),
-    [total, muscles]
+  // Aggregate data (volume or sets)
+  const { total, muscles } = useMemo(
+    () => computeMuscleStats(workouts, mode, metric),
+    [workouts, mode, metric]
   );
 
   if (total === 0) {
@@ -89,13 +45,19 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
     );
   }
 
+  // Build ring layers from muscle totals
+  const { fullBodyData, upperLowerData, groupData, muscleData } = useMemo(
+    () => buildMuscleRings(total, muscles),
+    [total, muscles]
+  );
+
   // Radii per ring – a bit smaller on mobile so we leave room around the chart
   const RINGS = isXsScreen
     ? {
         FULL: { inner: 0, outer: 18 },
         UPPER_LOWER: { inner: 22, outer: 46 },
         GROUPS: { inner: 50, outer: 76 },
-        MUSCLES: { inner: 80, outer: 102 },
+        MUSCLES: { inner: 80, outer: 102 }, // smaller outer radius
       }
     : isSmallScreen
     ? {

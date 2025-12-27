@@ -8,13 +8,10 @@ import SplitSelector from "@/components/dailylog/SplitSelector";
 import SessionView from "@/components/dailylog/SessionView";
 import { useWorkoutSession } from "@/components/dailylog/useWorkoutSession";
 import { WorkoutsAPI } from "@/lib/api/workouts";
-import { ExerciseAPI } from "@/lib/api/exercises";
-import type { Exercise } from "@/types/exercise";
 import {
   ALL_MUSCLE_GROUPS,
   type MuscleGroup,
 } from "@reptracker/shared/muscles";
-import { set } from "date-fns";
 
 type WorkoutStep = "empty" | "split" | "session";
 
@@ -36,93 +33,104 @@ export default function DailyLogClientPage() {
   );
 
   const router = useRouter();
+  const loadedFromWorkoutRef = useRef<string | null>(null);
+
   const searchParams = useSearchParams();
   const fromWorkoutId = searchParams.get("fromWorkout");
-
-  const loadedFromWorkoutRef = useRef<string | null>(null);
 
   const [step, setStep] = useState<WorkoutStep>("empty");
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<
     MuscleGroup[]
   >([]);
   const [workoutDate, setWorkoutDate] = useState(new Date());
-
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const [isEditingSplit, setIsEditingSplit] = useState(false);
 
-  // Backend-loaded exercise catalog (used for ExercisePicker / adding to session)
-  const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([]);
-  const [exercisesLoading, setExercisesLoading] = useState(false);
-  const [exercisesError, setExercisesError] = useState<string | null>(null);
-
-  // Load exercise catalog once (client-side)
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      try {
-        setExercisesLoading(true);
-        setExercisesError(null);
-        const list = await ExerciseAPI.list();
-        if (!cancelled) setExerciseCatalog(list);
-      } catch (err) {
-        if (!cancelled) setExercisesError("Failed to load exercises.");
-      } finally {
-        if (!cancelled) setExercisesLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+  console.log("DailyLog render fromWorkoutId:", fromWorkoutId);
   // 1) If we arrive with ?fromWorkout=123, auto-load that workout
   useEffect(() => {
     if (!fromWorkoutId) return;
 
     let cancelled = false;
 
-    (async () => {
-      try {
-        const workout = await WorkoutsAPI.get(fromWorkoutId);
-        if (cancelled) return;
+    WorkoutsAPI.get(fromWorkoutId).then((workout) => {
+      if (cancelled) return;
 
-        // Stash today's in-progress session so we can restore later
-        const {
-          currentWorkout,
-          stashedWorkout,
-          stashCurrentWorkout,
-          startWorkout,
-        } = useWorkoutSession.getState();
+      const {
+        currentWorkout,
+        stashedWorkout,
+        stashCurrentWorkout,
+        startWorkout,
+      } = useWorkoutSession.getState();
 
-        if (currentWorkout && !stashedWorkout) stashCurrentWorkout();
-        startWorkout(workout.muscleGroups, workout.date, workout.exercises);
-        setStep("session");
-        setSelectedMuscleGroups(workout.muscleGroups);
-        setWorkoutDate(new Date(workout.date));
-        setIsEditingSplit(false);
-        setIsPickerOpen(false);
-      } catch (error) {
-        if (cancelled) return;
-        console.error("Failed to load workout:", error);
-
-        // If a bad id was given, clear the param to avoid loops
-        loadedFromWorkoutRef.current = null;
-        router.replace("/dailylog");
-      }
-    })();
+      if (currentWorkout && !stashedWorkout) stashCurrentWorkout();
+      startWorkout(workout.muscleGroups, workout.date, workout.exercises);
+      setStep("session");
+      setSelectedMuscleGroups(workout.muscleGroups);
+      setWorkoutDate(new Date(workout.date));
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [fromWorkoutId, router]);
+  }, [fromWorkoutId]);
+
+  // useEffect(() => {
+  //   let cancelled = false;
+
+  //   // If the param is cleared, allow future history-loads again.
+  //   if (!fromWorkoutId) {
+  //     loadedFromWorkoutRef.current = null;
+  //     return;
+  //   }
+
+  //   // Prevent re-loading the same history workout after startWorkout() updates store state.
+  //   if (loadedFromWorkoutRef.current === fromWorkoutId) return;
+
+  //   //  Mark as loaded so we don't run again for this same id.
+  //   loadedFromWorkoutRef.current = fromWorkoutId;
+
+  //   WorkoutsAPI.get(fromWorkoutId)
+  //     .then((workout) => {
+  //       console.log("GET workout response:", workout);
+  //       console.log("Loading workout into session:", {
+  //         muscles: workout.muscleGroups,
+  //         date: workout.date,
+  //         exercises: workout.exercises,
+  //       });
+  //       if (cancelled) return;
+
+  //       // Stash today's in-progress session so we can restore later
+  //       if (currentWorkout && !stashedWorkout) {
+  //         stashCurrentWorkout();
+  //       }
+  //       setSelectedMuscleGroups(workout.muscleGroups);
+  //       setWorkoutDate(new Date(workout.date));
+  //       setIsEditingSplit(false);
+  //       setIsPickerOpen(false);
+  //       setStep("session");
+  //       try {
+  //         startWorkout(workout.muscleGroups, workout.date, workout.exercises);
+  //       } catch (error) {
+  //         console.error("Failed to start workout:", error);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       if (cancelled) return;
+  //       console.error("Failed to load workout:", error);
+
+  //       loadedFromWorkoutRef.current = null;
+
+  //       router.replace("/dailylog");
+  //     });
+
+  //   return () => {
+  //     cancelled = true;
+  //   };
+  // }, [fromWorkoutId]);
 
   // 2) If there is already a current workout in the store, auto-resume it
   useEffect(() => {
@@ -204,14 +212,7 @@ export default function DailyLogClientPage() {
     // Check if we are editing an existing history workout
     const isEditingHistory = !!fromWorkoutId;
 
-    // Normalize currentWorkout.exercises
-    const catalogById = Object.fromEntries(
-      exerciseCatalog.map((e) => [e.id, e])
-    );
-    const catalogByName = Object.fromEntries(
-      exerciseCatalog.map((e) => [e.name.trim().toLowerCase(), e])
-    );
-
+    // Build the payload from current session in Zustand
     const payload = {
       date: currentWorkout.date,
       muscleGroups: currentWorkout.muscleGroups,
@@ -245,7 +246,6 @@ export default function DailyLogClientPage() {
           return;
         }
 
-        // Otherwise reset UI to empty state
         setSelectedMuscleGroups([]);
         setWorkoutDate(new Date());
         setStep("empty");
@@ -307,8 +307,6 @@ export default function DailyLogClientPage() {
               onClosePicker={() => setIsPickerOpen(false)}
               onOpenPicker={() => setIsPickerOpen(true)}
               onSaveWorkout={handleSaveWorkout}
-              exerciseCatalog={exerciseCatalog}
-              exercisesCatalogLoading={exercisesLoading}
             />
           </div>
         )}

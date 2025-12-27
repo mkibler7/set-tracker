@@ -1,6 +1,5 @@
 import type { Workout } from "@/types/workout";
-import type { Exercise } from "@/types/exercise";
-import { getExerciseByIdFromList } from "../exercises/lookup";
+import { getExerciseById } from "../exercises";
 
 export type MuscleKey =
   | "chest"
@@ -97,18 +96,17 @@ function determineRegion(muscle: MuscleKey): RegionKey {
 
 export function buildSunburstData(
   workouts: Workout[],
-  exerciseCatalog: Exercise[],
   mode: "primary" | "secondary" = "primary"
 ): SunburstData {
   const muscleVolume = initMuscleMap();
 
   for (const workout of workouts) {
     for (const ex of workout.exercises) {
-      const exercise = getExerciseByIdFromList(exerciseCatalog, ex.exerciseId);
-      if (!exercise) continue;
-
       for (const set of ex.sets) {
         const volume = (set.reps ?? 0) * (set.weight ?? 0);
+        const exercise = getExerciseById(ex.exerciseId);
+        if (!exercise) continue;
+
         if (volume <= 0) continue;
 
         if (mode === "primary") {
