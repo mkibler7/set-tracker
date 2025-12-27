@@ -1,4 +1,4 @@
-const BASE = process.env.API_URL || "http://localhost:5000/api";
+const BASE = process.env.API_URL || "http://localhost:5000";
 
 if (!BASE) throw new Error("API_URL is not set");
 
