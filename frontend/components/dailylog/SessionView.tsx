@@ -5,7 +5,6 @@ import ExercisePicker from "@/components/dailylog/ExercisePicker";
 import ExerciseCard from "@/components/dailylog/ExerciseCard";
 import DeleteExerciseModal from "./DeleteExerciseModal";
 import { useWorkoutSession } from "@/components/dailylog/useWorkoutSession";
-// import { MOCK_EXERCISES } from "@/data/mockExercises";
 import type { WorkoutExercise } from "@/types/workout";
 import type { Exercise } from "@/types/exercise";
 import { formatExerciseMuscleLabel } from "@/lib/util/exercises";

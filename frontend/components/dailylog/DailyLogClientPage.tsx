@@ -51,9 +51,6 @@ export default function DailyLogClientPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-
   const [isEditingSplit, setIsEditingSplit] = useState(false);
 
   // Backend-loaded exercise catalog (used for ExercisePicker / adding to session)

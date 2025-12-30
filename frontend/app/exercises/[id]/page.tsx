@@ -2,7 +2,6 @@ import PageBackButton from "@/components/shared/PageBackButton";
 import Header from "@/components/exerciseInfo/Header";
 import ExerciseHistoryCard from "@/components/exerciseInfo/ExerciseHistoryCard";
 import ActiveLogExerciseCard from "@/components/exerciseInfo/ActiveLogExerciseCard";
-// import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
 import { ExerciseHistoryEntry } from "@/types/exercise";
 import { formatWorkoutDate } from "@/lib/util/date";
 import { ExerciseAPI } from "@/lib/api/exercises";

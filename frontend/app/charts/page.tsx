@@ -18,12 +18,19 @@ import { MuscleBreakdownSection } from "@/components/charts/MuscleBreakdownSecti
 import PageBackButton from "@/components/shared/PageBackButton";
 
 export default function ChartsPage() {
+  const API_ENABLED = !!process.env.NEXT_PUBLIC_API_URL;
+
   const [range, setRange] = useState<TimeRange>("1M");
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!API_ENABLED) {
+      setWorkouts([]);
+      return;
+    }
+
     let cancelled = false;
 
     (async () => {
@@ -53,8 +60,15 @@ export default function ChartsPage() {
     <main className="">
       <div className="page space-y-6">
         <PageBackButton />
+
         {/* Header + range selector */}
         <TrainingVolumeHeader />
+
+        {!API_ENABLED && (
+          <div className="rounded-lg border border-border bg-card/60 p-4 text-sm text-muted-foreground">
+            Charts will appear once the back end is connected.
+          </div>
+        )}
 
         {error && (
           <div className="rounded-lg border border-border bg-card/60 p-4 text-sm text-muted-foreground">
