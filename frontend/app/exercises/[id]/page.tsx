@@ -2,11 +2,14 @@ import PageBackButton from "@/components/shared/PageBackButton";
 import Header from "@/components/exerciseInfo/Header";
 import ExerciseHistoryCard from "@/components/exerciseInfo/ExerciseHistoryCard";
 import ActiveLogExerciseCard from "@/components/exerciseInfo/ActiveLogExerciseCard";
-import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
-import { Exercise, ExerciseHistoryEntry } from "@/types/exercise";
+import { ExerciseHistoryEntry } from "@/types/exercise";
 import { formatWorkoutDate } from "@/lib/util/date";
 import { ExerciseAPI } from "@/lib/api/exercises";
-// import { apiServer } from "@/lib/api/apiServer";
+import { WorkoutsAPI } from "@/lib/api/workouts"; // server-safe? if it's apiClient, use apiServer instead
+import type { Workout } from "@/types/workout";
+
+import { WorkoutHistoryAPI } from "@/lib/api/workoutHistory";
+import { apiServer } from "@/lib/api/apiServer";
 
 type PageProps = {
   // Next.js 16 passes these as Promises in server components
@@ -32,35 +35,8 @@ export default async function ExerciseDetailPage({
   // Did the user come here from the Daily Log page?
   const fromDailyLog = query.fromDailyLog === "true";
 
-  // Look up the exercise definition by id
+  // Exercise definition
   const exercise = await ExerciseAPI.get(id);
-
-  // Build a flat "history per workout" list for this exercise
-  const historyEntries: ExerciseHistoryEntry[] = MOCK_WORKOUTS.filter(
-    (workout) => workout.exercises.some((ex) => ex.exerciseId === id)
-  ).map((workout) => {
-    // The specific exercise instance within this workout
-    const target = workout.exercises.find((ex) => ex.exerciseId === id)!;
-
-    const sets = target.sets.map((s, index) => ({
-      setNumber: index + 1,
-      weight: s.weight,
-      reps: s.reps,
-      tempo: s.tempo,
-      rpe: s.rpe,
-    }));
-
-    const totalVolume = sets.reduce((sum, s) => sum + s.weight * s.reps, 0);
-
-    return {
-      workoutId: workout.id,
-      workoutDate: formatWorkoutDate(workout.date),
-      workoutName: workout.muscleGroups.join(" / "),
-      notes: target.notes,
-      sets,
-      totalVolume,
-    };
-  });
 
   // If the id doesn't match any exercise, show a simple not-found state
   if (!exercise) {
@@ -73,6 +49,40 @@ export default async function ExerciseDetailPage({
       </main>
     );
   }
+
+  // Workout history for this exercise
+  const allWorkouts = await apiServer<Workout[]>("/api/workouts"); // server component -> use apiServer
+  const historyRaw = allWorkouts
+    .filter((w) => w.exercises.some((ex) => ex.exerciseId === exercise.id))
+    .map((w) => {
+      const ex = w.exercises.find((x) => x.exerciseId === exercise.id)!;
+      return {
+        workoutId: w.id,
+        workoutDate: w.date,
+        workoutName: w.muscleGroups.join(" / "),
+        notes: ex.notes,
+        sets: ex.sets.map((s, idx) => ({
+          setNumber: idx + 1,
+          weight: s.weight,
+          reps: s.reps,
+          tempo: s.tempo,
+          rpe: s.rpe,
+        })),
+      };
+    });
+
+  // Format dates + compute totalVolume on server
+  const historyEntries: ExerciseHistoryEntry[] = historyRaw.map((entry) => {
+    const totalVolume = entry.sets.reduce(
+      (sum, s) => sum + s.weight * s.reps,
+      0
+    );
+    return {
+      ...entry,
+      workoutDate: formatWorkoutDate(entry.workoutDate),
+      totalVolume,
+    };
+  });
 
   return (
     <main className="page">
@@ -102,5 +112,3 @@ export default async function ExerciseDetailPage({
     </main>
   );
 }
-// Note: The above code assumes that the global workout store's WorkoutExercise
-// structure includes an 'exerciseId' field to link back to the Exercise.

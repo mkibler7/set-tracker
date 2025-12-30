@@ -1,9 +1,5 @@
-"use client";
-
 import { StatTile } from "@/components/ui/StatTile";
 import { PageSectionTitle } from "@/components/ui/PageSectionTitle";
-import { Button } from "@/components/ui/Button";
-import { MOCK_WORKOUTS } from "@/data/mockWorkouts";
 import { WorkoutCard } from "@/components/dashboard/WorkoutCard";
 import Link from "next/link";
 import PageBackButton from "@/components/shared/PageBackButton";
@@ -13,8 +9,9 @@ import {
   filterWorkoutsByRange,
   type TimeRange,
 } from "@/lib/workouts/stats";
-import { get } from "http";
 import AreaGraphTrainingVolume from "@/components/charts/AreaGraphTrainingVolume";
+import { apiServer } from "@/lib/api/apiServer";
+import type { Workout } from "@/types/workout";
 
 const mockStats = [
   {
@@ -34,15 +31,22 @@ const mockStats = [
   },
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   // Later this will call the backend; for now it's all mock data.
   const userFirstName = "Michael"; // TODO: replace with real user data
 
+  // Fetch workouts from the API
+  let workouts: Workout[] = [];
+  try {
+    workouts = await apiServer<Workout[]>("/api/workouts");
+  } catch {
+    workouts = [];
+  }
+
   const range: TimeRange = "1M";
-  const filteredWorkouts = filterWorkoutsByRange(MOCK_WORKOUTS, range);
+  const filteredWorkouts = filterWorkoutsByRange(workouts, range);
   const volumeData = getVolumeSeries(filteredWorkouts);
 
-  const workouts = MOCK_WORKOUTS; // TODO: replace MOCK_WORKOUTS with API data once backend is wired up
   const recentWorkouts = sortWorkoutsByDateDesc(workouts).slice(0, 5);
 
   return (
