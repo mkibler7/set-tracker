@@ -1,29 +1,22 @@
 import { Router, type Request, type Response } from "express";
-import Workout from "../models/Workout.js";
+import toWorkoutDTO from "../dtos/workoutDto.js";
 
-// Helpers
-function toWorkoutDTO(doc: any) {
-  const obj = doc.toObject?.() ?? doc;
-  return {
-    id: String(obj._id),
-    date: obj.date instanceof Date ? obj.date.toISOString() : obj.date,
-    muscleGroups: obj.muscleGroups ?? [],
-    exercises: obj.exercises ?? [],
-    createdAt: obj.createdAt,
-    updatedAt: obj.updatedAt,
-  };
-}
+import {
+  createWorkout,
+  deleteAllWorkoutsDevOnly,
+  deleteWorkout,
+  getWorkoutById,
+  getWorkouts,
+  updateWorkout,
+} from "../services/workoutsService.js";
+import {
+  parseCreateWorkoutInput,
+  parseUpdateWorkoutInput,
+} from "../validators/workoutInput.js";
 
-function canonicalizeMuscleGroup(value: string) {
-  const trimmed = value?.trim();
-  if (!trimmed) return null;
-
-  return trimmed
-    .toLowerCase()
-    .split(/\s+/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+type IdParams = {
+  id: string;
+};
 
 const router = Router();
 
@@ -34,7 +27,7 @@ router.delete("/__dev__/all", async (req: Request, res: Response) => {
   }
 
   try {
-    const result = await Workout.deleteMany({});
+    const result = await deleteAllWorkoutsDevOnly();
     res.json({
       deletedCount: result.deletedCount,
     });
@@ -48,7 +41,7 @@ router.delete("/__dev__/all", async (req: Request, res: Response) => {
 // Get all workouts
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const workouts = await Workout.find().sort({ date: -1 });
+    const workouts = await getWorkouts();
     res.json(workouts.map(toWorkoutDTO));
   } catch (err) {
     res
@@ -58,10 +51,9 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 // Get workout by ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req: Request<IdParams>, res: Response) => {
   try {
-    const doc = await Workout.findById(req.params.id);
-    if (!doc) return res.status(404).json({ message: "Not found" });
+    const doc = await getWorkoutById(req.params.id);
     res.json(toWorkoutDTO(doc));
   } catch {
     res.status(400).json({ message: "Invalid id" });
@@ -71,73 +63,34 @@ router.get("/:id", async (req, res) => {
 // Create new workout
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const { date, muscleGroups, exercises } = req.body;
-
-    const normalized = (Array.isArray(muscleGroups) ? muscleGroups : [])
-      .map((s) => canonicalizeMuscleGroup(String(s)))
-      .filter((s): s is string => Boolean(s))
-      .filter((s) => s.length <= 30);
-
-    // de-dupe muscleGroups
-    const uniqueMuscleGroups = Array.from(new Set(normalized));
-
-    const payload: any = {
-      muscleGroups: uniqueMuscleGroups,
-      exercises: Array.isArray(exercises) ? exercises : [],
-    };
-
-    if (date) {
-      const d = new Date(date);
-      if (!Number.isNaN(d.getTime())) payload.date = d;
-    }
-
-    const newWorkout = await Workout.create(payload);
-    res.status(201).json(toWorkoutDTO(newWorkout));
-  } catch (err) {
-    res
-      .status(400)
-      .json({ message: err instanceof Error ? err.message : String(err) });
+    const input = parseCreateWorkoutInput(req.body);
+    const saved = await createWorkout(input);
+    res.status(201).json(toWorkoutDTO(saved));
+  } catch (error) {
+    res.status(400).json({
+      message: error instanceof Error ? error.message : String(error),
+    });
   }
 });
 
 // Update workout by ID
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/:id", async (req: Request<IdParams>, res: Response) => {
   try {
-    const { date, muscleGroups, exercises } = req.body;
-    const updateData: any = {};
-    if (date) {
-      const d = new Date(date);
-      if (!Number.isNaN(d.getTime())) updateData.date = d;
-    }
-    if (muscleGroups) {
-      const normalized = (Array.isArray(muscleGroups) ? muscleGroups : [])
-        .map((s) => canonicalizeMuscleGroup(String(s)))
-        .filter((s): s is string => Boolean(s))
-        .filter((s) => s.length <= 30);
-      // de-dupe muscleGroups
-      updateData.muscleGroups = Array.from(new Set(normalized));
-    }
-    if (exercises) {
-      updateData.exercises = Array.isArray(exercises) ? exercises : [];
-    }
-    const updated = await Workout.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-    });
-    if (!updated) return res.status(404).json({ message: "Not found" });
+    const input = parseUpdateWorkoutInput(req.body);
+    const updated = await updateWorkout(req.params.id, input);
     res.json(toWorkoutDTO(updated));
-  } catch (err) {
-    res
-      .status(400)
-      .json({ message: err instanceof Error ? err.message : String(err) });
+  } catch (error) {
+    res.status(400).json({
+      message: error instanceof Error ? error.message : String(error),
+    });
   }
 });
 
 // Delete workout by ID
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", async (req: Request<IdParams>, res: Response) => {
   try {
-    const deleted = await Workout.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Not found" });
-    res.json({ success: true });
+    const deleted = await deleteWorkout(req.params.id);
+    res.json(deleted);
   } catch (err) {
     res
       .status(400)

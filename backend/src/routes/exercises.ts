@@ -1,19 +1,13 @@
 import { Router, type Request, type Response } from "express";
-import Exercise from "../models/Exercise.js";
-import mongoose from "mongoose";
-import Workout from "../models/Workout.js";
-
-// Helpers
-function toExerciseDTO(doc: any) {
-  const obj = doc.toObject?.() ?? doc;
-  return {
-    id: String(obj._id),
-    name: obj.name,
-    primaryMuscleGroup: obj.primaryMuscleGroup,
-    secondaryMuscleGroups: obj.secondaryMuscleGroups ?? [],
-    description: obj.description,
-  };
-}
+import {
+  createExercise,
+  deleteAllExercisesDevOnly,
+  getExercises,
+  getExerciseById,
+  getExerciseHistory,
+} from "../services/exercisesService.js";
+import toExerciseDTO from "../dtos/exerciseDto.js";
+import { get } from "node:http";
 
 const router = Router();
 
@@ -24,7 +18,7 @@ router.delete("/__dev__/all", async (req: Request, res: Response) => {
   }
 
   try {
-    const result = await Exercise.deleteMany({});
+    const result = await deleteAllExercisesDevOnly();
     res.json({
       deletedCount: result.deletedCount,
     });
@@ -38,7 +32,7 @@ router.delete("/__dev__/all", async (req: Request, res: Response) => {
 // Get all exercises
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const exercises = await Exercise.find().sort({ name: 1 });
+    const exercises = await getExercises();
     res.json(exercises.map(toExerciseDTO));
   } catch (err) {
     res
@@ -49,59 +43,23 @@ router.get("/", async (req: Request, res: Response) => {
 
 // Get exercise by ID
 router.get("/:id", async (req, res) => {
-  const { id } = req.params;
-
-  // Fast-fail invalid ObjectId formats
-  if (!mongoose.isValidObjectId(id)) {
-    return res.status(400).json({ message: "Invalid id" });
-  }
-
   try {
-    const doc = await Exercise.findById(id);
-    if (!doc) return res.status(404).json({ message: "Not found" });
-
-    return res.json(toExerciseDTO(doc));
-  } catch (err) {
-    return res
-      .status(500)
+    const doc = await getExerciseById(req.params.id);
+    res.json(toExerciseDTO(doc));
+  } catch (err: any) {
+    res
+      .status(err?.status ?? 500)
       .json({ message: err instanceof Error ? err.message : String(err) });
   }
 });
-
 // Get exercise history by ID
 router.get("/history/exercise/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-
-    // Find workouts that include this exercise
-    const workouts = await Workout.find({ "exercises.id": id }).sort({
-      date: -1,
-    });
-
-    // Reduce to only the matching exercise per workout (small payload)
-    const entries = workouts.map((workoutDoc: any) => {
-      const w = workoutDoc.toObject?.() ?? workoutDoc;
-      const target = (w.exercises ?? []).find((ex: any) => ex.id === id);
-
-      return {
-        workoutId: String(w._id),
-        workoutDate: w.date instanceof Date ? w.date.toISOString() : w.date,
-        workoutName: (w.muscleGroups ?? []).join(" / "),
-        notes: target?.notes ?? "",
-        sets: (target?.sets ?? []).map((s: any, i: number) => ({
-          setNumber: i + 1,
-          weight: s.weight,
-          reps: s.reps,
-          tempo: s.tempo,
-          rpe: s.rpe,
-        })),
-      };
-    });
-
+    const entries = await getExerciseHistory(req.params.id);
     res.json(entries);
-  } catch (err) {
+  } catch (err: any) {
     res
-      .status(400)
+      .status(err?.status ?? 500)
       .json({ message: err instanceof Error ? err.message : String(err) });
   }
 });
@@ -109,51 +67,12 @@ router.get("/history/exercise/:id", async (req, res) => {
 // Create new exercise
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const body = req.body ?? {};
-    const name = typeof body.name === "string" ? body.name.trim() : "";
-    const primaryMuscleGroup =
-      typeof body.primaryMuscleGroup === "string"
-        ? body.primaryMuscleGroup.trim()
-        : "";
-    const secondaryMuscleGroups = Array.isArray(body.secondaryMuscleGroups)
-      ? body.secondaryMuscleGroups
-      : [];
-    const description =
-      typeof body.description === "string"
-        ? body.description.trim()
-        : undefined;
-
-    if (!name || !primaryMuscleGroup) {
-      return res
-        .status(400)
-        .json({ message: "name and primaryMuscleGroup are required" });
-    }
-
-    const newExercise = new Exercise({
-      name,
-      primaryMuscleGroup,
-      secondaryMuscleGroups,
-      description,
+    const saved = await createExercise(req.body ?? []);
+    res.status(201).json(toExerciseDTO(saved));
+  } catch (err: any) {
+    res.status(err?.status ?? 400).json({
+      message: err instanceof Error ? err.message : String(err),
     });
-
-    const saved = await newExercise.save();
-    return res.status(201).json(toExerciseDTO(saved));
-  } catch (err) {
-    // Duplicate key (unique index) error handling (optional but helpful)
-    if (
-      err &&
-      typeof err === "object" &&
-      "code" in err &&
-      (err as any).code === 11000
-    ) {
-      return res.status(409).json({
-        message: "Exercise already exists (duplicate name or id).",
-      });
-    }
-
-    return res
-      .status(400)
-      .json({ message: err instanceof Error ? err.message : String(err) });
   }
 });
 

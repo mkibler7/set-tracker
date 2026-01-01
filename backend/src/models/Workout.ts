@@ -20,8 +20,7 @@ const WorkoutSetSchema = new mongoose.Schema(
 
 const WorkoutExerciseSchema = new mongoose.Schema(
   {
-    exerciseId: { type: String, required: true, trim: true },
-    exerciseName: { type: String, required: true, trim: true },
+    id: { type: String, required: true, trim: true },
     sets: { type: [WorkoutSetSchema], default: [] },
     notes: { type: String },
   },
