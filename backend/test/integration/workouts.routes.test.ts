@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
-import { createApp } from "../app.js";
-import Workout from "../src/models/Workout.js";
+import { createApp } from "../../app.js";
+import Workout from "../../src/models/Workout.js";
 
 describe("Workouts routes", () => {
   const app = createApp();

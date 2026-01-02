@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import request from "supertest";
 import mongoose from "mongoose";
 
-import { createApp } from "../app.js";
-import Exercise from "../src/models/Exercise.js";
-import Workout from "../src/models/Workout.js";
+import { createApp } from "../../app.js";
+import Exercise from "../../src/models/Exercise.js";
+import Workout from "../../src/models/Workout.js";
 
 describe("Exercises routes", () => {
   const app = createApp();
