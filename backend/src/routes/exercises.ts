@@ -41,17 +41,6 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-// Get exercise by ID
-router.get("/:id", async (req, res) => {
-  try {
-    const doc = await getExerciseById(req.params.id);
-    res.json(toExerciseDTO(doc));
-  } catch (err: any) {
-    res
-      .status(err?.status ?? 500)
-      .json({ message: err instanceof Error ? err.message : String(err) });
-  }
-});
 // Get exercise history by ID
 router.get("/history/exercise/:id", async (req, res) => {
   try {
@@ -64,10 +53,22 @@ router.get("/history/exercise/:id", async (req, res) => {
   }
 });
 
+// Get exercise by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const doc = await getExerciseById(req.params.id);
+    res.json(toExerciseDTO(doc));
+  } catch (err: any) {
+    res
+      .status(err?.status ?? 500)
+      .json({ message: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 // Create new exercise
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const saved = await createExercise(req.body ?? []);
+    const saved = await createExercise(req.body ?? {});
     res.status(201).json(toExerciseDTO(saved));
   } catch (err: any) {
     res.status(err?.status ?? 400).json({
