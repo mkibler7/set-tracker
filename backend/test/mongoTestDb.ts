@@ -5,9 +5,7 @@ let mongoServer: MongoMemoryServer | null = null;
 
 export async function connectTestDb() {
   mongoServer = await MongoMemoryServer.create();
-  const uri = `${mongoServer.getUri()}reptracker_test`;
-
-  await mongoose.connect(uri);
+  await mongoose.connect(mongoServer.getUri());
 }
 
 export async function clearTestDb() {
@@ -21,7 +19,14 @@ export async function clearTestDb() {
 }
 
 export async function disconnectTestDb() {
+  try {
+    await mongoose.connection.dropDatabase();
+  } catch (err) {
+    console.error("Error dropping test database:", err);
+  }
+
   await mongoose.disconnect();
+
   if (mongoServer) {
     await mongoServer.stop();
     mongoServer = null;
