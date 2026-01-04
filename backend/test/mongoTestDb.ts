@@ -4,8 +4,16 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 let mongoServer: MongoMemoryServer | null = null;
 
 export async function connectTestDb() {
-  mongoServer = await MongoMemoryServer.create();
-  await mongoose.connect(mongoServer.getUri());
+  mongoServer = await MongoMemoryServer.create({
+    instance: {
+      storageEngine: "wiredTiger",
+    },
+  });
+
+  const uri = mongoServer.getUri();
+  await mongoose.connect(uri, {
+    serverSelectionTimeoutMS: 60000,
+  });
 }
 
 export async function clearTestDb() {
@@ -20,15 +28,15 @@ export async function clearTestDb() {
 
 export async function disconnectTestDb() {
   try {
-    await mongoose.connection.dropDatabase();
-  } catch (err) {
-    console.error("Error dropping test database:", err);
-  }
-
-  await mongoose.disconnect();
-
-  if (mongoServer) {
-    await mongoServer.stop();
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.connection.dropDatabase();
+      await mongoose.disconnect();
+    } else {
+      // not connected; nothing to drop
+      await mongoose.disconnect().catch(() => {});
+    }
+  } finally {
+    if (mongoServer) await mongoServer.stop();
     mongoServer = null;
   }
 }
