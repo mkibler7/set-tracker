@@ -1,15 +1,26 @@
-import mongoose, { type InferSchemaType, type Model } from "mongoose";
+import mongoose, { type InferSchemaType, Model } from "mongoose";
 import {
   ALL_MUSCLE_GROUPS,
   type MuscleGroup,
 } from "@reptracker/shared/muscles";
 
 const ExerciseSchema = new mongoose.Schema({
+  scope: {
+    type: String,
+    enum: ["global", "user"],
+    default: "global",
+    index: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: false,
+    index: true,
+  },
   name: {
     type: String,
     required: true,
     trim: true,
-    unique: true,
     minLength: 3,
     maxLength: 80,
   },
@@ -39,6 +50,18 @@ const ExerciseSchema = new mongoose.Schema({
   },
   description: { type: String, trim: true, maxlength: 2000 },
 });
+
+// Unique for global: (scope, name) when scope === "global"
+ExerciseSchema.index(
+  { scope: 1, name: 1 },
+  { unique: true, partialFilterExpression: { scope: "global" } }
+);
+
+// Unique for user: (userId, name) when scope === "user"
+ExerciseSchema.index(
+  { userId: 1, name: 1 },
+  { unique: true, partialFilterExpression: { scope: "user" } }
+);
 
 type ExerciseDoc = InferSchemaType<typeof ExerciseSchema>;
 

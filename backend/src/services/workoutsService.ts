@@ -50,18 +50,18 @@ function assertValidObjectId(id: string) {
   }
 }
 
-export async function deleteAllWorkoutsDevOnly() {
-  return Workout.deleteMany({});
+export async function deleteAllWorkoutsDevOnly(userId: string) {
+  return Workout.deleteMany({ userId });
 }
 
-export async function getWorkouts() {
-  return Workout.find().sort({ date: -1 });
+export async function getWorkouts(userId: string) {
+  return Workout.find({ userId }).sort({ date: -1 });
 }
 
-export async function getWorkoutById(id: string) {
+export async function getWorkoutById(userId: string, id: string) {
   assertValidObjectId(id);
 
-  const doc = await Workout.findById(id);
+  const doc = await Workout.findOne({ _id: id, userId });
   if (!doc) {
     const error = new Error("Not found");
     (error as any).status = 404;
@@ -70,8 +70,9 @@ export async function getWorkoutById(id: string) {
   return doc;
 }
 
-export async function createWorkout(input: CreateWorkoutInput) {
+export async function createWorkout(userId: string, input: CreateWorkoutInput) {
   const workout = new Workout({
+    userId,
     date: input.date,
     muscleGroups: normalizeMuscleGroups(input.muscleGroups),
     exercises: input.exercises ?? [],
@@ -80,7 +81,11 @@ export async function createWorkout(input: CreateWorkoutInput) {
   return workout.save();
 }
 
-export async function updateWorkout(id: string, input: UpdateWorkoutInput) {
+export async function updateWorkout(
+  userId: string,
+  id: string,
+  input: UpdateWorkoutInput
+) {
   assertValidObjectId(id);
 
   const updateData: any = {};
@@ -91,9 +96,14 @@ export async function updateWorkout(id: string, input: UpdateWorkoutInput) {
   }
   if (input.exercises !== undefined) updateData.exercises = input.exercises;
 
-  const updated = await Workout.findByIdAndUpdate(id, updateData, {
-    new: true,
-  });
+  const updated = await Workout.findOneAndUpdate(
+    { _id: id, userId },
+    updateData,
+    {
+      new: true,
+    }
+  );
+
   if (!updated) {
     const error = new Error("Not found");
     (error as any).status = 404;
@@ -102,10 +112,10 @@ export async function updateWorkout(id: string, input: UpdateWorkoutInput) {
   return updated;
 }
 
-export async function deleteWorkout(id: string) {
+export async function deleteWorkout(userId: string, id: string) {
   assertValidObjectId(id);
 
-  const del = await Workout.findByIdAndDelete(id);
+  const del = await Workout.findOneAndDelete({ _id: id, userId });
   if (!del) {
     const error = new Error("Not found");
     (error as any).status = 404;
