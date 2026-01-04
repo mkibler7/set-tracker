@@ -4,6 +4,12 @@ import { createApp } from "../../app.js";
 
 const app = createApp();
 
+function getSetCookies(res: request.Response): string[] {
+  const raw = res.headers["set-cookie"];
+  if (!raw) return [];
+  return Array.isArray(raw) ? raw : [raw];
+}
+
 describe("Auth routes", () => {
   let agent: ReturnType<typeof request.agent>;
 
@@ -38,7 +44,7 @@ describe("Auth routes", () => {
     expect(res.body).toHaveProperty("user.id");
     expect(res.body).toHaveProperty("user.email");
 
-    const setCookie = res.headers["set-cookie"] ?? [];
+    const setCookie = getSetCookies(res);
 
     // refresh cookie exists
     expect(setCookie.join(";")).toContain("rt=");
@@ -57,7 +63,7 @@ describe("Auth routes", () => {
     expect(res.body).toHaveProperty("user.id");
     expect(res.body.user.email).toBe(email);
 
-    const setCookie = res.headers["set-cookie"] ?? [];
+    const setCookie = getSetCookies(res);
     expect(setCookie.join(";")).toContain("rt=");
     expect(setCookie.join(";")).toContain("Path=/auth/refresh");
   });
@@ -74,7 +80,7 @@ describe("Auth routes", () => {
     const reg = await register();
 
     // capture the rt cookie from register
-    const regCookies = reg.headers["set-cookie"] ?? [];
+    const regCookies = getSetCookies(reg);
     const regRt = regCookies.find((c: string) => c.startsWith("rt="));
     expect(regRt).toBeTruthy();
 
@@ -82,7 +88,7 @@ describe("Auth routes", () => {
     expect(ref1.status).toBe(200);
     expect(ref1.body).toHaveProperty("accessToken");
 
-    const refreshCookies = ref1.headers["set-cookie"] ?? [];
+    const refreshCookies = getSetCookies(ref1);
     const refRt = refreshCookies.find((c: string) => c.startsWith("rt="));
 
     // Once rotation is active, this should exist and differ from regRt.
