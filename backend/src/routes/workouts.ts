@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import toWorkoutDTO from "../dtos/workoutDto.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 
 import {
   createWorkout,
@@ -21,27 +22,33 @@ type IdParams = {
 const router = Router();
 
 // DEV TESTING ONLY — delete all workouts
-router.delete("/__dev__/all", async (req: Request, res: Response) => {
-  if (process.env.NODE_ENV === "production") {
-    return res.status(403).json({ message: "Forbidden" });
+router.delete(
+  "/__dev__/all",
+  requireAuth,
+  async (req: Request, res: Response) => {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    if (process.env.ENABLE_DEV_ROUTES !== "true") {
+      return res.status(404).json({ message: "Not found" });
+    }
+    try {
+      const result = await deleteAllWorkoutsDevOnly(req.user!.userId);
+      res.json({
+        deletedCount: result.deletedCount,
+      });
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: err instanceof Error ? err.message : String(err) });
+    }
   }
+);
 
+// Get all workouts (protected)
+router.get("/", requireAuth, async (req: Request, res: Response) => {
   try {
-    const result = await deleteAllWorkoutsDevOnly();
-    res.json({
-      deletedCount: result.deletedCount,
-    });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: err instanceof Error ? err.message : String(err) });
-  }
-});
-
-// Get all workouts
-router.get("/", async (req: Request, res: Response) => {
-  try {
-    const workouts = await getWorkouts();
+    const workouts = await getWorkouts(req.user!.userId);
     res.json(workouts.map(toWorkoutDTO));
   } catch (err) {
     res
@@ -51,20 +58,26 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 // Get workout by ID
-router.get("/:id", async (req: Request<IdParams>, res: Response) => {
-  try {
-    const doc = await getWorkoutById(req.params.id);
-    res.json(toWorkoutDTO(doc));
-  } catch {
-    res.status(400).json({ message: "Invalid id" });
+router.get(
+  "/:id",
+  requireAuth,
+  async (req: Request<IdParams>, res: Response) => {
+    try {
+      const doc = await getWorkoutById(req.user!.userId, req.params.id);
+      res.json(toWorkoutDTO(doc));
+    } catch (err: any) {
+      res
+        .status(err?.status ?? 400)
+        .json({ message: err instanceof Error ? err.message : String(err) });
+    }
   }
-});
+);
 
-// Create new workout
-router.post("/", async (req: Request, res: Response) => {
+// Create new workout (protected)
+router.post("/", requireAuth, async (req: Request, res: Response) => {
   try {
     const input = parseCreateWorkoutInput(req.body);
-    const saved = await createWorkout(input);
+    const saved = await createWorkout(req.user!.userId, input);
     res.status(201).json(toWorkoutDTO(saved));
   } catch (error) {
     res.status(400).json({
@@ -74,28 +87,40 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 // Update workout by ID
-router.put("/:id", async (req: Request<IdParams>, res: Response) => {
-  try {
-    const input = parseUpdateWorkoutInput(req.body);
-    const updated = await updateWorkout(req.params.id, input);
-    res.json(toWorkoutDTO(updated));
-  } catch (error) {
-    res.status(400).json({
-      message: error instanceof Error ? error.message : String(error),
-    });
+router.put(
+  "/:id",
+  requireAuth,
+  async (req: Request<IdParams>, res: Response) => {
+    try {
+      const input = parseUpdateWorkoutInput(req.body);
+      const updated = await updateWorkout(
+        req.user!.userId,
+        req.params.id,
+        input
+      );
+      res.json(toWorkoutDTO(updated));
+    } catch (err: any) {
+      res.status(err?.status ?? 400).json({
+        message: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
-});
+);
 
 // Delete workout by ID
-router.delete("/:id", async (req: Request<IdParams>, res: Response) => {
-  try {
-    const deleted = await deleteWorkout(req.params.id);
-    res.json(deleted);
-  } catch (err) {
-    res
-      .status(400)
-      .json({ message: err instanceof Error ? err.message : String(err) });
+router.delete(
+  "/:id",
+  requireAuth,
+  async (req: Request<IdParams>, res: Response) => {
+    try {
+      const deleted = await deleteWorkout(req.user!.userId, req.params.id);
+      res.json(deleted);
+    } catch (err: any) {
+      res.status(err?.status ?? 400).json({
+        message: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
-});
+);
 
 export default router;

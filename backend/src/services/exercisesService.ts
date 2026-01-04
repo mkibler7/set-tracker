@@ -13,12 +13,18 @@ export async function deleteAllExercisesDevOnly() {
   return Exercise.deleteMany({});
 }
 
-export async function getExercises() {
-  return Exercise.find().sort({ name: 1 });
+export async function getExercises(userId: string) {
+  // return Exercise.find().sort({ name: 1 });
+  return Exercise.find({
+    $or: [{ scope: "global" }, { scope: "user", userId }],
+  }).sort({ name: 1 });
 }
 
-export async function getExerciseHistory(exerciseId: string) {
+export async function getExerciseHistory(userId: string, exerciseId: string) {
+  await getExerciseById(userId, exerciseId);
+
   const workouts = await Workout.find({
+    userId,
     "exercises.id": exerciseId,
   }).sort({ date: -1 });
 
@@ -49,14 +55,17 @@ export async function getExerciseHistory(exerciseId: string) {
   return entries;
 }
 
-export async function getExerciseById(id: string) {
+export async function getExerciseById(userId: string, id: string) {
   if (!mongoose.isValidObjectId(id)) {
     const error = new Error("Invalid id");
     (error as any).status = 400;
     throw error;
   }
 
-  const doc = await Exercise.findById(id);
+  const doc = await Exercise.findOne({
+    _id: id,
+    $or: [{ scope: "global" }, { scope: "user", userId }],
+  });
 
   if (!doc) {
     const error = new Error("Not found");
@@ -66,7 +75,19 @@ export async function getExerciseById(id: string) {
   return doc;
 }
 
-export async function createExercise(input: CreateExerciseInput) {
+export async function createExercise(
+  userId: string,
+  input: CreateExerciseInput
+) {
+  // Limit user exercise count
+  const limit = Number(process.env.USER_EXERCISE_LIMIT ?? "300");
+  const count = await Exercise.countDocuments({ scope: "user", userId });
+  if (count >= limit) {
+    const error = new Error(`Exercise limit reached (${limit}).`);
+    (error as any).status = 403;
+    throw error;
+  }
+
   const name = typeof input.name === "string" ? input.name.trim() : "";
   const primaryMuscleGroup =
     typeof input.primaryMuscleGroup === "string"
@@ -79,12 +100,16 @@ export async function createExercise(input: CreateExerciseInput) {
     typeof input.description === "string"
       ? input.description.trim()
       : undefined;
+
   if (!name || !primaryMuscleGroup) {
     const error = new Error("name and primaryMuscleGroup are required");
     (error as any).status = 400;
     throw error;
   }
+
   const newExercise = new Exercise({
+    scope: "user",
+    userId,
     name,
     primaryMuscleGroup,
     secondaryMuscleGroups,

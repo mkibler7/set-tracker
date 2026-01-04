@@ -1,16 +1,40 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
-import mongoose from "mongoose";
 
 import { createApp } from "../../app.js";
 import Exercise from "../../src/models/Exercise.js";
 import Workout from "../../src/models/Workout.js";
 
+const app = createApp();
+
 describe("Exercises routes", () => {
-  const app = createApp();
+  let agent: ReturnType<typeof request.agent>;
+  let token: string;
+  let userId: string;
+
+  beforeEach(async () => {
+    agent = request.agent(app);
+
+    const res = await agent.post("/auth/register").send({
+      email: `test-${Date.now()}@example.com`,
+      password: "Password123!",
+    });
+
+    if (res.status !== 201) {
+      throw new Error(`Register failed: ${res.status} ${res.text}`);
+    }
+
+    token = res.body.accessToken;
+    userId = res.body.user.id;
+
+    await Exercise.deleteMany({ scope: "user", userId });
+  });
+
+  const auth = (req: request.Test) =>
+    req.set("Authorization", `Bearer ${token}`);
 
   it("GET /api/exercises returns 200 and an array", async () => {
-    const res = await request(app).get("/api/exercises");
+    const res = await auth(agent.get("/api/exercises"));
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
@@ -23,7 +47,7 @@ describe("Exercises routes", () => {
       description: "Standard curl",
     };
 
-    const first = await request(app).post("/api/exercises").send(payload);
+    const first = await auth(agent.post("/api/exercises").send(payload));
     if (first.status !== 201) {
       // temporary debug output
       // eslint-disable-next-line no-console
@@ -32,19 +56,21 @@ describe("Exercises routes", () => {
 
     expect(first.status).toBe(201);
 
-    const second = await request(app).post("/api/exercises").send(payload);
+    const second = await auth(agent.post("/api/exercises").send(payload));
     expect(second.status).toBe(409);
     expect(second.body).toHaveProperty("message");
   });
 
   it("GET /api/exercises/:id returns 400 for invalid id", async () => {
-    const res = await request(app).get("/api/exercises/not-an-id");
+    const res = await auth(agent.get("/api/exercises/not-an-id"));
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty("message");
   });
 
   it("GET /api/exercises/history/exercise/:id returns entries when workouts contain that exercise", async () => {
-    const ex = await Exercise.create({
+    const exercise = await Exercise.create({
+      scope: "user",
+      userId,
       name: "Barbell Curl",
       primaryMuscleGroup: "Biceps",
       secondaryMuscleGroups: [],
@@ -52,19 +78,20 @@ describe("Exercises routes", () => {
     });
 
     await Workout.create({
+      userId,
       date: new Date("2025-03-10"),
       muscleGroups: ["Arms"],
       exercises: [
         {
-          id: ex._id.toString(), // depends on how you store exercise id; adjust if different
+          id: exercise._id.toString(),
           notes: "Felt good",
           sets: [{ weight: 50, reps: 10 }],
         },
       ],
     });
 
-    const res = await request(app).get(
-      `/api/exercises/history/exercise/${ex._id.toString()}`
+    const res = await auth(
+      agent.get(`/api/exercises/history/exercise/${exercise._id.toString()}`)
     );
 
     expect(res.status).toBe(200);

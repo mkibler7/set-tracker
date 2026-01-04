@@ -29,6 +29,12 @@ const WorkoutExerciseSchema = new mongoose.Schema(
 
 const WorkoutSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
     date: { type: Date, default: Date.now, required: true },
     muscleGroups: {
       type: [String],
