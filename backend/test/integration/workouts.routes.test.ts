@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import { createApp } from "../../app.js";
 import Workout from "../../src/models/Workout.js";
+import { after } from "node:test";
 
 const app = createApp();
 
@@ -9,6 +10,7 @@ describe("Workouts routes", () => {
   let agent: ReturnType<typeof request.agent>;
   let token: string;
   let userId: string;
+  const originalEnv = { ...process.env };
 
   beforeEach(async () => {
     agent = request.agent(app);
@@ -28,8 +30,26 @@ describe("Workouts routes", () => {
     await Workout.deleteMany({ userId });
   });
 
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
   const auth = (req: request.Test) =>
     req.set("Authorization", `Bearer ${token}`);
+
+  it("returns 401 when Authorization header is missing", async () => {
+    const res = await agent.get("/api/workouts");
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ message: "Missing access token" });
+  });
+
+  it("returns 401 when Bearer token is invalid", async () => {
+    const res = await agent
+      .get("/api/workouts")
+      .set("Authorization", "Bearer not-a-real-jwt");
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ message: "Invalid or expired access token" });
+  });
 
   it("GET /api/workouts returns workouts sorted from newest to oldest & returns valid id", async () => {
     await Workout.create([
@@ -166,7 +186,28 @@ describe("Workouts routes", () => {
     expect(response.body).toEqual({ success: true });
   });
 
-  it("DEV ONLY: DELETE /api/workouts/__dev__/all deletes workouts when NODE_ENV != production", async () => {
+  it("DEV ONLY: DELETE /api/workouts/__dev__/all returns 404 when ENABLE_DEV_ROUTES is not true", async () => {
+    process.env.NODE_ENV = "test";
+    process.env.ENABLE_DEV_ROUTES = "false";
+
+    const res = await auth(agent.delete("/api/workouts/__dev__/all"));
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ message: "Not found" });
+  });
+
+  it("DEV ONLY: DELETE /api/workouts/__dev__/all returns 403 in production even if ENABLE_DEV_ROUTES is true", async () => {
+    process.env.NODE_ENV = "production";
+    process.env.ENABLE_DEV_ROUTES = "true";
+
+    const res = await auth(agent.delete("/api/workouts/__dev__/all"));
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({ message: "Forbidden" });
+  });
+
+  it("DEV ONLY: DELETE /api/workouts/__dev__/all deletes workouts when enabled and not production", async () => {
+    process.env.NODE_ENV = "test";
+    process.env.ENABLE_DEV_ROUTES = "true";
+
     await Workout.create([
       {
         userId,
@@ -182,13 +223,13 @@ describe("Workouts routes", () => {
       },
     ]);
 
-    const response = await auth(agent.delete("/api/workouts/__dev__/all"));
+    const res = await auth(agent.delete("/api/workouts/__dev__/all"));
 
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty("deletedCount");
-    expect(typeof response.body.deletedCount).toBe("number");
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("deletedCount");
+    expect(typeof res.body.deletedCount).toBe("number");
 
-    const remaining = await Workout.countDocuments();
+    const remaining = await Workout.countDocuments({ userId });
     expect(remaining).toBe(0);
   });
 });

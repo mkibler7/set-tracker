@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 
 import { createApp } from "../../app.js";
@@ -11,6 +11,7 @@ describe("Exercises routes", () => {
   let agent: ReturnType<typeof request.agent>;
   let token: string;
   let userId: string;
+  const originalEnv = { ...process.env };
 
   beforeEach(async () => {
     agent = request.agent(app);
@@ -28,6 +29,10 @@ describe("Exercises routes", () => {
     userId = res.body.user.id;
 
     await Exercise.deleteMany({ scope: "user", userId });
+  });
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
   });
 
   const auth = (req: request.Test) =>
@@ -99,5 +104,43 @@ describe("Exercises routes", () => {
     expect(res.body.length).toBeGreaterThan(0);
     expect(res.body[0]).toHaveProperty("workoutId");
     expect(res.body[0]).toHaveProperty("sets");
+  });
+
+  it("DEV ONLY: DELETE /api/exercises/__dev__/all returns 403 in production", async () => {
+    process.env.NODE_ENV = "production";
+
+    const res = await agent.delete("/api/exercises/__dev__/all");
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({ message: "Forbidden" });
+  });
+
+  it("DEV ONLY: DELETE /api/exercises/__dev__/all deletes exercises when not production", async () => {
+    process.env.NODE_ENV = "test";
+
+    await Exercise.create([
+      {
+        scope: "user",
+        userId,
+        name: "Barbell Curl",
+        primaryMuscleGroup: "Biceps",
+        secondaryMuscleGroups: [],
+        description: "",
+      },
+      {
+        scope: "user",
+        userId,
+        name: "Hammer Curl",
+        primaryMuscleGroup: "Biceps",
+        secondaryMuscleGroups: [],
+        description: "",
+      },
+    ]);
+
+    const res = await agent.delete("/api/exercises/__dev__/all");
+    expect(res.status).toBe(200);
+    expect(typeof res.body.deletedCount).toBe("number");
+
+    const remaining = await Exercise.countDocuments({ scope: "user", userId });
+    expect(remaining).toBe(0);
   });
 });
