@@ -20,12 +20,12 @@ export default function AuthBootstrap() {
       // verify it later; but for now, don’t block UI.
       if (auth.user) return;
 
-      // 1) Try /me first (works if at cookie exists)
+      // Try /me first (works if at cookie exists)
       const me = await apiClient<{
         id: string;
         email: string;
         displayName?: string;
-      }>("/auth/me").catch(() => null);
+      }>("/api/auth/me").catch(() => null);
 
       if (me) {
         auth.setUser({
@@ -35,9 +35,9 @@ export default function AuthBootstrap() {
         return;
       }
 
-      // 2) If /me failed, try refresh (uses rt cookie, sets at cookie)
+      // If /me failed, try refresh (uses rt cookie, sets at cookie)
       const refreshed = await apiClient<{ ok?: boolean; accessToken?: string }>(
-        "/auth/refresh",
+        "/api/auth/refresh",
         { method: "POST" }
       ).catch(() => null);
 
@@ -48,12 +48,12 @@ export default function AuthBootstrap() {
         return;
       }
 
-      // 3) Try /me again after refresh
+      // Try /me again after refresh
       const me2 = await apiClient<{
         id: string;
         email: string;
         displayName?: string;
-      }>("/auth/me").catch(() => null);
+      }>("/api/auth/me").catch(() => null);
 
       if (me2) {
         auth.setUser({

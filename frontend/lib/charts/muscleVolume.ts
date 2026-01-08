@@ -57,15 +57,9 @@ export type LayerDatum = {
 export type ExercisesById = Record<string, Exercise>;
 
 // Build a lookup map of exerciseId -> Exercise
-export function buildExercisesById(exercises: Exercise[]): ExercisesById {
-  return Object.fromEntries(
-    exercises.map((exercise) => [exercise.id, exercise])
-  );
+export function buildExercisesById(list: Exercise[]): ExercisesById {
+  return Object.fromEntries(list.map((ex) => [ex.id, ex]));
 }
-
-// const EXERCISE_BY_ID: Record<string, Exercise> = Object.fromEntries(
-//   exercises.map((e) => [e.id, e])
-// );
 
 // ------------------------------
 // Aggregation
@@ -138,7 +132,10 @@ export function computeMuscleStats(
 
   for (const workout of workouts) {
     for (const logged of workout.exercises) {
-      const def = exercisesById[logged.exerciseId];
+      const lookupId =
+        logged?.exerciseId != null ? String(logged.exerciseId) : "";
+      const def = lookupId ? exercisesById[lookupId] : undefined;
+
       if (!def) continue; // unknown exerciseId, skip safely
 
       const primary = def.primaryMuscleGroup;
