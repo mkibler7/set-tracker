@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import type { Exercise } from "@/types/exercise";
 import { initMuscleVolume } from "@/lib/charts/muscleVolume";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient } from "@/lib/api/apiClient";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 import type { Workout } from "@/types/workout";

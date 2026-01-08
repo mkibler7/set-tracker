@@ -7,7 +7,6 @@ function mustGetEnv(name: string): string {
   if (!value) {
     throw new Error(`Missing env var: ${name}`);
   }
-
   return value;
 }
 
@@ -35,6 +34,7 @@ export function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
+// Refresh cookie: only sent to /auth/refresh
 export function setRefreshCookie(res: Response, refreshToken: string) {
   const isProd = process.env.NODE_ENV === "production";
 
@@ -47,5 +47,22 @@ export function setRefreshCookie(res: Response, refreshToken: string) {
 }
 
 export function clearRefreshCookie(res: Response) {
+  // clearCookie must match at least the cookie path you set
   res.clearCookie("rt", { path: "/auth/refresh" });
+}
+
+// Access cookie: sent to ALL requests (so requireAuth can read it)
+export function setAccessCookie(res: Response, accessToken: string) {
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.cookie("at", accessToken, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: "lax",
+    path: "/",
+  });
+}
+
+export function clearAccessCookie(res: Response) {
+  res.clearCookie("at", { path: "/" });
 }

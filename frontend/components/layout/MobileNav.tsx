@@ -61,8 +61,15 @@ export default function MobileNavBar() {
           >
             Exercises
           </Link>
-          <Link href="/charts" onClick={close} className={`${navButtonClass}`}>
+          <Link
+            href="/charts"
+            onClick={close}
+            className={`border-b border-slate-800 ${navButtonClass}`}
+          >
             Charts
+          </Link>
+          <Link href="" onClick={close} className={`${navButtonClass}`}>
+            Log-out
           </Link>
 
           <div className="mt-1 border-t border-slate-800" />

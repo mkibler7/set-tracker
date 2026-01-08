@@ -7,12 +7,15 @@ import RefreshSession from "../models/RefreshSession.js";
 import crypto from "crypto";
 import { loginSchema, registerSchema } from "../validators/authInput.js";
 import {
+  clearAccessCookie,
   clearRefreshCookie,
   hashToken,
+  setAccessCookie,
   setRefreshCookie,
   signAccessToken,
   signRefreshToken,
 } from "../utils/tokens.js";
+
 import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = Router();
@@ -23,14 +26,18 @@ router.post("/register", async (req: Request, res: Response) => {
   if (!parsed.success)
     return res.status(400).json({ message: parsed.error.message });
 
-  const { email, password } = parsed.data;
+  const { email, password, displayName } = parsed.data;
 
   const existing = await User.findOne({ email });
   if (existing)
     return res.status(409).json({ message: "Email already in use" });
 
   const passwordHash = await bcrypt.hash(password, 12);
-  const user = await User.create({ email, passwordHash });
+  const user = await User.create({
+    email,
+    passwordHash,
+    displayName: displayName?.trim() ?? "",
+  });
 
   const refreshToken = signRefreshToken(String(user._id));
   const tokenHash = hashToken(refreshToken);
@@ -43,9 +50,15 @@ router.post("/register", async (req: Request, res: Response) => {
   setRefreshCookie(res, refreshToken);
 
   const accessToken = signAccessToken(String(user._id));
-  res
-    .status(201)
-    .json({ accessToken, user: { id: String(user._id), email: user.email } });
+  setAccessCookie(res, accessToken);
+
+  res.status(201).json({
+    user: {
+      id: String(user._id),
+      email: user.email,
+      displayName: user.displayName ?? "",
+    },
+  });
 });
 
 router.post("/login", async (req: Request, res: Response) => {
@@ -73,7 +86,15 @@ router.post("/login", async (req: Request, res: Response) => {
   setRefreshCookie(res, refreshToken);
 
   const accessToken = signAccessToken(String(user._id));
-  res.json({ accessToken, user: { id: String(user._id), email: user.email } });
+  setAccessCookie(res, accessToken);
+
+  res.json({
+    user: {
+      id: String(user._id),
+      email: user.email,
+      displayName: user.displayName ?? "",
+    },
+  });
 });
 
 router.post("/refresh", async (req: Request, res: Response) => {
@@ -116,7 +137,10 @@ router.post("/refresh", async (req: Request, res: Response) => {
 
     // Issue new access
     const accessToken = signAccessToken(payload.sub);
-    res.json({ accessToken });
+    setAccessCookie(res, accessToken);
+
+    // Cookie-based auth: frontend does not need the token body
+    return res.json({ ok: true });
   } catch {
     return res.status(401).json({ message: "Refresh token invalid" });
   }
@@ -134,14 +158,20 @@ router.post("/logout", async (req: Request, res: Response) => {
   }
 
   clearRefreshCookie(res);
+  clearAccessCookie(res);
+
   res.json({ ok: true });
 });
 
 router.get("/me", requireAuth, async (req: Request, res: Response) => {
   const userId = req.user!.userId;
-  const user = await User.findById(userId).select("email");
+  const user = await User.findById(userId).select("email displayName");
   if (!user) return res.status(404).json({ message: "User not found" });
-  res.json({ id: String(user._id), email: user.email });
+  res.json({
+    id: String(user._id),
+    email: user.email,
+    displayName: user.displayName ?? "",
+  });
 });
 
 export default router;

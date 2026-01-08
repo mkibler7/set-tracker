@@ -2,12 +2,9 @@ import { create } from "zustand";
 import type { WorkoutExercise } from "@/types/workout";
 
 interface WorkoutState {
-  // null until the user starts logging
   currentWorkoutId: string | null;
-  // all exercises in the current daily log
   exercises: WorkoutExercise[];
 
-  // actions
   startWorkout: () => void;
   setExercises: (exercises: WorkoutExercise[]) => void;
   upsertExercise: (exercise: WorkoutExercise) => void;
@@ -20,7 +17,10 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
 
   startWorkout: () =>
     set(() => ({
-      currentWorkoutId: crypto.randomUUID(),
+      currentWorkoutId:
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : String(Date.now()),
       exercises: [],
     })),
 
@@ -41,8 +41,9 @@ export const useWorkoutStore = create<WorkoutState>((set) => ({
       };
     }),
 
-  resetWorkout: () => ({
-    currentWorkoutId: null,
-    exercises: [],
-  }),
+  resetWorkout: () =>
+    set(() => ({
+      currentWorkoutId: null,
+      exercises: [],
+    })),
 }));

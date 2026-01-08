@@ -1,0 +1,65 @@
+import { NextRequest, NextResponse } from "next/server";
+
+const BACKEND = process.env.API_URL ?? "http://localhost:5000";
+type Ctx = { params: any };
+
+export async function GET(req: NextRequest, ctx: Ctx) {
+  return forward(req, ctx);
+}
+export async function POST(req: NextRequest, ctx: Ctx) {
+  return forward(req, ctx);
+}
+export async function PUT(req: NextRequest, ctx: Ctx) {
+  return forward(req, ctx);
+}
+export async function PATCH(req: NextRequest, ctx: Ctx) {
+  return forward(req, ctx);
+}
+export async function DELETE(req: NextRequest, ctx: Ctx) {
+  return forward(req, ctx);
+}
+
+async function forward(req: NextRequest, ctx: Ctx) {
+  const params = await Promise.resolve(ctx.params);
+  const segments: string[] = params?.path ?? [];
+
+  // segments example: ["auth","login"] or ["workouts"] or ["exercises","123"]
+  const [first, ...rest] = segments;
+
+  // Map /api/auth/* -> backend /auth/*
+  // Everything else stays under /api/*
+  const backendPath =
+    first === "auth" ? `/auth/${rest.join("/")}` : `/api/${segments.join("/")}`;
+
+  const url = new URL(req.url);
+  const target = new URL(backendPath, BACKEND);
+  target.search = url.search;
+
+  const headers = new Headers(req.headers);
+  headers.delete("host");
+  headers.delete("content-length");
+
+  const upstream = await fetch(target, {
+    method: req.method,
+    headers,
+    body:
+      req.method === "GET" || req.method === "HEAD"
+        ? undefined
+        : await req.text(),
+    redirect: "manual",
+  });
+
+  const body = await upstream.arrayBuffer();
+  const res = new NextResponse(body, { status: upstream.status });
+
+  // Copy headers except set-cookie, then append set-cookie(s)
+  upstream.headers.forEach((value, key) => {
+    if (key.toLowerCase() === "set-cookie") return;
+    res.headers.set(key, value);
+  });
+
+  const setCookies = (upstream.headers as any).getSetCookie?.() ?? [];
+  for (const cookie of setCookies) res.headers.append("set-cookie", cookie);
+
+  return res;
+}

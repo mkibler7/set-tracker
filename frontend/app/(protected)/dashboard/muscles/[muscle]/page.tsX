@@ -1,4 +1,4 @@
-import PageBackButton from "../../../../components/shared/PageBackButton";
+import PageBackButton from "../../../../../components/shared/PageBackButton";
 
 export default function MuscleAnalyticsPage({
   params,
