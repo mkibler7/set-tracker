@@ -42,13 +42,13 @@ export function setRefreshCookie(res: Response, refreshToken: string) {
     httpOnly: true,
     secure: isProd,
     sameSite: "lax",
-    path: "/auth/refresh",
+    path: "/",
   });
 }
 
 export function clearRefreshCookie(res: Response) {
   // clearCookie must match at least the cookie path you set
-  res.clearCookie("rt", { path: "/auth/refresh" });
+  res.clearCookie("rt", { path: "/" });
 }
 
 // Access cookie: sent to ALL requests (so requireAuth can read it)
