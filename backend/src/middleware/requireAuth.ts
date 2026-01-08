@@ -12,10 +12,14 @@ declare global {
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
+  const cookieToken = (req.cookies?.at as string | undefined) ?? undefined;
   const header = req.header("Authorization") ?? "";
-  const [type, token] = header.split(" ");
+  const [type, headerToken] = header.split(" ");
 
-  if (type !== "Bearer" || !token) {
+  const token =
+    cookieToken ?? (type === "Bearer" && headerToken ? headerToken : undefined);
+
+  if (!token) {
     return res.status(401).json({ message: "Missing access token" });
   }
 
