@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND = process.env.API_URL ?? "http://localhost:5000";
+
+// Logs once when the route module is loaded (server-side)
+console.log("[api-proxy] BACKEND =", BACKEND);
+
 type Ctx = { params: any };
 
 export async function GET(req: NextRequest, ctx: Ctx) {
@@ -35,31 +39,48 @@ async function forward(req: NextRequest, ctx: Ctx) {
   const target = new URL(backendPath, BACKEND);
   target.search = url.search;
 
+  // Log every request mapping
+  console.log("[api-proxy]", req.method, url.pathname, "->", target.toString());
+
   const headers = new Headers(req.headers);
   headers.delete("host");
   headers.delete("content-length");
 
-  const upstream = await fetch(target, {
-    method: req.method,
-    headers,
-    body:
-      req.method === "GET" || req.method === "HEAD"
-        ? undefined
-        : await req.text(),
-    redirect: "manual",
-  });
+  try {
+    const upstream = await fetch(target, {
+      method: req.method,
+      headers,
+      body:
+        req.method === "GET" || req.method === "HEAD"
+          ? undefined
+          : await req.text(),
+      redirect: "manual",
+    });
 
-  const body = await upstream.arrayBuffer();
-  const res = new NextResponse(body, { status: upstream.status });
+    const body = await upstream.arrayBuffer();
+    const res = new NextResponse(body, { status: upstream.status });
 
-  // Copy headers except set-cookie, then append set-cookie(s)
-  upstream.headers.forEach((value, key) => {
-    if (key.toLowerCase() === "set-cookie") return;
-    res.headers.set(key, value);
-  });
+    // Copy headers except set-cookie, then append set-cookie(s)
+    upstream.headers.forEach((value, key) => {
+      if (key.toLowerCase() === "set-cookie") return;
+      res.headers.set(key, value);
+    });
 
-  const setCookies = (upstream.headers as any).getSetCookie?.() ?? [];
-  for (const cookie of setCookies) res.headers.append("set-cookie", cookie);
+    const setCookies = (upstream.headers as any).getSetCookie?.() ?? [];
+    for (const cookie of setCookies) res.headers.append("set-cookie", cookie);
 
-  return res;
+    return res;
+  } catch (err: any) {
+    console.error("[api-proxy] UPSTREAM FETCH FAILED:", err);
+
+    return NextResponse.json(
+      {
+        error: "Upstream fetch failed",
+        backend: BACKEND,
+        target: target.toString(),
+        message: err?.message ?? String(err),
+      },
+      { status: 502 }
+    );
+  }
 }

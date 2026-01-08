@@ -2,7 +2,7 @@ import { useAuthStore } from "@/store/authStore";
 
 const BASE = ""; // FORCE same-origin. Never call :5000 from the browser.
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
     super(message);
@@ -38,11 +38,15 @@ async function doFetch(path: string, init?: RequestInit): Promise<Response> {
     headers.set("Content-Type", "application/json");
   }
 
-  return fetch(url, {
-    ...init,
-    headers,
-    credentials: "include",
-  });
+  try {
+    return fetch(url, {
+      ...init,
+      headers,
+      credentials: "include",
+    });
+  } catch {
+    throw new ApiError(0, "Network error. Please check your connection.");
+  }
 }
 
 let refreshInFlight: Promise<boolean> | null = null;
