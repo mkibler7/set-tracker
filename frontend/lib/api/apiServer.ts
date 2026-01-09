@@ -1,55 +1,78 @@
-// const BASE = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
+import { headers, cookies } from "next/headers";
 
-// export async function apiServer<T>(path: string): Promise<T> {
-//   if (!BASE) {
-//     throw new Error("API URL not configured");
-//   }
+export class ApiServerError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
 
-//   const normalized = BASE.replace(/\/$/, "");
-//   const res = await fetch(`${normalized}${path}`, { cache: "no-store" });
+async function getBaseUrl() {
+  // Prefer explicit env when deployed
+  const envBase =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
 
-//   if (!res.ok) {
-//     const text = await res.text();
-//     throw new Error(text || `HTTP ${res.status}`);
-//   }
+  if (envBase) return envBase;
 
-//   return (await res.json()) as T;
-// }
-import { cookies } from "next/headers";
+  // Derive from request headers (dev + reverse proxies)
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const proto = h.get("x-forwarded-proto") ?? "http";
 
-type ApiServerInit = RequestInit & {
-  baseUrl?: string;
-};
+  if (!host) throw new Error("Missing Host header");
+  return `${proto}://${host}`;
+}
+
+async function parseErrorMessage(res: Response): Promise<string> {
+  const contentType = res.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
+
+  try {
+    if (isJson) {
+      const body = await res.json().catch(() => null);
+      return body?.message || `HTTP ${res.status}`;
+    }
+    const text = await res.text().catch(() => "");
+    return text || `HTTP ${res.status}`;
+  } catch {
+    return `HTTP ${res.status}`;
+  }
+}
 
 export async function apiServer<T>(
   path: string,
-  init: ApiServerInit = {}
+  init?: RequestInit
 ): Promise<T> {
-  const baseUrl =
-    init.baseUrl ??
-    process.env.NEXT_PUBLIC_API_URL ??
-    process.env.API_URL ??
-    "http://localhost:5000";
+  const baseUrl = await getBaseUrl();
 
-  const url = path.startsWith("http") ? path : `${baseUrl}${path}`;
+  const reqCookies = await cookies();
+  const cookieHeader = reqCookies.toString(); // includes at/rt
 
-  // Forward cookies from the incoming request to backend
-  const cookieHeader = cookies().toString();
+  const reqHeaders = new Headers(init?.headers);
 
-  const res = await fetch(url, {
+  if (cookieHeader && !reqHeaders.has("cookie")) {
+    reqHeaders.set("cookie", cookieHeader);
+  }
+
+  if (init?.body != null && !reqHeaders.has("Content-Type")) {
+    reqHeaders.set("Content-Type", "application/json");
+  }
+
+  const res = await fetch(`${baseUrl}${path}`, {
     ...init,
-    // Prevent cross-user caching issues in Server Components
-    cache: "no-store",
-    headers: {
-      ...(init.headers ?? {}),
-      ...(cookieHeader ? { cookie: cookieHeader } : {}),
-    },
+    headers: reqHeaders,
+    cache: "no-store", // auth-dependent, do not cache
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`apiServer ${res.status} ${res.statusText}: ${text}`);
+    const msg = await parseErrorMessage(res);
+    throw new ApiServerError(res.status, msg);
   }
 
-  return res.json() as Promise<T>;
+  const contentType = res.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
+  return (isJson ? await res.json() : ((await res.text()) as any)) as T;
 }

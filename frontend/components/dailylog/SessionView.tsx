@@ -74,7 +74,9 @@ export default function SessionView({
 
   const catalogByName = useMemo(() => {
     return Object.fromEntries(
-      exerciseCatalog.map((e) => [e.name.trim().toLowerCase(), e])
+      exerciseCatalog
+        .filter((e) => typeof e.name === "string" && e.name.trim().length > 0)
+        .map((e) => [e.name.trim().toLowerCase(), e])
     );
   }, [exerciseCatalog]);
 
@@ -128,9 +130,15 @@ export default function SessionView({
         <div className="space-y-4">
           {sessionExercises.map((exercise) => {
             const id = exercise.exerciseId;
+            const metaById = catalogById[id];
+
+            const nameKey =
+              typeof exercise.exerciseName === "string"
+                ? exercise.exerciseName.trim().toLowerCase()
+                : "";
+
             const meta =
-              catalogById[id] ??
-              catalogByName[exercise.exerciseName.trim().toLowerCase()];
+              metaById ?? (nameKey ? catalogByName[nameKey] : undefined);
 
             return (
               <ExerciseCard

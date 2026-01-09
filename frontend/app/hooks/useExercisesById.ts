@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Exercise } from "@/types/exercise";
-import { apiClient } from "@/lib/api/apiClient";
+import { ExerciseAPI } from "@/lib/api/exercises";
 import {
   buildExercisesById,
   type ExercisesById,
@@ -11,14 +11,14 @@ import {
 type Result = {
   exercisesById: ExercisesById;
   loading: boolean;
-  error: string | null;
+  error: unknown | null;
   retry: () => void;
 };
 
 export function useExercisesById(): Result {
   const [exercisesById, setExercisesById] = useState<ExercisesById>({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown | null>(null);
   const [retryKey, setRetryKey] = useState(0);
 
   const retry = () => setRetryKey((k) => k + 1);
@@ -31,17 +31,12 @@ export function useExercisesById(): Result {
         setLoading(true);
         setError(null);
 
-        const list = await apiClient<Exercise[]>("/api/exercises");
+        const list = await ExerciseAPI.list();
         const map = buildExercisesById(list);
 
         if (!cancelled) setExercisesById(map);
       } catch (e: any) {
-        console.error(e);
-        const message =
-          typeof e?.message === "string" && e.message.length > 0
-            ? e.message
-            : "Failed to load exercises.";
-        if (!cancelled) setError(message);
+        if (!cancelled) setError(e);
       } finally {
         if (!cancelled) setLoading(false);
       }

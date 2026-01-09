@@ -1,7 +1,8 @@
 "use client";
 
-import React, { use } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Button } from "../ui/Button";
+import Link from "next/link";
 import { WorkoutsAPI } from "@/lib/api/workouts";
 import type { Workout, TimeFilter } from "@/types/workout";
 import DeleteWorkoutModal from "@/components/workouts/DeleteWorkoutModal";
@@ -9,6 +10,12 @@ import { WorkoutsFilters } from "@/components/workouts/WorkoutFilters";
 import { WorkoutList } from "@/components/workouts/WorkoutsList";
 import { Header } from "@/components/workouts/Header";
 import PageBackButton from "@/components/shared/PageBackButton";
+import ErrorState from "@/components/shared/ErrorState";
+import EmptyState from "../shared/EmptyState";
+import {
+  getUserErrorMessage,
+  getUserErrorTitle,
+} from "@/lib/api/getUserErrorMessage";
 
 function useResponsivePageSize() {
   const [pageSize, setPageSize] = React.useState(10);
@@ -37,32 +44,38 @@ export default function WorkoutsClientPage() {
   // Backend-Loaded workouts
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown | null>(null);
 
-  // Load workouts on mount
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadWorkouts() {
-      try {
-        setLoading(true);
-        setError(null);
-        const list = await WorkoutsAPI.list();
-        if (cancelled) return;
-        setWorkouts(list);
-      } catch (err) {
-        if (cancelled) return;
-        setError("Failed to load workouts.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+  const loadWorkouts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const list = await WorkoutsAPI.list();
+      setWorkouts(list);
+    } catch (e) {
+      setError(e);
+      setWorkouts([]);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  async function retryLoad() {
+    try {
+      setLoading(true);
+      setError(null);
+      const list = await WorkoutsAPI.list();
+      setWorkouts(list);
+    } catch (e) {
+      setError(e);
+      setWorkouts([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
     loadWorkouts();
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   const filteredWorkouts = useMemo(() => {
@@ -118,25 +131,34 @@ export default function WorkoutsClientPage() {
     return filteredWorkouts.slice(start, start + pageSize);
   }, [filteredWorkouts, page, totalPages, pageSize]);
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
-    if (!workouts.find((w) => w.id === deleteTarget.id)) return;
-    WorkoutsAPI.delete(deleteTarget.id);
-    setWorkouts((prev) => prev.filter((w) => w.id !== deleteTarget.id));
-    setDeleteTarget(null);
+
+    try {
+      await WorkoutsAPI.delete(deleteTarget.id);
+      setWorkouts((prev) => prev.filter((w) => w.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (e) {
+      setError(e);
+      // keep modal open or close it—your call. I'd close it:
+      setDeleteTarget(null);
+    }
   };
 
-  const handleDuplicate = (workoutId: string) => {
+  const handleDuplicate = async (workoutId: string) => {
     const payloadWorkout = workouts.find((w) => w.id === workoutId);
     if (!payloadWorkout) return;
 
-    WorkoutsAPI.create({
-      date: new Date().toISOString().slice(0, 10),
-      muscleGroups: payloadWorkout.muscleGroups,
-      exercises: payloadWorkout.exercises,
-    }).then((newWorkout) => {
+    try {
+      const newWorkout = await WorkoutsAPI.create({
+        date: new Date().toISOString().slice(0, 10),
+        muscleGroups: payloadWorkout.muscleGroups,
+        exercises: payloadWorkout.exercises,
+      });
       setWorkouts((prev) => [newWorkout, ...prev]);
-    });
+    } catch (e) {
+      setError(e);
+    }
   };
 
   const handleCancelDelete = () => {
@@ -146,6 +168,26 @@ export default function WorkoutsClientPage() {
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage);
   };
+
+  if (error) {
+    return (
+      <main className="page">
+        <PageBackButton />
+        <ErrorState
+          title={getUserErrorTitle(error)}
+          description={getUserErrorMessage(error)}
+          action={
+            <button
+              className="text-primary hover:underline"
+              onClick={loadWorkouts}
+            >
+              Retry
+            </button>
+          }
+        />
+      </main>
+    );
+  }
 
   return (
     <main className="page flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -164,18 +206,37 @@ export default function WorkoutsClientPage() {
         />
       </div>
 
-      {/* List */}
-      <WorkoutList
-        filteredWorkouts={filteredWorkouts}
-        pageWorkouts={pageWorkouts}
-        page={page}
-        totalPages={totalPages}
-        pageSize={pageSize}
-        onPageChange={handlePageChange}
-        setWorkouts={setWorkouts}
-        onDuplicate={handleDuplicate}
-        onRequestDelete={setDeleteTarget}
-      />
+      {/* List/Empty State on Load/Empty State on Empty */}
+      {loading ? (
+        <EmptyState
+          title="Loading workouts, please wait.."
+          description="Fetching your sessions."
+        />
+      ) : filteredWorkouts.length === 0 ? (
+        <EmptyState
+          title="No results"
+          description="Try adjusting your filters or starting a new workout."
+          action={
+            <Button>
+              <Link href="/dailylog" className="">
+                Start a workout
+              </Link>
+            </Button>
+          }
+        />
+      ) : (
+        <WorkoutList
+          filteredWorkouts={filteredWorkouts}
+          pageWorkouts={pageWorkouts}
+          page={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          setWorkouts={setWorkouts}
+          onDuplicate={handleDuplicate}
+          onRequestDelete={setDeleteTarget}
+        />
+      )}
 
       <DeleteWorkoutModal
         isOpen={!!deleteTarget}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AuthAPI } from "@/lib/api/apiAuth";
 
@@ -8,6 +8,18 @@ export default function LoginClient() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
   const nextPath = next && next.startsWith("/") ? next : "/dashboard";
+
+  const reason = searchParams.get("reason");
+  const reasonMessage = useMemo(() => {
+    switch (reason) {
+      case "expired":
+        return "Your session expired. Please log in again.";
+      case "logged_out":
+        return "You've been logged out.";
+      default:
+        return null;
+    }
+  }, [reason]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,6 +57,14 @@ export default function LoginClient() {
         onSubmit={onSubmit}
         className="space-y-4 rounded-lg border border-border p-4"
       >
+        {/* Reason banner (session expired, logged out, etc.) */}
+        {reasonMessage ? (
+          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground">
+            {reasonMessage}
+          </div>
+        ) : null}
+
+        {/* Credential / request error */}
         {error ? (
           <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
             {error}
