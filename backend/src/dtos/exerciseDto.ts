@@ -6,5 +6,6 @@ export default function toExerciseDTO(doc: any) {
     primaryMuscleGroup: obj.primaryMuscleGroup,
     secondaryMuscleGroups: obj.secondaryMuscleGroups ?? [],
     description: obj.description,
+    scope: obj.scope,
   };
 }

@@ -42,13 +42,29 @@ export function setRefreshCookie(res: Response, refreshToken: string) {
     httpOnly: true,
     secure: isProd,
     sameSite: "lax",
-    path: "/auth/refresh",
+    path: "/",
   });
 }
 
 export function clearRefreshCookie(res: Response) {
   // clearCookie must match at least the cookie path you set
-  res.clearCookie("rt", { path: "/auth/refresh" });
+  res.clearCookie("rt", { path: "/" });
+}
+
+// Access cookie: sent to ALL requests (so requireAuth can read it)
+export function setAccessCookie(res: Response, accessToken: string) {
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.cookie("at", accessToken, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: "lax",
+    path: "/",
+  });
+}
+
+export function clearAccessCookie(res: Response) {
+  res.clearCookie("at", { path: "/" });
 }
 
 // Access cookie: sent to ALL requests (so requireAuth can read it)

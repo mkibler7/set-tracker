@@ -39,9 +39,6 @@ async function forward(req: NextRequest, ctx: Ctx) {
   const target = new URL(backendPath, BACKEND);
   target.search = url.search;
 
-  // Log every request mapping
-  console.log("[api-proxy]", req.method, url.pathname, "->", target.toString());
-
   const headers = new Headers(req.headers);
   headers.delete("host");
   headers.delete("content-length");
