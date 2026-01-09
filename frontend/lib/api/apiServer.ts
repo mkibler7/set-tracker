@@ -1,4 +1,3 @@
-// frontend/lib/api/apiServer.ts
 import { headers, cookies } from "next/headers";
 
 export class ApiServerError extends Error {
