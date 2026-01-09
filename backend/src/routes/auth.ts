@@ -100,7 +100,12 @@ router.post("/login", async (req: Request, res: Response) => {
 router.post("/refresh", async (req: Request, res: Response) => {
   const token = req.cookies?.rt as string | undefined;
 
-  if (!token) return res.status(401).json({ message: "Missing refresh token" });
+  // If no refresh token cookie, clear any access cookie too (defensive)
+  if (!token) {
+    clearRefreshCookie(res);
+    clearAccessCookie(res);
+    return res.status(401).json({ message: "Missing refresh token" });
+  }
 
   try {
     const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as {
@@ -108,12 +113,20 @@ router.post("/refresh", async (req: Request, res: Response) => {
     };
     const tokenHash = hashToken(token);
 
-    const session = await RefreshSession.findOne({ tokenHash });
+    const session = await RefreshSession.findOne({
+      tokenHash,
+      revokedAt: { $exists: false },
+      expiresAt: { $gt: new Date() },
+    });
+
+    // If session invalid/expired/revoked: clear cookies so client stops sending junk
     if (
       !session ||
       session.revokedAt ||
       session.expiresAt.getTime() < Date.now()
     ) {
+      clearRefreshCookie(res);
+      clearAccessCookie(res);
       return res.status(401).json({ message: "Refresh token invalid" });
     }
 
@@ -142,6 +155,9 @@ router.post("/refresh", async (req: Request, res: Response) => {
     // Cookie-based auth: frontend does not need the token body
     return res.json({ ok: true });
   } catch {
+    // JWT verify failed (expired / invalid signature): clear cookies here too
+    clearRefreshCookie(res);
+    clearAccessCookie(res);
     return res.status(401).json({ message: "Refresh token invalid" });
   }
 });

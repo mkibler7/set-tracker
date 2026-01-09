@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
-
+import { Button } from "@/components/ui/Button";
+import ErrorState from "@/components/shared/ErrorState";
 import PageBackButton from "@/components/shared/PageBackButton";
 import { StatTile } from "@/components/ui/StatTile";
 import { PageSectionTitle } from "@/components/ui/PageSectionTitle";
@@ -18,32 +20,36 @@ import {
   type TimeRange,
 } from "@/lib/workouts/stats";
 import { computeDashboardStats } from "@/lib/workouts/dashboardStats";
-import { apiClient } from "@/lib/api/apiClient"; // use the SAME client fetch used elsewhere
+import { WorkoutsAPI } from "@/lib/api/workouts";
+import {
+  getUserErrorMessage,
+  getUserErrorTitle,
+} from "@/lib/api/getUserErrorMessage";
 
 export default function DashboardClient() {
-  const userFirstName = "Michael"; // keep placeholder for now
-
+  const user = useAuthStore((s) => s.user);
+  const userFirstName =
+    (user?.displayName?.trim().split(" ")[0] || "").trim() || "there";
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+
+  async function load() {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await WorkoutsAPI.list();
+      setWorkouts(data);
+    } catch (e) {
+      setError(e);
+      setWorkouts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
-    let alive = true;
-
-    async function load() {
-      try {
-        const data = await apiClient<Workout[]>("/api/workouts");
-        if (alive) setWorkouts(data);
-      } catch {
-        if (alive) setWorkouts([]);
-      } finally {
-        if (alive) setIsLoading(false);
-      }
-    }
-
     load();
-    return () => {
-      alive = false;
-    };
   }, []);
 
   const range: TimeRange = "1M";
@@ -89,6 +95,22 @@ export default function DashboardClient() {
     () => sortWorkoutsByDateDesc(workouts).slice(0, 5),
     [workouts]
   );
+
+  if (error) {
+    return (
+      <main className="page">
+        <ErrorState
+          title={getUserErrorTitle(error)}
+          description={getUserErrorMessage(error)}
+          action={
+            <button className="text-primary hover:underline" onClick={load}>
+              Retry
+            </button>
+          }
+        />
+      </main>
+    );
+  }
 
   return (
     <main className="page">
@@ -144,9 +166,11 @@ export default function DashboardClient() {
               title="No workouts yet"
               description="Log your first workout to see charts here."
               action={
-                <Link href="/dailylog" className="text-primary hover:underline">
-                  Start a workout
-                </Link>
+                <Button>
+                  <Link href="/dailylog" className="">
+                    Start a workout
+                  </Link>
+                </Button>
               }
             />
           </div>
@@ -179,9 +203,11 @@ export default function DashboardClient() {
               title="No workouts yet"
               description="Log your first workout to see your recent sessions here."
               action={
-                <Link href="/dailylog" className="text-primary hover:underline">
-                  Go to Daily Log
-                </Link>
+                <Button>
+                  <Link href="/dailylog" className="">
+                    Go to Daily Log
+                  </Link>
+                </Button>
               }
             />
           </div>

@@ -2,6 +2,11 @@
 
 import React, { useMemo, useState } from "react";
 import type { Workout } from "@/types/workout";
+import ErrorState from "../shared/ErrorState";
+import {
+  getUserErrorMessage,
+  getUserErrorTitle,
+} from "@/lib/api/getUserErrorMessage";
 import { initMuscleVolume } from "@/lib/charts/muscleVolume";
 import {
   buildMuscleRings,
@@ -48,36 +53,19 @@ export default function PieChartTrainingVolume({ workouts }: Props) {
     );
   }
 
-  // Exercises error
   if (error) {
     return (
-      <div className="w-full space-y-3">
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
-        </div>
-
-        <div className="rounded-lg border border-border p-6 text-center">
-          <h3 className="text-base font-semibold">
-            Couldn&apos;t load chart data
-          </h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Retry loading exercises. If this persists, your session may have
-            expired.
-          </p>
-          <div className="mt-4 flex justify-center">
-            <button
-              type="button"
-              onClick={retry}
-              className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      </div>
+      <ErrorState
+        title={getUserErrorTitle(error)}
+        description={getUserErrorMessage(error)}
+        action={
+          <button className="text-primary hover:underline" onClick={retry}>
+            Retry
+          </button>
+        }
+      />
     );
   }
-
   // Exercises loaded but empty
   if (!exercisesReady) {
     return (

@@ -5,9 +5,9 @@ const PUBLIC_PATHS = ["/login", "/signup"];
 const PUBLIC_PREFIXES = ["/_next", "/favicon.ico"];
 
 export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  const { pathname, search } = req.nextUrl;
 
-  // never guard/protect API proxy routes
+  // Never guard/protect API proxy routes
   if (pathname.startsWith("/api")) {
     return NextResponse.next();
   }
@@ -18,21 +18,20 @@ export function middleware(req: NextRequest) {
   }
 
   // Allow public pages
-  if (PUBLIC_PATHS.includes(pathname)) {
+  if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
+
+  const hasAccessCookie = Boolean(req.cookies.get("at")?.value);
+  const hasRefreshCookie = Boolean(req.cookies.get("rt")?.value);
+
+  if (hasAccessCookie || hasRefreshCookie) {
     return NextResponse.next();
   }
 
-  // Cookie-based auth gate: access-token cookie must exist
-  const hasAccessCookie = Boolean(req.cookies.get("at")?.value);
-
-  if (!hasAccessCookie) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
-  }
-
-  return NextResponse.next();
+  const url = req.nextUrl.clone();
+  url.pathname = "/login";
+  url.searchParams.set("reason", "expired");
+  url.searchParams.set("next", `${pathname}${search}`);
+  return NextResponse.redirect(url);
 }
 
 export const config = {

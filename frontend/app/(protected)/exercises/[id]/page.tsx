@@ -2,29 +2,26 @@ import PageBackButton from "@/components/shared/PageBackButton";
 import Header from "@/components/exerciseInfo/Header";
 import ExerciseHistoryCard from "@/components/exerciseInfo/ExerciseHistoryCard";
 import ActiveLogExerciseCard from "@/components/exerciseInfo/ActiveLogExerciseCard";
-import { ExerciseHistoryEntry } from "@/types/exercise";
+import type { Exercise, ExerciseHistoryEntry } from "@/types/exercise";
 import { formatWorkoutDate } from "@/lib/util/date";
-import { ExerciseAPI } from "@/lib/api/exercises";
-import { WorkoutsAPI } from "@/lib/api/workouts"; // server-safe? if it's apiClient, use apiServer instead
 import type { Workout } from "@/types/workout";
-
-import { WorkoutHistoryAPI } from "@/lib/api/workoutHistory";
-import { apiServer } from "@/lib/api/apiServer";
+import { apiServer, ApiServerError } from "@/lib/api/apiServer";
 
 type PageProps = {
-  // Next.js 16 passes these as Promises in server components
   params: Promise<{ id: string }>;
   searchParams: Promise<{ fromDailyLog?: string }>;
 };
 
-/**
- * ExerciseDetailPage
- *
- * - Shows an exercise header (name, muscles, description)
- * - When navigated from Daily Log (?fromDailyLog=true), also shows
- *   the *live* log card for this exercise (ActiveLogExerciseCard)
- * - Below that, shows historical performance cards for this exercise
- */
+// Mongo normalization for server fetch
+type ExerciseFromApi = Omit<Exercise, "id"> & {
+  _id: string;
+  id?: string;
+};
+
+function normalizeExercise(e: ExerciseFromApi): Exercise {
+  return { ...e, id: e.id ?? e._id };
+}
+
 export default async function ExerciseDetailPage({
   params,
   searchParams,
@@ -32,13 +29,29 @@ export default async function ExerciseDetailPage({
   const { id } = await params;
   const query = await searchParams;
 
-  // Did the user come here from the Daily Log page?
   const fromDailyLog = query.fromDailyLog === "true";
 
-  // Exercise definition
-  const exercise = await ExerciseAPI.get(id);
+  let exercise: Exercise | null = null;
+  let allWorkouts: Workout[] = [];
 
-  // If the id doesn't match any exercise, show a simple not-found state
+  try {
+    const [exerciseRaw, workouts] = await Promise.all([
+      apiServer<ExerciseFromApi>(`/api/exercises/${id}`),
+      apiServer<Workout[]>(`/api/workouts`),
+    ]);
+
+    exercise = normalizeExercise(exerciseRaw);
+    allWorkouts = workouts;
+  } catch (e) {
+    // If the exercise endpoint returns 404, show “not found”
+    if (e instanceof ApiServerError && e.status === 404) {
+      exercise = null;
+    } else {
+      // For other errors (401, 500), rethrow so you see it during dev
+      throw e;
+    }
+  }
+
   if (!exercise) {
     return (
       <main className="page">
@@ -50,12 +63,10 @@ export default async function ExerciseDetailPage({
     );
   }
 
-  // Workout history for this exercise
-  const allWorkouts = await apiServer<Workout[]>("/api/workouts"); // server component -> use apiServer
   const historyRaw = allWorkouts
-    .filter((w) => w.exercises.some((ex) => ex.exerciseId === exercise.id))
+    .filter((w) => w.exercises.some((ex) => ex.exerciseId === exercise!.id))
     .map((w) => {
-      const ex = w.exercises.find((x) => x.exerciseId === exercise.id)!;
+      const ex = w.exercises.find((x) => x.exerciseId === exercise!.id)!;
       return {
         workoutId: w.id,
         workoutDate: w.date,
@@ -71,7 +82,6 @@ export default async function ExerciseDetailPage({
       };
     });
 
-  // Format dates + compute totalVolume on server
   const historyEntries: ExerciseHistoryEntry[] = historyRaw.map((entry) => {
     const totalVolume = entry.sets.reduce(
       (sum, s) => sum + s.weight * s.reps,
@@ -90,17 +100,14 @@ export default async function ExerciseDetailPage({
         <PageBackButton />
       </div>
 
-      {/* Header: title + muscle groups + description */}
       <Header exercise={exercise} />
 
-      {/* Live log view when this page is opened from Daily Log */}
       {fromDailyLog && (
         <div className="mt-4 mb-4">
           <ActiveLogExerciseCard exerciseId={exercise.id} />
         </div>
       )}
 
-      {/* Historical workouts that include this exercise */}
       <h2 className="mb-4 text-lg font-semibold">History</h2>
       <section className="mt-2 overflow-y-auto scroll">
         <div className="mr-3 space-y-4">
