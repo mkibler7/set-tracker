@@ -27,7 +27,7 @@ export function createApp() {
   });
 
   // Routes
-  app.use("/auth", authRouter);
+  app.use("/api/auth", authRouter);
   app.use("/api/workouts", workoutsRouter);
   app.use("/api/exercises", exercisesRouter);
 
