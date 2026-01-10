@@ -101,23 +101,3 @@ export function setAccessCookie(res: Response, accessToken: string) {
     maxAge: accessMaxAgeMs,
   });
 }
-
-export function clearAccessCookie(res: Response) {
-  res.clearCookie("at", { path: "/" });
-}
-
-// Access cookie: sent to ALL requests (so requireAuth can read it)
-export function setAccessCookie(res: Response, accessToken: string) {
-  const isProd = process.env.NODE_ENV === "production";
-
-  res.cookie("at", accessToken, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: "lax",
-    path: "/",
-  });
-}
-
-export function clearAccessCookie(res: Response) {
-  res.clearCookie("at", { path: "/" });
-}
