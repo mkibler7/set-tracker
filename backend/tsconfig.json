@@ -15,6 +15,6 @@
     "resolveJsonModule": true,
     "skipLibCheck": true
   },
-  "include": ["server.ts", "src/**/*.ts", "test/unit/workoutService.test.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["server.ts", "src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "test"]
 }
