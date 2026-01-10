@@ -101,3 +101,14 @@ export function setAccessCookie(res: Response, accessToken: string) {
     maxAge: accessMaxAgeMs,
   });
 }
+
+export function clearAccessCookie(res: Response) {
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.clearCookie("at", {
+    path: "/",
+    httpOnly: true,
+    secure: isProd,
+    sameSite: "lax",
+  });
+}
