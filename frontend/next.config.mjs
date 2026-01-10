@@ -3,7 +3,7 @@ const nextConfig = {
   transpilePackages: ["@reptracker/shared"],
 
   async rewrites() {
-    const origin = process.env.BACKEND_ORIGIN;
+    const origin = process.env.BACKEND_ORIGIN || "http://localhost:5000";
     if (!origin) return [];
 
     return [

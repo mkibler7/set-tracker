@@ -1,8 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { AuthAPI } from "@/lib/api/apiAuth";
+
+function hasCookie(name: string): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie
+    .split(";")
+    .some((c) => c.trim().startsWith(`${name}=`));
+}
 
 export default function LoginClient() {
   const searchParams = useSearchParams();
@@ -10,10 +17,18 @@ export default function LoginClient() {
   const nextPath = next && next.startsWith("/") ? next : "/dashboard";
 
   const reason = searchParams.get("reason");
+
+  const [hasSessionMarker, setHasSessionMarker] = useState(false);
+  useEffect(() => {
+    setHasSessionMarker(hasCookie("has_session"));
+  });
+
   const reasonMessage = useMemo(() => {
     switch (reason) {
       case "expired":
-        return "Your session expired. Please log in again.";
+        return hasSessionMarker
+          ? "Your session expired. Please log in again."
+          : null;
       case "logged_out":
         return "You've been logged out.";
       default:
