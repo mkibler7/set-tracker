@@ -9,6 +9,6 @@ export async function appLogout() {
     // ignore
   } finally {
     useAuthStore.getState().clear();
-    useWorkoutStore.getState().resetWorkout();
+    useWorkoutStore.getState().resetAllDrafts();
   }
 }
