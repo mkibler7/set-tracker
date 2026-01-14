@@ -10,6 +10,7 @@ import type { Workout, WorkoutExercise } from "@/types/workout";
 import { formatWorkoutDate } from "@/lib/util/date";
 import { exerciseVolume } from "@/lib/workouts/stats";
 import PageBackButton from "@/components/shared/PageBackButton";
+import WorkoutExerciseCard from "@/components/workouts/WorkoutExerciseCard";
 
 export default function WorkoutDetailPage() {
   const params = useParams();
@@ -135,86 +136,17 @@ export default function WorkoutDetailPage() {
           workout.exercises.map((exercise, index) => {
             const meta = catalogById[exercise.exerciseId];
             const muscleLabel = meta ? formatExerciseMuscleLabel(meta) : "";
-
-            const exVolume = exerciseVolume(exercise as WorkoutExercise);
+            const volume = exerciseVolume(exercise as WorkoutExercise);
 
             return (
-              <div
-                key={exercise.exerciseId || index}
-                className="rounded-lg border border-border bg-card/70 p-4 text-sm shadow-sm mr-2"
-              >
-                <div className="mb-2 flex items-start justify-between gap-2">
-                  <div>
-                    <h2 className="mb-2 text-sm font-semibold text-foreground">
-                      {exercise.exerciseName}
-                    </h2>
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      {muscleLabel ||
-                        (catalogLoading ? "Loading muscles..." : "—")}
-                    </p>
-                  </div>
-
-                  <span className="text-xs text-muted-foreground">
-                    {exVolume.toLocaleString()} volume
-                  </span>
-                </div>
-
-                {exercise.sets && exercise.sets.length > 0 && (
-                  <div className="mt-3 overflow-x-auto">
-                    <table className="w-full border-collapse text-xs">
-                      <thead className="text-[11px] uppercase tracking-wide text-muted-foreground/80">
-                        <tr className="border-b border-border/60">
-                          <th className="px-3 py-2 text-left font-medium">
-                            Set
-                          </th>
-                          <th className="px-3 py-2 text-left font-medium">
-                            Weight
-                          </th>
-                          <th className="px-3 py-2 text-left font-medium">
-                            Reps
-                          </th>
-                          {exercise.sets.some((s: any) => s.tempo) && (
-                            <th className="px-3 py-2 text-left font-medium">
-                              Tempo
-                            </th>
-                          )}
-                          {exercise.sets.some((s: any) => s.rpe) && (
-                            <th className="px-3 py-2 text-left font-medium">
-                              RPE
-                            </th>
-                          )}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {exercise.sets.map((set: any, index: number) => (
-                          <tr
-                            key={set.id ?? index}
-                            className="border-b border-border/40 last:border-0 hover:bg-card/80"
-                          >
-                            <td className="px-3 py-2 text-muted-foreground">
-                              {index + 1}
-                            </td>
-                            <td className="px-3 py-2">{set.weight ?? "--"}</td>
-                            <td className="px-3 py-2">{set.reps ?? "--"}</td>
-                            {exercise.sets.some((s: any) => s.tempo) && (
-                              <td className="px-3 py-2">{set.tempo ?? "--"}</td>
-                            )}
-                            {exercise.sets.some((s: any) => s.rpe) && (
-                              <td className="px-3 py-2">{set.rpe ?? "--"}</td>
-                            )}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-
-                {exercise.notes && (
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    {exercise.notes}
-                  </p>
-                )}
-              </div>
+              <WorkoutExerciseCard
+                key={exercise.exerciseId ?? index}
+                exercise={exercise as WorkoutExercise}
+                muscleLabel={muscleLabel}
+                loadingMuscles={catalogLoading}
+                fallbackName={meta?.name}
+                volume={volume}
+              />
             );
           })
         ) : (
