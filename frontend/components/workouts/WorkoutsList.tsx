@@ -2,7 +2,6 @@ import type { Workout } from "@/types/workout";
 import Link from "next/link";
 import { AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { WorkoutCard } from "./WorkoutCard";
 import {
   ChevronLeftIcon,
@@ -10,8 +9,6 @@ import {
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
 } from "@heroicons/react/24/solid";
-import { set } from "date-fns";
-
 type WorkoutsListProps = {
   filteredWorkouts: Workout[];
   pageWorkouts: Workout[];
@@ -22,6 +19,7 @@ type WorkoutsListProps = {
   setWorkouts: React.Dispatch<React.SetStateAction<Workout[]>>;
   onDuplicate: (workoutId: string) => void;
   onRequestDelete: (workout: Workout) => void;
+  onEdit: (workoutId: string) => void;
 };
 
 export function WorkoutList({
@@ -34,8 +32,8 @@ export function WorkoutList({
   setWorkouts,
   onDuplicate,
   onRequestDelete,
+  onEdit,
 }: WorkoutsListProps) {
-  const router = useRouter();
   const listRef = useRef<HTMLElement | null>(null);
 
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
@@ -78,7 +76,7 @@ export function WorkoutList({
   };
 
   const handleEdit = (workoutId: string) => {
-    router.push(`/dailylog?fromWorkout=${workoutId}`);
+    onEdit(workoutId);
     setActiveMenuId(null);
   };
 

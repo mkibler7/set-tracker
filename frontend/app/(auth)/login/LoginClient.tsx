@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AuthAPI } from "@/lib/api/apiAuth";
 
@@ -18,23 +18,24 @@ export default function LoginClient() {
 
   const reason = searchParams.get("reason");
 
-  const [hasSessionMarker, setHasSessionMarker] = useState(false);
+  // Only show “expired” if the user previously had a session
+  const [hadSessionBefore, setHadSessionBefore] = useState(false);
   useEffect(() => {
-    setHasSessionMarker(hasCookie("has_session"));
-  });
+    setHadSessionBefore(localStorage.getItem("has_session") === "1");
+  }, []);
 
   const reasonMessage = useMemo(() => {
+    if (!hadSessionBefore) return null;
+
     switch (reason) {
       case "expired":
-        return hasSessionMarker
-          ? "Your session expired. Please log in again."
-          : null;
+        return "Your session expired. Please log in again.";
       case "logged_out":
         return "You've been logged out.";
       default:
         return null;
     }
-  }, [reason]);
+  }, [reason, hadSessionBefore]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,6 +50,8 @@ export default function LoginClient() {
 
     try {
       await AuthAPI.login({ email, password });
+
+      localStorage.setItem("had_session", "1");
 
       // Hard navigation so middleware runs with the cookie
       window.location.assign(nextPath);
@@ -72,14 +75,12 @@ export default function LoginClient() {
         onSubmit={onSubmit}
         className="space-y-4 rounded-lg border border-border p-4"
       >
-        {/* Reason banner (session expired, logged out, etc.) */}
-        {reasonMessage ? (
+        {reasonMessage && hadSessionBefore ? (
           <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground">
             {reasonMessage}
           </div>
         ) : null}
 
-        {/* Credential / request error */}
         {error ? (
           <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
             {error}

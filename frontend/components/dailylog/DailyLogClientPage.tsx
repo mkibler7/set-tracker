@@ -6,7 +6,7 @@ import Header from "@/components/dailylog/Header";
 import EmptyState from "@/components/dailylog/EmptyState";
 import SplitSelector from "@/components/dailylog/SplitSelector";
 import SessionView from "@/components/dailylog/SessionView";
-import { useWorkoutSession } from "@/components/dailylog/useWorkoutSession";
+import { useWorkoutStore } from "@/app/store/useWorkoutStore";
 import { WorkoutsAPI } from "@/lib/api/workouts";
 import { ExerciseAPI } from "@/lib/api/exercises";
 import type { Exercise } from "@/types/exercise";
@@ -14,30 +14,29 @@ import {
   ALL_MUSCLE_GROUPS,
   type MuscleGroup,
 } from "@reptracker/shared/muscles";
-import { set } from "date-fns";
 
 type WorkoutStep = "empty" | "split" | "session";
 
 export default function DailyLogClientPage() {
   // Zustand workout session store
   // Use individual selectors to avoid unnecessary re-renders
-  const currentWorkout = useWorkoutSession((state) => state.currentWorkout);
-  const stashedWorkout = useWorkoutSession((state) => state.stashedWorkout);
-  const startWorkout = useWorkoutSession((state) => state.startWorkout);
-  const updateMuscleGroups = useWorkoutSession(
-    (state) => state.updateMuscleGroups
-  );
-  const endWorkout = useWorkoutSession((state) => state.endWorkout);
-  const stashCurrentWorkout = useWorkoutSession(
-    (state) => state.stashCurrentWorkout
-  );
-  const restoreStashedWorkout = useWorkoutSession(
-    (state) => state.restoreStashedWorkout
-  );
+  const sessionDraft = useWorkoutStore((s) => s.sessionDraft);
+  const editDraft = useWorkoutStore((s) => s.editDraft);
+
+  const startSession = useWorkoutStore((s) => s.startSession);
+  const updateSessionMeta = useWorkoutStore((s) => s.updateSessionMeta);
+  const resetSession = useWorkoutStore((s) => s.resetSession);
+
+  const canReplaceEditDraft = useWorkoutStore((s) => s.canReplaceEditDraft);
+  const startEdit = useWorkoutStore((s) => s.startEdit);
+  const resetEditDraft = useWorkoutStore((s) => s.resetEditDraft);
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromWorkoutId = searchParams.get("fromWorkout");
+
+  const isEditingHistory = !!fromWorkoutId;
+  const activeDraft = isEditingHistory ? editDraft : sessionDraft;
 
   const loadedFromWorkoutRef = useRef<string | null>(null);
 
@@ -88,19 +87,28 @@ export default function DailyLogClientPage() {
 
     (async () => {
       try {
+        const gate = canReplaceEditDraft(fromWorkoutId);
+        if (!gate.ok && gate.reason === "dirty") {
+          const discard = window.confirm(
+            "You have unsaved changes from another edit. Discard them and edit this workout instead?"
+          );
+          if (!discard) {
+            router.replace("/workouts");
+            return;
+          }
+          resetEditDraft();
+        }
+
         const workout = await WorkoutsAPI.get(fromWorkoutId);
         if (cancelled) return;
 
-        // Stash today's in-progress session so we can restore later
-        const {
-          currentWorkout,
-          stashedWorkout,
-          stashCurrentWorkout,
-          startWorkout,
-        } = useWorkoutSession.getState();
+        startEdit({
+          id: workout.id,
+          date: workout.date,
+          muscleGroups: workout.muscleGroups,
+          exercises: workout.exercises,
+        });
 
-        if (currentWorkout && !stashedWorkout) stashCurrentWorkout();
-        startWorkout(workout.muscleGroups, workout.date, workout.exercises);
         setStep("session");
         setSelectedMuscleGroups(workout.muscleGroups);
         setWorkoutDate(new Date(workout.date));
@@ -109,9 +117,6 @@ export default function DailyLogClientPage() {
       } catch (error) {
         if (cancelled) return;
         console.error("Failed to load workout:", error);
-
-        // If a bad id was given, clear the param to avoid loops
-        loadedFromWorkoutRef.current = null;
         router.replace("/dailylog");
       }
     })();
@@ -119,18 +124,16 @@ export default function DailyLogClientPage() {
     return () => {
       cancelled = true;
     };
-  }, [fromWorkoutId, router]);
+  }, [fromWorkoutId, canReplaceEditDraft, resetEditDraft, startEdit, router]);
 
   // 2) If there is already a current workout in the store, auto-resume it
   useEffect(() => {
-    if (fromWorkoutId || !currentWorkout || step !== "empty") return;
+    if (fromWorkoutId || !sessionDraft || step !== "empty") return;
 
-    const groups = currentWorkout.muscleGroups;
-
-    setSelectedMuscleGroups(groups);
-    setWorkoutDate(new Date(currentWorkout.date));
+    setSelectedMuscleGroups(sessionDraft.muscleGroups);
+    setWorkoutDate(new Date(sessionDraft.date));
     setStep("session");
-  }, [fromWorkoutId, currentWorkout, step]);
+  }, [fromWorkoutId, sessionDraft, step]);
 
   const splitLabel =
     (selectedMuscleGroups?.length ?? 0) > 0
@@ -153,112 +156,111 @@ export default function DailyLogClientPage() {
   const handleBeginSession = () => {
     if (selectedMuscleGroups.length === 0) return;
 
-    const splitName = selectedMuscleGroups.join(" / ");
+    // Editing the split of the currently open draft (session OR edit)
+    if (isEditingSplit && activeDraft) {
+      if (isEditingHistory) {
+        useWorkoutStore.getState().updateEditMeta({
+          muscleGroups: selectedMuscleGroups,
+          date: workoutDate.toISOString(),
+        });
+      } else {
+        updateSessionMeta({
+          muscleGroups: selectedMuscleGroups,
+          date: workoutDate.toISOString(),
+        });
+      }
 
-    // EDIT EXISTING SESSION (do NOT restart)
-    if (isEditingSplit && currentWorkout) {
-      updateMuscleGroups(selectedMuscleGroups);
       setStep("session");
       setIsEditingSplit(false);
       return;
     }
 
-    // START NEW SESSION
-    const dateString = workoutDate.toISOString();
-    startWorkout(selectedMuscleGroups, dateString);
-    setStep("session");
+    // Starting a NEW session draft
+    if (!isEditingHistory) {
+      startSession(selectedMuscleGroups, workoutDate.toISOString());
+      setStep("session");
+      return;
+    }
+
+    // If we’re editing history and not in "edit split" mode, do nothing here.
+    // Edit draft is created by the fromWorkout effect.
   };
 
   const handleCancelSplit = () => {
-    if (isEditingSplit && currentWorkout) {
+    // If user was editing split for an existing draft, just return to session view
+    if (isEditingSplit && activeDraft) {
       setStep("session");
       setIsEditingSplit(false);
       return;
     }
 
+    // Otherwise we were starting a brand new session and want to exit back to empty
     setSelectedMuscleGroups([]);
+    setWorkoutDate(new Date());
     setStep("empty");
   };
 
   const handleEditSplit = () => {
-    if (!currentWorkout) return;
+    if (!activeDraft) return;
 
-    const groups = currentWorkout.muscleGroups;
-
-    setSelectedMuscleGroups(groups);
+    setSelectedMuscleGroups(activeDraft.muscleGroups);
+    setWorkoutDate(new Date(activeDraft.date));
     setIsEditingSplit(true);
     setStep("split");
   };
 
   const handleSaveWorkout = async () => {
-    if (!currentWorkout) return;
+    if (!activeDraft) return;
 
-    // Prevent multiple saves
     if (isSaving) return;
     setIsSaving(true);
     setSaveError(null);
 
-    // Check if we are editing an existing history workout
-    const isEditingHistory = !!fromWorkoutId;
-
-    // Normalize currentWorkout.exercises
-    const catalogById = Object.fromEntries(
-      exerciseCatalog.map((e) => [e.id, e])
-    );
-    const catalogByName = Object.fromEntries(
-      exerciseCatalog.map((e) => [e.name.trim().toLowerCase(), e])
-    );
-
     const payload = {
-      date: currentWorkout.date,
-      muscleGroups: currentWorkout.muscleGroups,
-      exercises: currentWorkout.exercises,
+      date: activeDraft.date,
+      muscleGroups: activeDraft.muscleGroups,
+      exercises: activeDraft.exercises,
     };
 
     try {
       if (isEditingHistory && fromWorkoutId) {
-        // Update existing workout
         await WorkoutsAPI.update(fromWorkoutId, payload);
-      } else {
-        // Create new workout
-        await WorkoutsAPI.create(payload);
-      }
 
-      endWorkout();
-      setIsPickerOpen(false);
-      setIsEditingSplit(false);
+        // Clear edit mode + draft
+        resetEditDraft();
+        setIsPickerOpen(false);
+        setIsEditingSplit(false);
 
-      if (isEditingHistory) {
-        // Keep the current id “locked” until the query param is actually gone
-        loadedFromWorkoutRef.current = fromWorkoutId;
         router.replace("/dailylog");
 
-        if (stashedWorkout) {
-          restoreStashedWorkout();
-
-          setSelectedMuscleGroups(stashedWorkout.muscleGroups);
-          setWorkoutDate(new Date(stashedWorkout.date));
+        // If a session draft exists, show it; otherwise empty
+        if (sessionDraft) {
+          setSelectedMuscleGroups(sessionDraft.muscleGroups);
+          setWorkoutDate(new Date(sessionDraft.date));
           setStep("session");
-          return;
+        } else {
+          setSelectedMuscleGroups([]);
+          setWorkoutDate(new Date());
+          setStep("empty");
         }
 
-        // Otherwise reset UI to empty state
-        setSelectedMuscleGroups([]);
-        setWorkoutDate(new Date());
-        setStep("empty");
         return;
       }
 
-      // Normal save (ending today's session)
+      // Normal session save -> create new workout
+      await WorkoutsAPI.create(payload);
+
+      resetSession();
+      setIsPickerOpen(false);
+      setIsEditingSplit(false);
+
       setSelectedMuscleGroups([]);
       setWorkoutDate(new Date());
       setStep("empty");
     } catch (error) {
       console.error("Failed to save workout:", error);
       setSaveError(
-        error instanceof Error
-          ? error.message
-          : "An unknown error occurred while saving."
+        error instanceof Error ? error.message : "Failed to save workout."
       );
     } finally {
       setIsSaving(false);
@@ -298,6 +300,7 @@ export default function DailyLogClientPage() {
         {step === "session" && (
           <div className="flex-1 flex flex-col overflow-hidden scroll">
             <SessionView
+              mode={isEditingHistory ? "edit" : "session"}
               selectedMuscleGroups={selectedMuscleGroups}
               fromWorkoutId={fromWorkoutId}
               isPickerOpen={isPickerOpen}

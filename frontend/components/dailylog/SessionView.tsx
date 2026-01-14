@@ -4,13 +4,14 @@ import React, { useState, useMemo } from "react";
 import ExercisePicker from "@/components/dailylog/ExercisePicker";
 import ExerciseCard from "@/components/dailylog/ExerciseCard";
 import DeleteExerciseModal from "./DeleteExerciseModal";
-import { useWorkoutSession } from "@/components/dailylog/useWorkoutSession";
+import { useWorkoutStore } from "@/app/store/useWorkoutStore";
 import type { WorkoutExercise } from "@/types/workout";
 import type { Exercise } from "@/types/exercise";
 import { formatExerciseMuscleLabel } from "@/lib/util/exercises";
-import { format } from "path";
+import { ADDRCONFIG } from "dns";
 
 type SessionViewProps = {
+  mode: "session" | "edit";
   selectedMuscleGroups: string[];
   fromWorkoutId?: string | null;
   isPickerOpen: boolean;
@@ -22,6 +23,7 @@ type SessionViewProps = {
 };
 
 export default function SessionView({
+  mode,
   selectedMuscleGroups,
   isPickerOpen,
   onClosePicker,
@@ -30,19 +32,31 @@ export default function SessionView({
   exerciseCatalog,
   exercisesCatalogLoading,
 }: SessionViewProps) {
-  const {
-    currentWorkout,
-    addExercise,
-    removeExercise,
-    updateExerciseNotes,
-    addSet,
-    updateSet,
-    deleteSet,
-  } = useWorkoutSession();
+  const sessionDraft = useWorkoutStore((s) => s.sessionDraft);
+  const editDraft = useWorkoutStore((s) => s.editDraft);
+
+  const upsertSessionExercise = useWorkoutStore((s) => s.upsertSessionExercise);
+  const removeSessionExercise = useWorkoutStore((s) => s.removeSessionExercise);
+  const updateSessionExerciseNotes = useWorkoutStore(
+    (s) => s.updateSessionExerciseNotes
+  );
+  const addSessionSet = useWorkoutStore((s) => s.addSessionSet);
+  const updateSessionSet = useWorkoutStore((s) => s.updateSessionSet);
+  const deleteSessionSet = useWorkoutStore((s) => s.deleteSessionSet);
+
+  const upsertEditExercise = useWorkoutStore((s) => s.upsertEditExercise);
+  const removeEditExercise = useWorkoutStore((s) => s.removeEditExercise);
+  const updateEditExerciseNotes = useWorkoutStore(
+    (s) => s.updateEditExerciseNotes
+  );
+  const addEditSet = useWorkoutStore((s) => s.addEditSet);
+  const updateEditSet = useWorkoutStore((s) => s.updateEditSet);
+  const deleteEditSet = useWorkoutStore((s) => s.deleteEditSet);
+
+  const draft = mode === "edit" ? editDraft : sessionDraft;
+  const sessionExercises = draft?.exercises ?? [];
 
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-
-  const sessionExercises = currentWorkout?.exercises ?? [];
 
   const exerciseToDelete = pendingDeleteId
     ? sessionExercises.find(
@@ -103,7 +117,9 @@ export default function SessionView({
       sets: [],
     };
 
-    addExercise(workoutExercise);
+    if (mode === "edit") upsertEditExercise(workoutExercise);
+    else upsertSessionExercise(workoutExercise);
+
     onClosePicker();
   };
 
@@ -146,10 +162,26 @@ export default function SessionView({
                 exercise={exercise}
                 muscleLabel={meta ? formatExerciseMuscleLabel(meta) : ""}
                 onRemove={() => setPendingDeleteId(id)}
-                onAddSet={(values) => addSet(id, values)}
-                onUpdateSet={(setId, values) => updateSet(id, setId, values)}
-                onDeleteSet={(setId) => deleteSet(id, setId)}
-                onNotesChange={(notes) => updateExerciseNotes(id, notes)}
+                onAddSet={(values) =>
+                  mode === "edit"
+                    ? addEditSet(id, values)
+                    : addSessionSet(id, values)
+                }
+                onUpdateSet={(setId, values) =>
+                  mode === "edit"
+                    ? updateEditSet(id, setId, values)
+                    : updateSessionSet(id, setId, values)
+                }
+                onDeleteSet={(setId) =>
+                  mode === "edit"
+                    ? deleteEditSet(id, setId)
+                    : deleteSessionSet(id, setId)
+                }
+                onNotesChange={(notes) =>
+                  mode === "edit"
+                    ? updateEditExerciseNotes(id, notes)
+                    : updateSessionExerciseNotes(id, notes)
+                }
               />
             );
           })}
@@ -189,7 +221,8 @@ export default function SessionView({
         onCancel={() => setPendingDeleteId(null)}
         onConfirm={() => {
           if (pendingDeleteId) {
-            removeExercise(pendingDeleteId);
+            if (mode === "edit") removeEditExercise(pendingDeleteId);
+            else removeSessionExercise(pendingDeleteId);
           }
           setPendingDeleteId(null);
         }}

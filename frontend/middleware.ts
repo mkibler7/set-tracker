@@ -29,7 +29,7 @@ export function middleware(req: NextRequest) {
 
   const url = req.nextUrl.clone();
   url.pathname = "/login";
-  url.searchParams.set("reason", "expired");
+  // url.searchParams.set("reason", "expired");
   url.searchParams.set("next", `${pathname}${search}`);
   return NextResponse.redirect(url);
 }

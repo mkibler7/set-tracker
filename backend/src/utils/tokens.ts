@@ -112,3 +112,25 @@ export function clearAccessCookie(res: Response) {
     sameSite: "lax",
   });
 }
+
+export function setSessionMarkerCookie(res: Response) {
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.cookie("has_session", "1", {
+    httpOnly: false,
+    secure: isProd,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
+  });
+}
+
+export function clearSessionMarkerCookie(res: Response) {
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.clearCookie("has_session", {
+    secure: isProd,
+    sameSite: "lax",
+    path: "/",
+  });
+}

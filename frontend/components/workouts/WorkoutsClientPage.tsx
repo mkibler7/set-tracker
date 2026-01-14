@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useWorkoutStore } from "@/app/store/useWorkoutStore";
 import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/Button";
 import Link from "next/link";
@@ -34,6 +36,9 @@ function useResponsivePageSize() {
 }
 
 export default function WorkoutsClientPage() {
+  const router = useRouter();
+  const canReplaceEditDraft = useWorkoutStore((s) => s.canReplaceEditDraft);
+  const resetEditDraft = useWorkoutStore((s) => s.resetEditDraft);
   const pageSize = useResponsivePageSize();
 
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
@@ -145,6 +150,24 @@ export default function WorkoutsClientPage() {
     }
   };
 
+  const handleEdit = (workoutId: string) => {
+    // Guard: if user has a different edit draft with unsaved changes, decide what to do.
+    const decision = canReplaceEditDraft(workoutId);
+
+    if (!decision.ok && decision.reason === "dirty") {
+      const discard = window.confirm(
+        "You have unsaved changes while editing another workout. Discard changes and open this workout?"
+      );
+
+      if (!discard) return;
+
+      resetEditDraft();
+    }
+
+    // Navigate with param so DailyLog saves as UPDATE not CREATE.
+    router.push(`/dailylog?fromWorkout=${encodeURIComponent(workoutId)}`);
+  };
+
   const handleDuplicate = async (workoutId: string) => {
     const payloadWorkout = workouts.find((w) => w.id === workoutId);
     if (!payloadWorkout) return;
@@ -235,6 +258,7 @@ export default function WorkoutsClientPage() {
           setWorkouts={setWorkouts}
           onDuplicate={handleDuplicate}
           onRequestDelete={setDeleteTarget}
+          onEdit={handleEdit}
         />
       )}
 

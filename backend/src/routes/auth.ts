@@ -1,4 +1,8 @@
 import { Router, type Request, type Response } from "express";
+// import {
+//   setSessionMarkerCookie,
+//   clearSessionMarkerCookie,
+// } from "../utils/tokens.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -51,6 +55,7 @@ router.post("/register", async (req: Request, res: Response) => {
 
   const accessToken = signAccessToken(String(user._id));
   setAccessCookie(res, accessToken);
+  // setSessionMarkerCookie(res);
 
   res.status(201).json({
     user: {
@@ -87,6 +92,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
   const accessToken = signAccessToken(String(user._id));
   setAccessCookie(res, accessToken);
+  // setSessionMarkerCookie(res);
 
   res.json({
     user: {
@@ -104,6 +110,7 @@ router.post("/refresh", async (req: Request, res: Response) => {
   if (!token) {
     clearRefreshCookie(res);
     clearAccessCookie(res);
+    // clearSessionMarkerCookie(res);
     return res.status(401).json({ message: "Missing refresh token" });
   }
 
@@ -115,18 +122,15 @@ router.post("/refresh", async (req: Request, res: Response) => {
 
     const session = await RefreshSession.findOne({
       tokenHash,
-      revokedAt: { $exists: false },
+      revokedAt: null,
       expiresAt: { $gt: new Date() },
     });
 
     // If session invalid/expired/revoked: clear cookies so client stops sending junk
-    if (
-      !session ||
-      session.revokedAt ||
-      session.expiresAt.getTime() < Date.now()
-    ) {
+    if (!session) {
       clearRefreshCookie(res);
       clearAccessCookie(res);
+      // clearSessionMarkerCookie(res);
       return res.status(401).json({ message: "Refresh token invalid" });
     }
 
@@ -151,6 +155,7 @@ router.post("/refresh", async (req: Request, res: Response) => {
     // Issue new access
     const accessToken = signAccessToken(payload.sub);
     setAccessCookie(res, accessToken);
+    // setSessionMarkerCookie(res);
 
     // Cookie-based auth: frontend does not need the token body
     return res.json({ ok: true });
@@ -158,6 +163,7 @@ router.post("/refresh", async (req: Request, res: Response) => {
     // JWT verify failed (expired / invalid signature): clear cookies here too
     clearRefreshCookie(res);
     clearAccessCookie(res);
+    // clearSessionMarkerCookie(res);
     return res.status(401).json({ message: "Refresh token invalid" });
   }
 });
@@ -175,6 +181,7 @@ router.post("/logout", async (req: Request, res: Response) => {
 
   clearRefreshCookie(res);
   clearAccessCookie(res);
+  // clearSessionMarkerCookie(res);
 
   res.json({ ok: true });
 });

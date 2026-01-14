@@ -95,12 +95,18 @@ async function refreshSession(): Promise<boolean> {
   if (!refreshInFlight) {
     refreshInFlight = (async () => {
       const res = await doFetch("/api/auth/refresh", { method: "POST" });
-      if (!res.ok) refreshPermanentlyFailed = true;
-      return res.ok;
+
+      if (!res.ok) {
+        if (res.status === 401) refreshPermanentlyFailed = true;
+        return false;
+      }
+
+      return true;
     })().finally(() => {
       refreshInFlight = null;
     });
   }
+
   return refreshInFlight;
 }
 

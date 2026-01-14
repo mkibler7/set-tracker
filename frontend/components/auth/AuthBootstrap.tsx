@@ -44,7 +44,9 @@ export default function AuthBootstrap() {
       if (!refreshed) {
         // Hard logout client state
         auth.clear();
-        workouts.resetWorkout();
+        workouts.resetAllDrafts();
+        // workouts.resetSession();
+        // workouts.resetEditDraft();
         return;
       }
 
@@ -65,7 +67,9 @@ export default function AuthBootstrap() {
 
       // If still no auth, clear
       auth.clear();
-      workouts.resetWorkout();
+      workouts.resetAllDrafts();
+      // workouts.resetSession();
+      // workouts.resetEditDraft();
     })();
   }, []);
 

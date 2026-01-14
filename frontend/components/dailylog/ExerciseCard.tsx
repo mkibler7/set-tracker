@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { WorkoutExercise } from "@/types/workout";
 import SetForm, { SetFormValues } from "@/components/dailylog/SetForm";
 import ExercisePanel from "@/components/dailylog/ExercisePanel";
 import InfoIcon from "@/components/icons/info-icon";
+import { ExerciseAPI } from "@/lib/api/exercises";
 
 type ExerciseCardProps = {
   exercise: WorkoutExercise;
@@ -28,8 +29,27 @@ export default function ExerciseCard({
 }: ExerciseCardProps) {
   const router = useRouter();
   const hasSets = exercise.sets.length > 0;
+  const [exerciseName, setExerciseName] = useState<string>("");
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [isAddingSet, setIsAddingSet] = useState(false);
+
+  // Grab exerciseName
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const exDoc = await ExerciseAPI.get(exercise.exerciseId);
+        if (!cancelled) setExerciseName(exDoc.name);
+      } catch {
+        if (!cancelled) setExerciseName("Unknown exercise");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [exercise.exerciseId, exercise.exerciseName]);
 
   // Handle Open Details safely
   const isMongoObjectId = (v: string) => /^[a-fA-F0-9]{24}$/.test(v);
@@ -51,10 +71,6 @@ export default function ExerciseCard({
     router.push(`/exercises/${id}?fromDailyLog=true`);
   };
 
-  // const handleOpenDetails = () => {
-  //   router.push(`/exercises/${exercise.exerciseId}?fromDailyLog=true`);
-  // };
-
   return (
     <section
       className={[
@@ -69,7 +85,7 @@ export default function ExerciseCard({
         <div>
           <div className="mb-1 flex items-center gap-2">
             <h2 className="text-base font-semibold text-foreground">
-              {exercise.exerciseName}
+              {exerciseName}
             </h2>
             <button
               type="button"
