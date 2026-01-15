@@ -5,24 +5,38 @@ type AuthResponse = {
   user: AuthUser;
 };
 
+type RegisterResponse = {
+  ok: boolean;
+  message?: string;
+};
+
 export const AuthAPI = {
   register: async (payload: {
     email: string;
     password: string;
     displayName?: string;
   }) => {
-    const data = await apiClient<AuthResponse>("/api/auth/register", {
+    const data = await apiClient<RegisterResponse>("/api/auth/register", {
       method: "POST",
       body: JSON.stringify(payload),
     });
 
-    useAuthStore.getState().setUser({
-      ...data.user,
-      displayName: data.user.displayName ?? "",
-    });
+    useAuthStore.getState().clear();
 
-    return data.user;
+    return data;
   },
+
+  verifyEmail: (payload: { token: string }) =>
+    apiClient<{ ok: boolean }>("/api/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  resendVerification: (payload: { email: string }) =>
+    apiClient<{ message?: string }>("/api/auth/resend-verification", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 
   login: async (payload: { email: string; password: string }) => {
     const data = await apiClient<AuthResponse>("/api/auth/login", {

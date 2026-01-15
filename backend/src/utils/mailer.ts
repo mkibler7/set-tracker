@@ -32,13 +32,24 @@ function getTransporter() {
   return transporter;
 }
 
-export async function sendPasswordResetEmail(to: string, resetUrl: string) {
-  // Dev fallback (no domain / not configured yet)
-  if (!smtpConfigured()) {
-    console.log("[DEV] Password reset link:", resetUrl);
-    return;
-  }
+export async function sendVerifyEmail(to: string, verifyUrl: string) {
+  const tx = getTransporter();
 
+  await tx.sendMail({
+    from: MAIL_FROM!,
+    to,
+    replyTo: MAIL_REPLY_TO,
+    subject: "Verify your e-mail for your new RepTracker account!",
+    text: `Verify your email by clicking this link: ${verifyUrl}`,
+    html: `
+      <p>Verify your e-mail by clicking the link below:</p>
+      <p><a href="${verifyUrl}">Verify E-mail</a></p>
+      <p>If you didn't request this, you can ignore this email.</p>
+    `,
+  });
+}
+
+export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   const tx = getTransporter();
 
   await tx.sendMail({

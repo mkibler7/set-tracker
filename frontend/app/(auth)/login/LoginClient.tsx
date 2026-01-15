@@ -5,19 +5,14 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AuthAPI } from "@/lib/api/apiAuth";
 
-function hasCookie(name: string): boolean {
-  if (typeof document === "undefined") return false;
-  return document.cookie
-    .split(";")
-    .some((c) => c.trim().startsWith(`${name}=`));
-}
-
 export default function LoginClient() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
   const nextPath = next && next.startsWith("/") ? next : "/dashboard";
 
   const reason = searchParams.get("reason");
+  const verified = searchParams.get("verified");
+  const prefillEmail = searchParams.get("email") ?? "";
 
   // Only show “expired” if the user previously had a session
   const [hadSessionBefore, setHadSessionBefore] = useState(false);
@@ -38,19 +33,33 @@ export default function LoginClient() {
     }
   }, [reason, hadSessionBefore]);
 
-  const [email, setEmail] = useState("");
+  const verifiedMessage = useMemo(() => {
+    if (verified === "1") return "Email verified. Log in to continue.";
+    return null;
+  }, [verified]);
+
+  const [email, setEmail] = useState(prefillEmail);
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+
+  const isUnverifiedError = useMemo(() => {
+    if (!error) return false;
+    return error.toLowerCase().includes("not verified");
+  }, [error]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setInfo(null);
     setIsSubmitting(true);
 
     try {
-      await AuthAPI.login({ email, password });
+      await AuthAPI.login({ email: email.trim(), password });
 
       localStorage.setItem("has_session", "1");
 
@@ -60,6 +69,27 @@ export default function LoginClient() {
       setError(err?.message ?? "Login failed");
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function onResendVerification() {
+    setError(null);
+    setInfo(null);
+
+    const trimmed = email.trim();
+    if (!trimmed) return setError("Please enter your email first.");
+
+    try {
+      setIsResending(true);
+      const resp = await AuthAPI.resendVerification({ email: trimmed });
+      setInfo(
+        resp.message ??
+          "If an account exists for that email, we sent a verification link."
+      );
+    } catch (err: any) {
+      setError(err?.message ?? "Failed to resend verification email.");
+    } finally {
+      setIsResending(false);
     }
   }
 
@@ -76,9 +106,21 @@ export default function LoginClient() {
         onSubmit={onSubmit}
         className="space-y-4 rounded-lg border border-border p-4"
       >
+        {verifiedMessage ? (
+          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground">
+            {verifiedMessage}
+          </div>
+        ) : null}
+
         {reasonMessage && hadSessionBefore ? (
           <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground">
             {reasonMessage}
+          </div>
+        ) : null}
+
+        {info ? (
+          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground">
+            {info}
           </div>
         ) : null}
 
@@ -86,6 +128,17 @@ export default function LoginClient() {
           <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
             {error}
           </div>
+        ) : null}
+
+        {isUnverifiedError ? (
+          <button
+            type="button"
+            onClick={onResendVerification}
+            disabled={isResending}
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-card/80 disabled:opacity-60"
+          >
+            {isResending ? "Sending..." : "Resend verification email"}
+          </button>
         ) : null}
 
         <div className="space-y-1 text-sm text-foreground">
@@ -123,7 +176,7 @@ export default function LoginClient() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
           {isSubmitting ? "Logging in..." : "Log In"}
         </button>

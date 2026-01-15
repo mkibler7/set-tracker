@@ -6,6 +6,7 @@ const PUBLIC_PATHS = [
   "/signup",
   "/forgot-password",
   "/reset-password",
+  "/verify-email",
 ];
 const PUBLIC_PREFIXES = ["/_next", "/favicon.ico"];
 

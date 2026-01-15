@@ -1,8 +1,4 @@
 import { Router, type Request, type Response } from "express";
-// import {
-//   setSessionMarkerCookie,
-//   clearSessionMarkerCookie,
-// } from "../utils/tokens.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -24,8 +20,9 @@ import {
   signRefreshToken,
 } from "../utils/tokens.js";
 import PasswordResetToken from "../models/PasswordResetToken.js";
-import { sendPasswordResetEmail } from "../utils/mailer.js";
-import { z } from "zod";
+import EmailVerificationToken from "../models/EmailVerificationToken.js";
+import { sendPasswordResetEmail, sendVerifyEmail } from "../utils/mailer.js";
+import z from "zod";
 
 import { requireAuth } from "../middleware/requireAuth.js";
 
@@ -44,32 +41,47 @@ router.post("/register", async (req: Request, res: Response) => {
     return res.status(409).json({ message: "Email already in use" });
 
   const passwordHash = await bcrypt.hash(password, 12);
+
   const user = await User.create({
     email,
     passwordHash,
     displayName: displayName?.trim() ?? "",
+    emailVerifiedAt: null,
   });
 
-  const refreshToken = signRefreshToken(String(user._id));
-  const tokenHash = hashToken(refreshToken);
+  // Invalidate prior unused verify tokens for this user
+  await EmailVerificationToken.updateMany(
+    { userId: user._id, usedAt: null, expiresAt: { $gt: new Date() } },
+    { $set: { usedAt: new Date() } }
+  );
+  // Create new verification token
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const tokenHash = hashToken(rawToken);
 
-  const days = Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? "30");
-  const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+  const minutes = Number(process.env.EMAIL_VERIFY_TTL_MINUTES ?? "60");
+  const expiresAt = new Date(Date.now() + minutes * 60 * 1000);
 
-  await RefreshSession.create({ userId: user._id, tokenHash, expiresAt });
+  await EmailVerificationToken.create({
+    userId: user._id,
+    tokenHash,
+    expiresAt,
+    usedAt: null,
+  });
 
-  setRefreshCookie(res, refreshToken);
+  const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://localhost:3000";
+  const verifyUrl = `${frontendOrigin}/verify-email?token=${encodeURIComponent(
+    rawToken
+  )}`;
 
-  const accessToken = signAccessToken(String(user._id));
-  setAccessCookie(res, accessToken);
-  // setSessionMarkerCookie(res);
+  await sendVerifyEmail(user.email, verifyUrl);
 
-  res.status(201).json({
-    user: {
-      id: String(user._id),
-      email: user.email,
-      displayName: user.displayName ?? "",
-    },
+  // Do NOT set cookies here; they must verify first
+  clearRefreshCookie(res);
+  clearAccessCookie(res);
+
+  return res.status(201).json({
+    ok: true,
+    message: "Account created. Please verify your email to continue.",
   });
 });
 
@@ -86,6 +98,10 @@ router.post("/login", async (req: Request, res: Response) => {
 
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return res.status(401).json({ message: "Invalid credentials" });
+
+  if (!user.emailVerifiedAt) {
+    return res.status(403).json({ message: "Email not verified" });
+  }
 
   const refreshToken = signRefreshToken(String(user._id));
   const tokenHash = hashToken(refreshToken);
@@ -227,7 +243,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
   const minutes = Number(process.env.PASSWORD_RESET_TTL_MINUTES ?? "30");
   const expiresAt = new Date(Date.now() + minutes * 60 * 1000);
 
-  // Optional: invalidate prior unused tokens for this user
+  // Invalidate prior unused tokens for this user
   await PasswordResetToken.updateMany(
     { userId: user._id, usedAt: null, expiresAt: { $gt: new Date() } },
     { $set: { usedAt: new Date() } }
@@ -285,7 +301,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
   record.usedAt = new Date();
   await record.save();
 
-  // Recommended: revoke refresh sessions to force re-login on other devices
+  // Revoke refresh sessions to force re-login on other devices
   await RefreshSession.updateMany(
     { userId: user._id },
     { $set: { revokedAt: new Date() } }
@@ -297,13 +313,92 @@ router.post("/reset-password", async (req: Request, res: Response) => {
   return res.json({ ok: true });
 });
 
-// // TEST
-// router.post("/__dev/test-email", async (_req: Request, res: Response) => {
-//   await sendPasswordResetEmail(
-//     process.env.SMTP_USER!,
-//     "http://localhost:3000/reset-password?token=dev-test"
-//   );
-//   res.json({ ok: true });
-// });
+router.post("/verify-email", async (req: Request, res: Response) => {
+  const schema = z.object({ token: z.string().min(1) });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ message: parsed.error.message });
+  }
+
+  const tokenHash = hashToken(parsed.data.token);
+
+  const record = await EmailVerificationToken.findOne({
+    tokenHash,
+    usedAt: null,
+    expiresAt: { $gt: new Date() },
+  });
+
+  if (!record) {
+    return res
+      .status(400)
+      .json({ message: "Verification link is invalid or expired." });
+  }
+
+  const user = await User.findById(record.userId);
+  if (!user) {
+    return res
+      .status(400)
+      .json({ message: "Verification link is invalid or expired." });
+  }
+
+  // If already verified, still succeed
+  if (!user.emailVerifiedAt) {
+    user.emailVerifiedAt = new Date();
+    await user.save();
+  }
+
+  record.usedAt = new Date();
+  await record.save();
+
+  return res.json({ ok: true });
+});
+
+router.post("/resend-verification", async (req: Request, res: Response) => {
+  const schema = z.object({ email: z.string().email() });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ message: parsed.error.message });
+  }
+
+  // Generic response to avoid enumeration
+  const generic = {
+    message:
+      "If an account exists for that email, we sent a verification link.",
+  };
+
+  const email = parsed.data.email.trim().toLowerCase();
+  const user = await User.findOne({ email }).select(
+    "_id email emailVerifiedAt"
+  );
+  if (!user) return res.json(generic);
+  if (user.emailVerifiedAt) return res.json(generic);
+
+  await EmailVerificationToken.updateMany(
+    { userId: user._id, usedAt: null, expiresAt: { $gt: new Date() } },
+    { $set: { usedAt: new Date() } }
+  );
+
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const tokenHash = hashToken(rawToken);
+
+  const minutes = Number(process.env.EMAIL_VERIFY_TTL_MINUTES ?? "60");
+  const expiresAt = new Date(Date.now() + minutes * 60 * 1000);
+
+  await EmailVerificationToken.create({
+    userId: user._id,
+    tokenHash,
+    expiresAt,
+    usedAt: null,
+  });
+
+  const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://localhost:3000";
+  const verifyUrl = `${frontendOrigin}/verify-email?token=${encodeURIComponent(
+    rawToken
+  )}`;
+
+  await sendVerifyEmail(user.email, verifyUrl);
+
+  return res.json(generic);
+});
 
 export default router;

@@ -6,6 +6,7 @@ const userSchema = new Schema(
     passwordHash: { type: String, required: true },
     displayName: { type: String, trim: true, maxlength: 60, default: "" },
     roles: { type: [String], default: ["user"] },
+    emailVerifiedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
