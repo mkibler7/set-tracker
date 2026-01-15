@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AuthAPI } from "@/lib/api/apiAuth";
 
@@ -51,7 +52,7 @@ export default function LoginClient() {
     try {
       await AuthAPI.login({ email, password });
 
-      localStorage.setItem("had_session", "1");
+      localStorage.setItem("has_session", "1");
 
       // Hard navigation so middleware runs with the cookie
       window.location.assign(nextPath);
@@ -87,14 +88,14 @@ export default function LoginClient() {
           </div>
         ) : null}
 
-        <div className="space-y-1 text-sm">
-          <label htmlFor="email" className="block">
-            Email
+        <div className="space-y-1 text-sm text-foreground">
+          <label htmlFor="email" className="ml-2 block text-foreground">
+            E-mail
           </label>
           <input
             id="email"
             type="email"
-            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 mt-1 text-sm"
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -104,13 +105,13 @@ export default function LoginClient() {
         </div>
 
         <div className="space-y-1 text-sm">
-          <label htmlFor="password" className="block">
+          <label htmlFor="password" className="ml-2 block text-foreground">
             Password
           </label>
           <input
             id="password"
             type="password"
-            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 mt-1 text-sm"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -126,6 +127,28 @@ export default function LoginClient() {
         >
           {isSubmitting ? "Logging in..." : "Log In"}
         </button>
+
+        {/* Forgot password */}
+        <div className="text-center">
+          <Link
+            href={`/forgot-password?email=${encodeURIComponent(
+              email
+            )}&next=${encodeURIComponent(nextPath)}`}
+            className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
+
+        <div className="mb-4 border-t border-border" />
+
+        {/* Create account */}
+        <Link
+          href={`/signup?next=${encodeURIComponent(nextPath)}`}
+          className="block w-full rounded-md border border-border bg-card px-3 py-2 text-center text-sm font-medium text-foreground hover:bg-card/80"
+        >
+          Create new account
+        </Link>
       </form>
     </section>
   );

@@ -20,12 +20,6 @@ export function createApp() {
   app.use(cookieParser());
   app.use(express.json());
 
-  //  Test
-  // app.use((req, _res, next) => {
-  //   console.log("[REQ]", req.method, req.url);
-  //   next();
-  // });
-
   // Routes
   app.use("/api/auth", authRouter);
   app.use("/api/workouts", workoutsRouter);

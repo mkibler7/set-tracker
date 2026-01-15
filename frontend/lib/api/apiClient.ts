@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/store/authStore";
-
-const BASE = ""; // FORCE same-origin. Never call :5000 from the browser.
+console.log("NEXT_PUBLIC_API_BASE_URL =", process.env.NEXT_PUBLIC_API_BASE_URL);
+const BASE = "";
 
 export class ApiError extends Error {
   status: number;

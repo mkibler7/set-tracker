@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND = process.env.API_URL ?? "http://localhost:5000";
 
-// Logs once when the route module is loaded (server-side)
 console.log("[api-proxy] BACKEND =", BACKEND);
 
 type Ctx = { params: any };
@@ -27,13 +26,8 @@ async function forward(req: NextRequest, ctx: Ctx) {
   const params = await Promise.resolve(ctx.params);
   const segments: string[] = params?.path ?? [];
 
-  // segments example: ["auth","login"] or ["workouts"] or ["exercises","123"]
-  const [first, ...rest] = segments;
-
-  // Map /api/auth/* -> backend /auth/*
-  // Everything else stays under /api/*
-  const backendPath =
-    first === "auth" ? `/auth/${rest.join("/")}` : `/api/${segments.join("/")}`;
+  // Always forward /api/* to backend /api/*
+  const backendPath = `/api/${segments.join("/")}`;
 
   const url = new URL(req.url);
   const target = new URL(backendPath, BACKEND);
@@ -59,7 +53,13 @@ async function forward(req: NextRequest, ctx: Ctx) {
 
     // Copy headers except set-cookie, then append set-cookie(s)
     upstream.headers.forEach((value, key) => {
-      if (key.toLowerCase() === "set-cookie") return;
+      const k = key.toLowerCase();
+      if (k === "set-cookie") return;
+      // avoid hop-by-hop / problematic headers
+      if (k === "content-encoding") return;
+      if (k === "content-length") return;
+      if (k === "transfer-encoding") return;
+      if (k === "connection") return;
       res.headers.set(key, value);
     });
 
