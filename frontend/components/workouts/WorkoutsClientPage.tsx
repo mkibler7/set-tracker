@@ -11,7 +11,6 @@ import DeleteWorkoutModal from "@/components/workouts/DeleteWorkoutModal";
 import { WorkoutsFilters } from "@/components/workouts/WorkoutFilters";
 import { WorkoutList } from "@/components/workouts/WorkoutsList";
 import { Header } from "@/components/workouts/Header";
-import PageBackButton from "@/components/shared/PageBackButton";
 import ErrorState from "@/components/shared/ErrorState";
 import EmptyState from "../shared/EmptyState";
 import {
@@ -195,7 +194,6 @@ export default function WorkoutsClientPage() {
   if (error) {
     return (
       <main className="page">
-        <PageBackButton />
         <ErrorState
           title={getUserErrorTitle(error)}
           description={getUserErrorMessage(error)}
@@ -217,7 +215,6 @@ export default function WorkoutsClientPage() {
       {/* Header */}
 
       <div className="shrink-0">
-        <PageBackButton />
         <Header />
 
         {/* Filters */}

@@ -1,4 +1,3 @@
-import PageBackButton from "@/components/shared/PageBackButton";
 import Header from "@/components/exerciseInfo/Header";
 import ExerciseHistoryCard from "@/components/exerciseInfo/ExerciseHistoryCard";
 import ActiveLogExerciseCard from "@/components/exerciseInfo/ActiveLogExerciseCard";
@@ -56,7 +55,6 @@ export default async function ExerciseDetailPage({
     return (
       <main className="page">
         <div className="mx-auto w-full max-w-4xl">
-          <PageBackButton />
           <p>Exercise not found.</p>
         </div>
       </main>
@@ -96,9 +94,7 @@ export default async function ExerciseDetailPage({
 
   return (
     <main className="page">
-      <div className="mb-6">
-        <PageBackButton />
-      </div>
+      <div className="mb-6"></div>
 
       <Header exercise={exercise} />
 

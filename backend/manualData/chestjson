@@ -1,0 +1,177 @@
+[
+  {
+    "scope": "global",
+    "name": "Barbell Bench Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Lie on a flat bench with eyes under the bar. Feet planted, slight arch, shoulder blades squeezed down/back. Grip slightly wider than shoulders. \nExecution: Unrack, lower to mid-chest with elbows ~45-70° from torso, press up and slightly back to over shoulders."
+  },
+  {
+    "scope": "global",
+    "name": "Dumbbell Bench Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Lie on flat bench, dumbbells on thighs, retract/depress shoulders, feet planted. \nExecution: Kick dumbbells to start position, lower to chest line with controlled elbows, press up until arms are straight (don't slam together)"
+  },
+  {
+    "scope": "global",
+    "name": "Machine Chest Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Adjust seat so handles align with mid-chest. Back flat, shoulders down/back, neutral wrist. \nExecution: Press handles forward to near lockout, control the return until a chest stretch, repeat without bouncing."
+  },
+  {
+    "scope": "global",
+    "name": "Smith Machine Bench Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Flat bench centered under bar. Set hooks, align bar over mid-chest, feet planted, shoulders retracted. \nExecution: Unhook, lower to chest, press up along the fixed path to near lockout, rehook safely."
+  },
+  {
+    "scope": "global",
+    "name": "Incline Barbell Bench Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Bench at ~15-30°. Eyes under bar, feet planted, shoulders down/back, grip slightly wider than shoulders. \nExecution: Lower to upper chest/clavicle area, press up to over shoulders without flaring excessively."
+  },
+  {
+    "scope": "global",
+    "name": "Incline Dumbbell Bench Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Bench at ~15-30°. Dumbbells on thighs, shoulders set, feet planted. \nExecution: Bring dumbbells to start, lower to upper chest line, press up and slightly in, keeping control."
+  },
+  {
+    "scope": "global",
+    "name": "Incline Machine Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Adjust seat so handles match upper chest height; shoulder blades set and back supported. \nExecution: Press smoothly to near lockout, control back until you feel a stretch in upper chest."
+  },
+  {
+    "scope": "global",
+    "name": "Decline Barbell Bench Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Decline bench with leg anchors; eyes under bar, shoulders retracted, secure foot/leg position. \nExecution: Lower to lower chest/upper abdomen area, press up to over shoulders; keep wrists stacked."
+  },
+  {
+    "scope": "global",
+    "name": "Decline Dumbbell Bench Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Decline bench; secure legs; shoulder blades set; dumbbells start over lower chest line. \nExecution: Lower under control, press up to full extension without losing shoulder position."
+  },
+  {
+    "scope": "global",
+    "name": "Close-Grip Bench Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Flat bench, grip just inside shoulder width, shoulders retracted, elbows tucked more than standard bench. \nExecution: Lower to mid/lower chest, press up keeping elbows closer to torso to bias triceps."
+  },
+  {
+    "scope": "global",
+    "name": "Dumbbell Floor Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Lie on floor, knees bent, dumbbells held over chest, shoulders pinned to floor. \nExecution: Lower until triceps lightly contact floor, pause briefly, press back up—limited ROM reduces shoulder stress."
+  },
+  {
+    "scope": "global",
+    "name": "Push-Up",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Hands slightly wider than shoulders, body straight line, core braced, shoulders down/back. \nExecution: Lower chest toward floor with elbows ~30-60° from torso, press back up without sagging hips."
+  },
+  {
+    "scope": "global",
+    "name": "Incline Push-Up",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Hands on bench/box, body straight line from head to heels, shoulders set. \nExecution: Lower chest to the edge of the surface, press back up keeping body rigid."
+  },
+  {
+    "scope": "global",
+    "name": "Decline Push-Up",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Feet elevated on bench/box, hands on floor, tight core and glutes. \nExecution: Lower under control, press up—more upper chest/front delt demand than standard push-up."
+  },
+  {
+    "scope": "global",
+    "name": "Chest Dips",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Hands on dip bars, lock shoulders down, slight forward torso lean, legs tucked or crossed. \nExecution: Descend until a deep chest stretch (as tolerated), elbows flare slightly, drive up while maintaining forward lean."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Chest Fly",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders"],
+    "description": "Setup: Pulleys at mid-chest height. Step forward into staggered stance, slight torso lean, arms slightly bent. \nExecution: Bring handles together in front of chest, squeeze, return slowly to a stretched position without losing shoulder control."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Fly (low-to-high)",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Shoulders"],
+    "description": "Setup: Pulleys low. Step forward, arms slightly bent, shoulders down/back. \nExecution: Sweep handles upward and inward toward upper chest/face level, squeeze, return slowly to stretch."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Fly (high-to-low)",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Shoulders"],
+    "description": "Setup: Pulleys high. Step forward, brace core, slight bend in elbows. \nExecution: Sweep handles down and together toward lower chest/upper abs, squeeze, return under control."
+  },
+  {
+    "scope": "global",
+    "name": "Machine Fly",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders"],
+    "description": "Setup: Adjust the seat so the handles/forearm pads line up with mid-chest. Sit tall with your back against the pad, feet flat, and shoulder blades pulled down and back. Use a slight bend in the elbows and keep wrists neutral.\nExecution: Sweep the arms together in a wide arc until the handles/pads meet in front of your chest, squeeze briefly, then return slowly to the start until you feel a chest stretch. Keep the elbow bend consistent and avoid shrugging or letting the shoulders roll forward."
+  },
+  {
+    "scope": "global",
+    "name": "Pec Deck",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders"],
+    "description": "Setup: Set the seat height so the handles/pads are level with the middle of your chest. Sit with your back fully supported, chest up, and shoulder blades retracted and depressed. Maintain a slight elbow bend (or place forearms on the pads) and keep your wrists neutral.\nExecution: Bring the arms together in an arc until they meet in front of your chest, pause to squeeze the pecs, then return under control until you reach a comfortable stretch. Do not bounce at the end range and avoid letting your shoulders drift forward."
+  },
+  {
+    "scope": "global",
+    "name": "Dumbbell Fly (Flat Bench)",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders"],
+    "description": "Setup: Lie flat, dumbbells over chest, slight elbow bend “locked in,” shoulders retracted. \nExecution: Lower arms in a wide arc until chest stretch, keep bend constant, raise back to start by squeezing chest (not pressing)."
+  },
+  {
+    "scope": "global",
+    "name": "Incline Dumbbell Fly",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders"],
+    "description": "Setup: Incline bench 15-30°, shoulders set, dumbbells over upper chest. \nExecution: Lower wide in an arc to a deep upper-chest stretch, bring back up to start without clanking."
+  },
+  {
+    "scope": "global",
+    "name": "Decline Dumbbell Fly",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders"],
+    "description": "Setup: Decline bench, secure legs, shoulders down/back, slight elbow bend. \nExecution: Lower in an arc to stretch lower chest, raise back up smoothly with controlled shoulder position."
+  },
+  {
+    "scope": "global",
+    "name": "Smith Machine Incline Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Set an incline bench to about 15-30° and position it under the Smith bar so the bar will touch your upper chest at the bottom. Lie back with feet planted, slight arch, and shoulder blades pulled down and back. Grip the bar slightly wider than shoulder width with wrists stacked over forearms.\nExecution: Unrack the bar, lower it under control to the upper chest/clavicle line, then press up to near lockout along the fixed track. Keep your shoulders pinned back and avoid bouncing off the chest. Re-rack securely at the top."
+  },
+  {
+    "scope": "global",
+    "name": "Smith Machine Bench Press",
+    "primaryMuscleGroup": "Chest",
+    "secondaryMuscleGroups": ["Triceps", "Shoulders"],
+    "description": "Setup: Place a flat bench under the Smith bar and align it so the bar lowers to mid-chest at the bottom. Lie back with feet planted, slight arch, and shoulder blades retracted and depressed. Grip the bar slightly wider than shoulder width with wrists neutral and forearms vertical at the bottom.\nExecution: Unrack the bar, lower it slowly to mid-chest with elbows angled slightly out (not fully flared), then press up to near lockout along the fixed path. Maintain tight upper back position and do not let shoulders roll forward. Re-rack securely after the set."
+  }
+]

@@ -1,0 +1,219 @@
+[
+  {
+    "scope": "global",
+    "name": "Barbell Back Squat",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Hamstrings", "Abs"],
+    "description": "Setup: Set the bar in a rack at upper-chest height. Step under the bar with it resting across upper traps or rear delts, brace your core, and set feet about shoulder-width with toes slightly out. Unrack and take 1-2 steps back.\nExecution: Sit down and back while keeping knees tracking over toes and chest up. Descend to at least parallel (as mobility allows), then drive up through midfoot/heel to standing while maintaining a braced torso."
+  },
+  {
+    "scope": "global",
+    "name": "Barbell Front Squat",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Abs", "Traps"],
+    "description": "Setup: Rack the bar at shoulder height. Place the bar on the front delts with elbows high (front rack), feet shoulder-width, core braced.\nExecution: Squat straight down with an upright torso, knees over toes. Reach depth you can control, then drive up keeping elbows high and torso tall."
+  },
+  {
+    "scope": "global",
+    "name": "Goblet Squat",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Abs"],
+    "description": "Setup: Hold a dumbbell or kettlebell at chest height, elbows tucked. Stand with feet shoulder-width and toes slightly out, brace core.\nExecution: Sit down between your hips while keeping chest tall. Pause briefly at depth, then stand up by driving through feet and squeezing glutes."
+  },
+  {
+    "scope": "global",
+    "name": "Hack Squat (Machine)",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Hamstrings"],
+    "description": "Setup: Set shoulders under pads, back against the pad, and feet on the platform about shoulder-width. Unrack the machine and brace.\nExecution: Lower under control until knees are deeply bent as tolerated, then drive up through the platform to near lockout, keeping hips and back pinned."
+  },
+  {
+    "scope": "global",
+    "name": "Smith Machine Squat",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Hamstrings", "Abs"],
+    "description": "Setup: Position feet slightly forward of the bar path so you can squat comfortably. Place bar across upper back, brace core, and unrack.\nExecution: Descend under control keeping knees tracking over toes. Reach a depth you can maintain, then stand up by driving through the floor while staying braced."
+  },
+  {
+    "scope": "global",
+    "name": "Bulgarian Split Squat",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Hamstrings", "Adductors", "Abs"],
+    "description": "Setup: Stand a step in front of a bench and place the top of your rear foot on it. Front foot flat, torso tall, core braced (hold dumbbells if desired).\nExecution: Lower straight down until front thigh is near parallel and rear knee approaches the floor. Drive through the front foot to stand, keeping knee aligned over toes."
+  },
+  {
+    "scope": "global",
+    "name": "Walking Lunge",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Hamstrings", "Adductors", "Abs"],
+    "description": "Setup: Stand tall with feet hip-width and core braced (hold dumbbells on your sides, or a barbell on your back, if desired).\nExecution: Step forward into a lunge and lower until both knees are bent ~90°. Push through the front foot to bring the rear leg through into the next step, maintaining balance and control."
+  },
+  {
+    "scope": "global",
+    "name": "Reverse Lunge",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Hamstrings", "Abs"],
+    "description": "Setup: Stand tall with core braced (hold dumbbells on your sides, or a barbell on your back, if desired).\nExecution: Step one leg back and lower until front thigh is near parallel. Drive through the front foot to return to standing, then repeat on the other side."
+  },
+  {
+    "scope": "global",
+    "name": "Step-Up",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Hamstrings", "Abs"],
+    "description": "Setup: Stand in front of a box/bench at knee height or lower. Place one foot fully on the surface and brace core (hold dumbbells if desired).\nExecution: Drive through the planted foot to step up and stand tall on the box without pushing off excessively with the trailing leg. Step down under control and repeat."
+  },
+  {
+    "scope": "global",
+    "name": "Romanian Deadlift",
+    "primaryMuscleGroup": "Hamstrings",
+    "secondaryMuscleGroups": ["Glutes", "Abs"],
+    "description": "Setup: Hold a barbell or dumbbells with feet hip-width. Soft bend in knees, shoulders down/back, core braced.\nExecution: Hinge hips back while keeping spine neutral and weight close to legs. Lower until you feel a hamstring stretch, then drive hips forward to stand and squeeze glutes."
+  },
+  {
+    "scope": "global",
+    "name": "Stiff-Leg Deadlift",
+    "primaryMuscleGroup": "Hamstrings",
+    "secondaryMuscleGroups": ["Glutes", "Abs"],
+    "description": "Setup: Hold barbell or dumbbells with feet hip-width. Keep knees only slightly bent and torso braced.\nExecution: Hinge at the hips and lower weight down the legs with a neutral spine. Stop at a strong hamstring stretch, then return to standing by driving hips forward."
+  },
+  {
+    "scope": "global",
+    "name": "Barbell Deadlift (Conventional)",
+    "primaryMuscleGroup": "Glutes",
+    "secondaryMuscleGroups": ["Hamstrings", "Quads", "Back", "Traps", "Abs"],
+    "description": "Setup: Bar over midfoot, feet hip-width. Grip the bar, bring shins to bar, set back flat, brace core, and pull slack out of the bar.\nExecution: Push the floor away to stand, keeping bar close to the body. Lock out by squeezing glutes, then lower under control by hinging hips and bending knees."
+  },
+  {
+    "scope": "global",
+    "name": "Sumo Deadlift",
+    "primaryMuscleGroup": "Glutes",
+    "secondaryMuscleGroups": [
+      "Quads",
+      "Hamstrings",
+      "Adductors",
+      "Back",
+      "Traps",
+      "Abs"
+    ],
+    "description": "Setup: Take a wide stance with toes out, bar over midfoot. Grip inside legs, drop hips, brace core, chest up.\nExecution: Drive through the floor and extend hips/knees together, keeping bar close. Lock out with glutes, then lower under control while maintaining position."
+  },
+  {
+    "scope": "global",
+    "name": "Hip Thrust (Barbell)",
+    "primaryMuscleGroup": "Glutes",
+    "secondaryMuscleGroups": ["Hamstrings", "Abs"],
+    "description": "Setup: Upper back on a bench, barbell over hips with pad. Feet flat, about shoulder-width, shins near vertical at top, core braced.\nExecution: Drive through heels to lift hips until torso is parallel to the floor. Squeeze glutes at the top, then lower hips under control."
+  },
+  {
+    "scope": "global",
+    "name": "Glute Bridge",
+    "primaryMuscleGroup": "Glutes",
+    "secondaryMuscleGroups": ["Hamstrings", "Abs"],
+    "description": "Setup: Lie on your back with knees bent and feet flat near hips. Brace core and keep ribs down.\nExecution: Drive through heels to lift hips until you form a straight line from shoulders to knees. Squeeze glutes, then lower under control."
+  },
+  {
+    "scope": "global",
+    "name": "Leg Extension",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Adjust seat so knees line up with the machine pivot. Place the pad on the lower shin/ankle area and grip handles.\nExecution: Extend knees to lift the pad until legs are almost straight, squeeze quads, then lower slowly to the starting bend without bouncing."
+  },
+  {
+    "scope": "global",
+    "name": "Seated Leg Curl",
+    "primaryMuscleGroup": "Hamstrings",
+    "secondaryMuscleGroups": ["Calves"],
+    "description": "Setup: Adjust seat so knees align with machine pivot and the ankle pad sits just above heels. Lock thighs under the thigh pad and brace.\nExecution: Curl heels down/back to contract hamstrings, pause briefly, then return slowly to full extension without letting the stack slam."
+  },
+  {
+    "scope": "global",
+    "name": "Lying Leg Curl",
+    "primaryMuscleGroup": "Hamstrings",
+    "secondaryMuscleGroups": ["Calves"],
+    "description": "Setup: Lie face down with knees aligned to the machine pivot and pad positioned above heels. Keep hips pressed into the bench and grip handles.\nExecution: Curl heels toward glutes, squeeze hamstrings, then lower under control to the start without arching excessively."
+  },
+  {
+    "scope": "global",
+    "name": "Nordic Ham Curl",
+    "primaryMuscleGroup": "Hamstrings",
+    "secondaryMuscleGroups": ["Glutes", "Abs"],
+    "description": "Setup: Kneel with ankles secured under pads or held by a partner. Keep hips extended, torso tall, and core braced.\nExecution: Slowly lower your body forward under control, resisting with hamstrings. Catch yourself with hands as needed, then push lightly and pull back to the start."
+  },
+  {
+    "scope": "global",
+    "name": "Good Morning",
+    "primaryMuscleGroup": "Hamstrings",
+    "secondaryMuscleGroups": ["Glutes", "Abs", "Back"],
+    "description": "Setup: Place a barbell on your upper back like a squat. Feet hip-to-shoulder width, soft knees, brace core and set shoulders.\nExecution: Hinge hips back with a neutral spine until torso is near parallel (as mobility allows), then drive hips forward to return to standing."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Pull-Through",
+    "primaryMuscleGroup": "Glutes",
+    "secondaryMuscleGroups": ["Hamstrings", "Abs"],
+    "description": "Setup: Attach a rope to a low cable, face away from the stack, and step forward to create tension. Hold rope between legs, feet shoulder-width, brace core.\nExecution: Hinge hips back allowing rope to travel behind you, then drive hips forward to stand and squeeze glutes. Keep spine neutral throughout."
+  },
+  {
+    "scope": "global",
+    "name": "Standing Calf Raise",
+    "primaryMuscleGroup": "Calves",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Stand on a calf raise machine or a step with the balls of your feet on the edge and heels hanging free. Keep legs mostly straight and core braced.\nExecution: Rise onto toes as high as possible, pause/squeeze, then lower heels slowly below the step for a full stretch."
+  },
+  {
+    "scope": "global",
+    "name": "Seated Calf Raise",
+    "primaryMuscleGroup": "Calves",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Sit in the machine with knees under pads and balls of feet on the platform edge. Keep torso upright and feet planted.\nExecution: Raise heels to the top, pause/squeeze, then lower slowly into a deep stretch under the platform."
+  },
+  {
+    "scope": "global",
+    "name": "Abductor Machine",
+    "primaryMuscleGroup": "Abductors",
+    "secondaryMuscleGroups": ["Glutes"],
+    "description": "Setup: Sit in the hip abduction machine with pads against outer knees (or place a band above knees). Sit tall, brace core, and keep hips square.\nExecution: Drive knees outward to spread the pads/band, pause to squeeze, then return slowly under control without letting the weight stack slam."
+  },
+  {
+    "scope": "global",
+    "name": "Adductor Machine",
+    "primaryMuscleGroup": "Adductors",
+    "secondaryMuscleGroups": ["Glutes"],
+    "description": "Setup: Sit in the adductor machine and adjust the seat so your hips are comfortable and your knees rest against the pads. Set the starting width so you feel a mild inner-thigh stretch without pain. Sit tall with back supported, brace your core, and grip the handles.\nExecution: Squeeze your legs together to bring the pads inward until you reach a strong contraction in the inner thighs. Pause briefly, then return slowly to the start under control without letting the stack slam."
+  },
+  {
+    "scope": "global",
+    "name": "Leg Press (Feet High and Wide)",
+    "primaryMuscleGroup": "Glutes",
+    "secondaryMuscleGroups": ["Hamstrings", "Adductors"],
+    "description": "Setup: Sit in the leg press with hips and lower back flat against the pad. Place feet high on the platform and wider than shoulder width with toes slightly out. Unrack the sled and brace your core.\nExecution: Lower the sled until knees reach a comfortable depth without your hips lifting. Drive through heels to press the sled up to near lockout. Keep knees tracking over toes and maintain control throughout."
+  },
+  {
+    "scope": "global",
+    "name": "Leg Press (Feet Low and Wide)",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Adductors"],
+    "description": "Setup: Sit with hips and back pinned to the pad. Place feet lower on the platform and wider than shoulder width with toes slightly out. Unrack and brace.\nExecution: Lower the sled under control until you reach a strong knee bend without hips lifting. Press up by driving through midfoot, keeping knees tracking outward over toes. Stop just short of lockout and repeat smoothly."
+  },
+  {
+    "scope": "global",
+    "name": "Leg Press (Feet High and Neutral)",
+    "primaryMuscleGroup": "Glutes",
+    "secondaryMuscleGroups": ["Hamstrings", "Quads"],
+    "description": "Setup: Sit with hips and back flat against the pad. Place feet high on the platform at about shoulder width (neutral stance), toes slightly out or forward. Unrack and brace core.\nExecution: Lower the sled until you feel a controlled stretch and your hips stay down. Press up through heels to near lockout, keeping knees aligned with toes and avoiding bouncing at the bottom."
+  },
+  {
+    "scope": "global",
+    "name": "Leg Press (Feet Low and Neutral)",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Hamstrings"],
+    "description": "Setup: Sit with your lower back and hips firmly against the pad. Place feet lower on the platform at about shoulder width (neutral stance). Unrack the sled and brace.\nExecution: Lower under control to a comfortable depth with knees tracking over toes. Drive the platform away through midfoot to near lockout without snapping the knees, then repeat with smooth tempo."
+  },
+  {
+    "scope": "global",
+    "name": "Cannon Ball Leg Press (Feet Low and Close)",
+    "primaryMuscleGroup": "Quads",
+    "secondaryMuscleGroups": ["Glutes", "Calves"],
+    "description": "Setup: Sit in the leg press with hips and back pinned to the pad. Place feet low on the platform and close together (narrow stance), toes forward or slightly out. Use a manageable load and brace your core.\nExecution: Lower the sled under control to a comfortable depth while keeping knees tracking in line with toes (avoid collapsing inward). Press up through midfoot to near lockout, maintaining constant tension and a controlled pace."
+  }
+]

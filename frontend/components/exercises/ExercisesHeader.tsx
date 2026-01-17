@@ -1,5 +1,3 @@
-import PageBackButton from "@/components/shared/PageBackButton";
-
 type ExercisesHeaderProps = {
   search: string;
   onSearchChange: (newSearch: string) => void;
@@ -13,8 +11,6 @@ export default function ExercisesHeader({
 }: ExercisesHeaderProps) {
   return (
     <div>
-      <PageBackButton />
-
       <header className="mt-6 space-y-4 lg:max-w-2xl lg:mx-auto">
         {/* Row 1: Title + CTA */}
         <h1 className="text-2xl font-semibold tracking-tight text-foreground text-center w-full text-centersm:text-left">

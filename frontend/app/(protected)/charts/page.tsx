@@ -13,7 +13,6 @@ import AreaGraphTrainingVolume from "@/components/charts/AreaGraphTrainingVolume
 import { TrainingVolumeHeader } from "@/components/charts/TrainingVolumeHeader";
 import { TimeRangeToggle } from "@/components/charts/TimeRangeToggle";
 import { MuscleBreakdownSection } from "@/components/charts/MuscleBreakdownSection";
-import PageBackButton from "@/components/shared/PageBackButton";
 
 export default function ChartsPage() {
   const [range, setRange] = useState<TimeRange>("1M");
@@ -56,8 +55,6 @@ export default function ChartsPage() {
   return (
     <main>
       <div className="page space-y-6">
-        <PageBackButton />
-
         <TrainingVolumeHeader />
 
         {/* Training volume chart card:

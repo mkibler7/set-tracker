@@ -1,0 +1,157 @@
+[
+  {
+    "scope": "global",
+    "name": "Barbell Overhead Press",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Triceps", "Traps", "Abs"],
+    "description": "Setup: Stand with feet shoulder-width and bar racked at upper chest/clavicle level. Grip just outside shoulder width, elbows slightly in front of the bar, and brace your core.\nExecution: Press the bar straight up overhead, moving your head slightly back then through at the top. Lock out gently with biceps near ears, then lower under control back to the rack position."
+  },
+
+  {
+    "scope": "global",
+    "name": "Seated Dumbbell Shoulder Press",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Triceps", "Traps"],
+    "description": "Setup: Set a bench upright with back support. Sit tall with feet planted and dumbbells at shoulder height, wrists neutral.\nExecution: Press up overhead to near lockout, then lower under control until elbows are just below shoulder level. Keep ribs down and avoid flaring elbows excessively."
+  },
+  {
+    "scope": "global",
+    "name": "Machine Shoulder Press",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Triceps", "Traps"],
+    "description": "Setup: Adjust the seat so handles align with shoulder height. Sit with back supported, shoulders down/back, and grip handles with neutral wrists.\nExecution: Press handles overhead to near lockout, pause briefly, then lower slowly to the start position without letting the stack slam."
+  },
+  {
+    "scope": "global",
+    "name": "Arnold Press",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Triceps", "Traps"],
+    "description": "Setup: Sit or stand holding dumbbells in front of shoulders with palms facing you and elbows in. Brace core.\nExecution: Press up while rotating palms forward, finishing overhead. Reverse the motion on the way down, rotating back to the start under control."
+  },
+  {
+    "scope": "global",
+    "name": "Smith Machine Shoulder Press",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Triceps", "Traps"],
+    "description": "Setup: Place a bench upright under the Smith bar and set the seat so the bar starts near chin/upper chest level. Grip slightly wider than shoulders and brace.\nExecution: Unrack, press the bar overhead along the fixed track to near lockout, then lower under control to the start. Re-rack securely after the set."
+  },
+  {
+    "scope": "global",
+    "name": "Landmine Press",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Triceps", "Traps", "Abs"],
+    "description": "Setup: Place a barbell in a landmine attachment. Hold the end at shoulder height, take a staggered stance, and brace core with ribs down.\nExecution: Press the bar up and forward along the arc until arm is extended, then return under control to shoulder height. Resist leaning back."
+  },
+  {
+    "scope": "global",
+    "name": "Push Press",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Triceps", "Quads", "Glutes", "Abs", "Traps"],
+    "description": "Setup: Barbell racked at upper chest with feet shoulder-width. Brace core and keep elbows slightly forward.\nExecution: Dip slightly by bending knees, then drive up powerfully and press the bar overhead. Lower back to the rack position under control and reset each rep."
+  },
+  {
+    "scope": "global",
+    "name": "Dumbbell Shoulder Press (Standing)",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Triceps", "Traps", "Abs"],
+    "description": "Setup: Stand tall holding dumbbells at shoulder height, feet shoulder-width, core braced, glutes tight.\nExecution: Press dumbbells overhead to near lockout, then lower slowly back to shoulder height. Avoid leaning back and keep ribs down."
+  },
+  {
+    "scope": "global",
+    "name": "Shoulder Press (Plate-Loaded Machine)",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Triceps", "Traps"],
+    "description": "Setup: Adjust seat so handles start at shoulder height. Sit tall with back supported and shoulders set down/back.\nExecution: Press handles overhead to near lockout, pause briefly, then lower under control until you reach the start position."
+  },
+  {
+    "scope": "global",
+    "name": "Dumbbell Lateral Raise",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Traps"],
+    "description": "Setup: Stand tall holding dumbbells at sides with a slight bend in elbows. Brace core and keep shoulders down.\nExecution: Raise dumbbells out to the sides to shoulder height, leading with elbows. Pause briefly, then lower slowly without swinging."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Lateral Raise",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Traps", "Abs"],
+    "description": "Setup: Set a low cable with a single handle. Stand side-on to the stack, grab the handle with the outside hand, and brace core.\nExecution: Raise the arm out to the side to shoulder height with a slight elbow bend. Pause to squeeze, then lower slowly, keeping tension the entire time."
+  },
+  {
+    "scope": "global",
+    "name": "Machine Lateral Raise",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Traps"],
+    "description": "Setup: Adjust seat so elbows align with the machine pads/handles. Sit tall with back supported and shoulders down.\nExecution: Lift arms out to the sides to shoulder level, pause/squeeze, then lower under control without letting the stack slam."
+  },
+  {
+    "scope": "global",
+    "name": "Dumbbell Front Raise",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Traps"],
+    "description": "Setup: Stand tall holding dumbbells in front of thighs, palms facing body, core braced.\nExecution: Raise one or both dumbbells straight in front to shoulder height, pause briefly, then lower slowly without swinging or leaning back."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Front Raise",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Traps", "Abs"],
+    "description": "Setup: Attach a single handle to a low cable. Face away from the stack, hold the handle in front, and brace your core.\nExecution: Raise the handle forward to shoulder height with a controlled arm path. Pause, then lower slowly to maintain constant tension."
+  },
+  {
+    "scope": "global",
+    "name": "Rear Delt Fly (Dumbbell)",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Back", "Traps"],
+    "description": "Setup: Hinge at hips with a flat back and slight bend in knees. Hold dumbbells hanging below shoulders with palms facing each other.\nExecution: Sweep arms out wide, leading with elbows, until upper arms are in line with torso. Squeeze rear delts/upper back, then lower slowly."
+  },
+  {
+    "scope": "global",
+    "name": "Rear Delt Fly (Machine)",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Back", "Traps"],
+    "description": "Setup: Sit facing the machine with chest against the pad and handles at shoulder height. Keep shoulders down/back.\nExecution: Pull arms back in a wide arc until you feel a strong rear delt contraction, then return slowly to the start without letting shoulders shrug."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Rear Delt Fly",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Back", "Traps"],
+    "description": "Setup: Set two cables at about shoulder height and grab opposite handles (crossed). Step back slightly, arms extended with a soft elbow bend, core braced.\nExecution: Pull arms out and back in a wide arc until hands are out to your sides. Squeeze rear delts, then return slowly to the crossed start position."
+  },
+  {
+    "scope": "global",
+    "name": "Face Pull",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Back", "Traps", "Biceps"],
+    "description": "Setup: Attach a rope to a high cable at eye level. Grab ends, step back into a stable stance, and brace core.\nExecution: Pull rope toward your face while spreading hands apart and keeping elbows high. Squeeze rear delts/upper back, then return under control."
+  },
+  {
+    "scope": "global",
+    "name": "Upright Row (Cable)",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Traps", "Biceps"],
+    "description": "Setup: Attach a straight bar to a low cable. Stand tall with hands about shoulder-width and core braced.\nExecution: Pull the bar up along your torso to upper chest height, leading with elbows. Pause briefly, then lower slowly. Keep range comfortable."
+  },
+  {
+    "scope": "global",
+    "name": "Upright Row (EZ Bar)",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Traps", "Biceps"],
+    "description": "Setup: Stand holding an EZ bar with hands about shoulder-width. Brace core and keep bar close to thighs.\nExecution: Pull the bar up to upper chest height by driving elbows up and out. Pause, then lower under control. Use a comfortable range of motion."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Y-Raise",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Traps", "Abs"],
+    "description": "Setup: Set cables low with single handles. Stand centered, hinge slightly at hips, and brace core. Start with hands in front of thighs.\nExecution: Raise arms up and out into a 'Y' pattern to about head height, keeping thumbs slightly up. Pause/squeeze, then lower slowly with control."
+  },
+  {
+    "scope": "global",
+    "name": "Dumbbell Y-Raise",
+    "primaryMuscleGroup": "Shoulders",
+    "secondaryMuscleGroups": ["Traps"],
+    "description": "Setup: Lie chest-down on an incline bench or hinge forward slightly while holding light dumbbells. Keep thumbs up and shoulders down.\nExecution: Raise arms up and out into a 'Y' shape until you feel upper back/rear delt engagement. Pause, then lower slowly without swinging."
+  }
+]

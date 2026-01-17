@@ -9,7 +9,6 @@ import { formatExerciseMuscleLabel } from "@/lib/util/exercises";
 import type { Workout, WorkoutExercise } from "@/types/workout";
 import { formatWorkoutDate } from "@/lib/util/date";
 import { exerciseVolume } from "@/lib/workouts/stats";
-import PageBackButton from "@/components/shared/PageBackButton";
 import WorkoutExerciseCard from "@/components/workouts/WorkoutExerciseCard";
 
 export default function WorkoutDetailPage() {
@@ -73,7 +72,6 @@ export default function WorkoutDetailPage() {
     return (
       <main className="flex h-full flex-col px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-4xl">
-          <PageBackButton />
           <div className="rounded-lg border border-border bg-card/60 p-6 text-sm text-muted-foreground">
             Workout not found.
           </div>
@@ -97,9 +95,7 @@ export default function WorkoutDetailPage() {
   return (
     <main className="page">
       <header className="mb-6">
-        <div className="flex items-center justify-between gap-2">
-          <PageBackButton />
-        </div>
+        <div className="flex items-center justify-between gap-2"></div>
 
         <p className="mb-2 text-sm tracking-tight text-muted-foreground">
           Completed workout:

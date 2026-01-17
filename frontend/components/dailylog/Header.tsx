@@ -2,7 +2,6 @@
 
 import React from "react";
 import EditIcon from "../icons/edit-icon";
-import PageBackButton from "@/components/shared/PageBackButton";
 
 type HeaderProps = {
   title: string;
@@ -28,8 +27,6 @@ export default function Header({
 
   return (
     <div>
-      <PageBackButton />
-
       {/* Centered title + edit + add exercise */}
       <div className="mb-4 mt-1 flex flex-col items-center gap-3">
         {/* Title + edit */}

@@ -5,7 +5,6 @@ import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import ErrorState from "@/components/shared/ErrorState";
-import PageBackButton from "@/components/shared/PageBackButton";
 import { StatTile } from "@/components/ui/StatTile";
 import { PageSectionTitle } from "@/components/ui/PageSectionTitle";
 import { WorkoutCard } from "@/components/dashboard/WorkoutCard";
@@ -114,8 +113,6 @@ export default function DashboardClient() {
 
   return (
     <main className="page">
-      <PageBackButton />
-
       {/* Header */}
       <section className="mt-8 flex flex-col items-center text-center justify-between gap-4 sm:flex-row sm:items-center">
         <div className="w-full flex text-center justify-center items-center">

@@ -1,0 +1,191 @@
+[
+  {
+    "scope": "global",
+    "name": "Pull-Up",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps", "Abs"],
+    "description": "Setup: Grip a pull-up bar slightly wider than shoulder width with palms facing away. Hang with arms straight, shoulders pulled down (avoid shrugging), and core braced.\nExecution: Pull your chest toward the bar by driving elbows down and back. Pause briefly at the top, then lower under control to a full hang without swinging."
+  },
+  {
+    "scope": "global",
+    "name": "Chin-Up",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps", "Abs"],
+    "description": "Setup: Grip the bar about shoulder width with palms facing you. Start from a dead hang with shoulders down and core tight.\nExecution: Pull up by driving elbows down, bringing chin over the bar. Lower slowly to full extension, keeping body controlled and minimizing swing."
+  },
+  {
+    "scope": "global",
+    "name": "Lat Pulldown",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps"],
+    "description": "Setup: Sit at the pulldown station with thighs secured under pads. Grip the bar slightly wider than shoulder width, chest tall, and shoulders pulled down/back.\nExecution: Pull the bar to the upper chest by driving elbows down and slightly back. Pause to squeeze lats, then return the bar upward under control without leaning excessively."
+  },
+  {
+    "scope": "global",
+    "name": "Close-Grip Lat Pulldown",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps"],
+    "description": "Setup: Attach a close-grip handle or use a narrow grip on the bar. Sit tall with thighs secured, shoulders down/back.\nExecution: Pull the handle toward the upper chest, keeping elbows tucked. Squeeze the lats, then return slowly to a full stretch without letting shoulders shrug."
+  },
+  {
+    "scope": "global",
+    "name": "Single-Arm Lat Pulldown",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Abs"],
+    "description": "Setup: Use a single handle on a high cable. Sit or kneel with a stable torso and brace your core. Start with arm overhead and shoulder pulled down.\nExecution: Pull the handle down toward your shoulder/upper chest by driving the elbow down. Pause to squeeze the lat, then return under control to a full stretch."
+  },
+  {
+    "scope": "global",
+    "name": "Seated Cable Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps"],
+    "description": "Setup: Sit at a cable row station with feet braced on the platform. Grab the handle with a neutral grip, sit tall, and brace core with shoulders down/back.\nExecution: Row the handle toward your lower ribs/upper abs, driving elbows back. Squeeze shoulder blades together, then extend arms forward under control without rounding your back."
+  },
+  {
+    "scope": "global",
+    "name": "Close-Grip Seated Cable Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps"],
+    "description": "Setup: Use a V-handle (neutral close grip). Sit tall with chest up, shoulders down/back, and core braced.\nExecution: Pull handle to the lower ribs with elbows close to your sides. Pause to squeeze lats, then return slowly to a full stretch without rocking."
+  },
+  {
+    "scope": "global",
+    "name": "Wide-Grip Seated Cable Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps"],
+    "description": "Setup: Attach a wide bar and sit tall with neutral spine. Take a wide grip, shoulders set down/back.\nExecution: Row toward upper abs/lower chest, keeping elbows flared slightly. Squeeze upper back, then return under control to full extension without leaning back excessively."
+  },
+  {
+    "scope": "global",
+    "name": "Barbell Bent-Over Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps", "Abs"],
+    "description": "Setup: Hold a barbell with hands just outside shoulder width. Hinge at hips until torso is near parallel, knees slightly bent, spine neutral, core braced.\nExecution: Row the bar to your lower ribs/upper abs by driving elbows back. Pause to squeeze the back, then lower the bar under control without losing torso position."
+  },
+  {
+    "scope": "global",
+    "name": "Dumbbell Bent-Over Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps", "Abs"],
+    "description": "Setup: Hold dumbbells at your sides. Hinge at hips with a flat back, knees softly bent, core braced.\nExecution: Row dumbbells toward your hips/ribs, keeping elbows close. Squeeze the back, then lower slowly to full arm extension without rounding."
+  },
+  {
+    "scope": "global",
+    "name": "Single-Arm Dumbbell Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps", "Abs"],
+    "description": "Setup: Support one hand and knee on a bench, other foot on the floor. Keep spine neutral and shoulders square. Hold a dumbbell in the free hand.\nExecution: Pull the dumbbell toward your hip by driving elbow up and back. Pause to squeeze the lat, then lower under control to a full stretch."
+  },
+  {
+    "scope": "global",
+    "name": "Chest-Supported Dumbbell Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps"],
+    "description": "Setup: Set an incline bench to ~30–45° and lie chest-down with feet planted. Hold dumbbells with arms hanging straight.\nExecution: Row dumbbells up toward the lower ribs, squeezing shoulder blades back. Lower slowly to full extension while keeping chest against the pad."
+  },
+  {
+    "scope": "global",
+    "name": "T-Bar Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps", "Abs"],
+    "description": "Setup: Straddle a T-bar row station or landmine setup. Hinge at hips with a neutral spine and brace core. Grip the handles.\nExecution: Pull the handle toward your midsection by driving elbows back. Squeeze the back at the top, then lower under control without jerking."
+  },
+  {
+    "scope": "global",
+    "name": "Machine Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps"],
+    "description": "Setup: Adjust seat/chest pad so handles line up comfortably with your torso. Sit tall with chest supported and shoulders down/back.\nExecution: Pull handles toward your ribs by driving elbows back. Pause to squeeze the back, then return slowly until arms are extended without letting shoulders shrug."
+  },
+  {
+    "scope": "global",
+    "name": "Iso-Lateral Machine Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps"],
+    "description": "Setup: Sit in the iso-lateral row machine with chest supported and handles at a comfortable height. Set shoulders down/back and brace core.\nExecution: Row one or both arms toward your ribs, focusing on elbow drive and scapular retraction. Return under control to a full stretch, keeping torso stable."
+  },
+  {
+    "scope": "global",
+    "name": "Inverted Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps", "Abs"],
+    "description": "Setup: Set a bar in a rack at waist height. Lie underneath and grip the bar with hands shoulder-width. Keep body in a straight line with heels on the floor.\nExecution: Pull your chest to the bar by driving elbows back and squeezing shoulder blades. Lower under control to full arm extension without letting hips sag."
+  },
+  {
+    "scope": "global",
+    "name": "Straight-Arm Cable Pulldown",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Shoulders", "Triceps", "Abs"],
+    "description": "Setup: Attach a straight bar or rope to a high cable. Stand tall with slight hip hinge, arms straight, shoulders pulled down.\nExecution: Pull the bar down to thighs using lats (keep elbows mostly straight). Pause to squeeze, then return slowly overhead without shrugging."
+  },
+  {
+    "scope": "global",
+    "name": "Dumbbell Pullover",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Chest", "Triceps", "Abs"],
+    "description": "Setup: Lie on a bench holding one dumbbell with both hands over your chest. Slight bend in elbows and core braced.\nExecution: Lower the dumbbell back overhead until you feel a stretch in lats/chest, then pull it back over your chest under control without flaring ribs."
+  },
+  {
+    "scope": "global",
+    "name": "Face Pull",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Shoulders", "Traps", "Biceps"],
+    "description": "Setup: Attach a rope to a high cable at eye level. Grab ends with thumbs pointing back, step into a stable stance, and brace core.\nExecution: Pull the rope toward your face while spreading hands apart and rotating elbows out. Squeeze upper back/rear delts, then return slowly with control."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Row (Wide Grip to Chest)",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps"],
+    "description": "Setup: Attach a wide bar to a seated row and sit tall with neutral spine. Take a wide grip, shoulders down/back.\nExecution: Row the bar toward your lower chest/upper abs, driving elbows back and slightly out. Pause to squeeze upper back, then return slowly to full extension."
+  },
+  {
+    "scope": "global",
+    "name": "Shrug (Dumbbell)",
+    "primaryMuscleGroup": "Traps",
+    "secondaryMuscleGroups": ["Back", "Shoulders"],
+    "description": "Setup: Stand tall holding dumbbells at your sides with arms straight and core braced. Keep shoulders neutral and chest up.\nExecution: Elevate shoulders straight up toward ears, pause/squeeze traps, then lower slowly to full stretch without rolling shoulders forward."
+  },
+  {
+    "scope": "global",
+    "name": "Shrug (Barbell)",
+    "primaryMuscleGroup": "Traps",
+    "secondaryMuscleGroups": ["Back", "Shoulders"],
+    "description": "Setup: Stand tall holding a barbell in front of thighs with hands just outside shoulder width. Brace core and keep arms straight.\nExecution: Shrug shoulders straight up, squeeze traps briefly, then lower under control. Avoid bending elbows or rolling shoulders."
+  },
+  {
+    "scope": "global",
+    "name": "Rack Pull",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Glutes", "Hamstrings", "Traps", "Abs"],
+    "description": "Setup: Set a barbell on safety pins just below knee to mid-shin height. Stand with bar over midfoot, grip the bar, set back flat, and brace core.\nExecution: Drive through the floor to stand tall, keeping the bar close. Lock out by squeezing glutes and bracing, then lower back to pins under control."
+  },
+  {
+    "scope": "global",
+    "name": "Barbell Deadlift(Conventional)",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Glutes", "Hamstrings", "Quads", "Traps", "Abs"],
+    "description": "Setup: Bar over midfoot, feet hip-width. Grip the bar, bring shins to bar, set back neutral, brace core, and pull slack out.\nExecution: Push the floor away to stand, keeping the bar close and torso tight. Lock out by squeezing glutes, then lower under control with a hip hinge and knee bend."
+  },
+  {
+    "scope": "global",
+    "name": "Reverse-Grip Lat Pulldown",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps"],
+    "description": "Setup: Sit at a lat pulldown station with thighs secured under the pads. Grab the bar with a shoulder-width underhand (palms-up) grip, chest tall, and shoulders pulled down and back.\nExecution: Pull the bar down toward the upper chest by driving elbows down and slightly back while keeping the torso mostly upright. Pause to squeeze the lats, then return the bar upward under control to a full stretch without shrugging."
+  },
+  {
+    "scope": "global",
+    "name": "Single-Arm Cable Row",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Biceps", "Shoulders", "Traps", "Abs"],
+    "description": "Setup: Attach a single handle to a seated row cable. Sit tall with feet braced, grab the handle with one hand, and square your shoulders and hips. Brace your core and set the working shoulder down and back.\nExecution: Row the handle toward your lower ribs/hip by driving the elbow back while resisting torso rotation. Squeeze the back at the end range, then extend the arm forward under control to a full stretch without rounding."
+  },
+  {
+    "scope": "global",
+    "name": "Straight-Arm EZ Bar Pulldown",
+    "primaryMuscleGroup": "Back",
+    "secondaryMuscleGroups": ["Abs", "Shoulders", "Triceps"],
+    "description": "Setup: Attach an EZ bar to a high cable. Stand with feet shoulder-width, slight hip hinge, arms straight, and shoulders pulled down (not shrugged). Brace your core and keep ribs down.\nExecution: Keeping elbows mostly straight, pull the bar down in an arc to your thighs using your lats. Pause to squeeze at the bottom, then return slowly to the start position with control without letting shoulders rise."
+  }
+]

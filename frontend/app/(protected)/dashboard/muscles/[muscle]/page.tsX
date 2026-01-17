@@ -1,5 +1,3 @@
-import PageBackButton from "../../../../../components/shared/PageBackButton";
-
 export default function MuscleAnalyticsPage({
   params,
 }: {
@@ -10,8 +8,6 @@ export default function MuscleAnalyticsPage({
 
   return (
     <main className="page">
-      <PageBackButton />
-
       <h1 className="text-2xl font-semibold text-foreground mb-2">{label}</h1>
 
       <p className="text-sm text-muted-foreground mb-6">
