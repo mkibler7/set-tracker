@@ -57,6 +57,19 @@ export default function DailyLogClientPage() {
   const [exercisesLoading, setExercisesLoading] = useState(false);
   const [exercisesError, setExercisesError] = useState<string | null>(null);
 
+  function toYYYYMMDDUTC(value: string | Date) {
+    const d = value instanceof Date ? value : new Date(value);
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function fromYYYYMMDDToUTCNoon(yyyyMmDd: string) {
+    // store as UTC noon to avoid day-shift
+    return new Date(`${yyyyMmDd}T12:00:00.000Z`);
+  }
+
   // Load exercise catalog once (client-side)
   useEffect(() => {
     let cancelled = false;
@@ -100,16 +113,6 @@ export default function DailyLogClientPage() {
         }
 
         const workout = await WorkoutsAPI.get(fromWorkoutId);
-
-        // TESTING
-        console.log(
-          "API workout first set:",
-          workout.exercises?.[0]?.sets?.[0],
-        );
-        console.log(
-          "API set ids:",
-          workout.exercises?.[0]?.sets?.map((s: any) => s.id),
-        );
 
         if (cancelled) return;
 
@@ -289,6 +292,18 @@ export default function DailyLogClientPage() {
           onAddExercise={
             step === "session" ? () => setIsPickerOpen(true) : undefined
           }
+          canEditDate={isEditingHistory && step === "session"}
+          onCommitDate={(ymd) => {
+            if (!isEditingHistory) return;
+
+            const next = fromYYYYMMDDToUTCNoon(ymd);
+            setWorkoutDate(next);
+
+            // Persist into edit draft so Save Workout uses it
+            useWorkoutStore.getState().updateEditMeta({
+              date: next.toISOString(),
+            });
+          }}
         />
 
         {step === "empty" && (

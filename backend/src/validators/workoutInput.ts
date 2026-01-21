@@ -5,6 +5,10 @@ import type {
   WorkoutSetInput,
 } from "../services/workoutsService.js";
 
+function badRequest(message: string) {
+  return Object.assign(new Error(message), { status: 400 });
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -27,17 +31,61 @@ function assert(condition: any, message: string): asserts condition {
   if (!condition) throw Object.assign(new Error(message), { status: 400 });
 }
 
+/**
+ * Accepts either:
+ * - "YYYY-MM-DD" (preferred for calendar-day semantics)
+ * - any Date-parseable string (fallback)
+ *
+ * Normalizes "YYYY-MM-DD" to UTC noon to avoid timezone day-shift.
+ */
+function parseCalendarDate(
+  value: unknown,
+  required: boolean,
+): Date | undefined {
+  if (value === null || value === undefined) {
+    if (required) throw badRequest("date is required and must be valid");
+    return undefined;
+  }
+
+  // If client ever sends a Date object (unlikely over JSON), accept it.
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) throw badRequest("date must be valid");
+    return value;
+  }
+
+  const raw = trimString(value);
+  if (!raw) {
+    if (required) throw badRequest("date is required and must be valid");
+    return undefined;
+  }
+
+  // Preferred: YYYY-MM-DD from <input type="date">
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  if (m) {
+    const [, y, mo, d] = m;
+    const iso = `${y}-${mo}-${d}T12:00:00.000Z`; // UTC noon avoids day drift
+    const dt = new Date(iso);
+    if (Number.isNaN(dt.getTime())) throw badRequest("date must be valid");
+    return dt;
+  }
+
+  // Fallback: allow ISO timestamps, etc.
+  const dt = new Date(raw);
+  if (Number.isNaN(dt.getTime()))
+    throw badRequest(
+      required ? "date is required and must be valid" : "date must be valid",
+    );
+  return dt;
+}
+
 function parseDateRequired(value: unknown): Date {
-  const date = value instanceof Date ? value : new Date(String(value));
-  assert(!Number.isNaN(date.getTime()), "date is required and must be valid");
-  return date;
+  const dt = parseCalendarDate(value, true);
+  // dt will never be undefined when required=true
+  return dt!;
 }
 
 function parseDateOptional(value: unknown): Date | undefined {
-  if (value === null || value === undefined) return undefined;
-  const date = value instanceof Date ? value : new Date(String(value));
-  assert(!Number.isNaN(date.getTime()), "date must be valid");
-  return date;
+  return parseCalendarDate(value, false);
 }
 
 function parseMuscleGroupsRequired(value: unknown): string[] {
@@ -63,11 +111,11 @@ function parseSetsRequired(value: unknown): WorkoutSetInput[] {
 
     assert(
       Number.isFinite(weight) && weight > 0,
-      "set weight must be a positive number"
+      "set weight must be a positive number",
     );
     assert(
       Number.isFinite(reps) && reps > 0,
-      "set reps must be a positive number"
+      "set reps must be a positive number",
     );
 
     const tempo = toOptionalTrimmedString(set.tempo);
@@ -77,7 +125,7 @@ function parseSetsRequired(value: unknown): WorkoutSetInput[] {
     if (rpe !== undefined) {
       assert(
         Number.isFinite(rpe) && rpe >= 1 && rpe <= 10,
-        "set rpe must be between 1 and 10"
+        "set rpe must be between 1 and 10",
       );
     }
     return {
@@ -110,7 +158,7 @@ function parseExercsisesRequired(value: unknown): WorkoutExerciseInput[] {
 }
 
 function parseExercisesOptional(
-  value: unknown
+  value: unknown,
 ): WorkoutExerciseInput[] | undefined {
   if (value === null || value === undefined) return undefined;
   return parseExercsisesRequired(value);
@@ -150,7 +198,7 @@ export function parseUpdateWorkoutInput(body: unknown): UpdateWorkoutInput {
   // require at least on field for update
   assert(
     Object.keys(updated).length > 0,
-    "At least one field (date, muscleGroups, exercises) must be provided for update"
+    "At least one field (date, muscleGroups, exercises) must be provided for update",
   );
   return updated;
 }

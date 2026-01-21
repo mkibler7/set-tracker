@@ -2,6 +2,7 @@
 
 import React from "react";
 import EditIcon from "../icons/edit-icon";
+import WorkoutDateEditor from "./WorkoutDateEditor";
 
 type HeaderProps = {
   title: string;
@@ -9,6 +10,10 @@ type HeaderProps = {
   isSession: boolean;
   onEditSplit?: () => void;
   onAddExercise?: () => void;
+
+  // date editing (only for history edits)
+  canEditDate?: boolean;
+  onCommitDate?: (ymd: string) => void; // YYYY-MM-DD
 };
 
 export default function Header({
@@ -17,22 +22,15 @@ export default function Header({
   isSession,
   onEditSplit,
   onAddExercise,
+  canEditDate,
+  onCommitDate,
 }: HeaderProps) {
-  const formattedDate = date.toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-
   return (
     <div>
-      {/* Centered title + edit + add exercise */}
       <div className="mb-4 mt-1 flex flex-col items-center gap-3">
-        {/* Title + edit */}
         <div className="flex items-center gap-2">
           <h1
-            className="max-w-[80vw] truncate text-center text-2xl font-semibold tracking-tight text-foreground my-2"
+            className="my-2 max-w-[80vw] truncate text-center text-2xl font-semibold tracking-tight text-foreground"
             title={title}
           >
             {title}
@@ -49,7 +47,6 @@ export default function Header({
           )}
         </div>
 
-        {/* Add Exercise – centered, with a sensible max width */}
         {isSession && onAddExercise && (
           <button
             type="button"
@@ -61,10 +58,13 @@ export default function Header({
         )}
       </div>
 
-      {/* Centered date line */}
-      <p className="mb-6 text-center text-sm text-muted-foreground">
-        {formattedDate} • Workout
-      </p>
+      <div className="mb-6 flex items-center justify-center">
+        <WorkoutDateEditor
+          date={date}
+          canEdit={!!canEditDate}
+          onCommitDate={(ymd) => onCommitDate?.(ymd)}
+        />
+      </div>
     </div>
   );
 }
