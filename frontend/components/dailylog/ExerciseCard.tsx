@@ -37,6 +37,12 @@ export default function ExerciseCard({
   useEffect(() => {
     let cancelled = false;
 
+    console.log("[ExerciseCard] fetching exercise", {
+      exerciseId: exercise.exerciseId,
+      url: `/api/exercises/${exercise.exerciseId}`,
+      origin: typeof window !== "undefined" ? window.location.origin : "server",
+    });
+
     (async () => {
       try {
         const exDoc = await ExerciseAPI.get(exercise.exerciseId);
