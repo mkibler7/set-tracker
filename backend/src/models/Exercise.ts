@@ -1,4 +1,5 @@
 import mongoose, { type InferSchemaType, Model } from "mongoose";
+import { normalizeExerciseName } from "../utils/exerciseName.js";
 import {
   ALL_MUSCLE_GROUPS,
   type MuscleGroup,
@@ -39,7 +40,7 @@ const ExerciseSchema = new mongoose.Schema({
         if (!Array.isArray(arr)) return false;
         // all valid muscle groups, no duplicates, and not the same as primary handled below
         const allValid = arr.every((string) =>
-          ALL_MUSCLE_GROUPS.includes(string as MuscleGroup)
+          ALL_MUSCLE_GROUPS.includes(string as MuscleGroup),
         );
         const uniqueCount = new Set(arr).size === arr.length;
         return allValid && uniqueCount;
@@ -51,16 +52,42 @@ const ExerciseSchema = new mongoose.Schema({
   description: { type: String, trim: true, maxlength: 2000 },
 });
 
+ExerciseSchema.pre("validate", function (next) {
+  if (typeof this.name === "string") {
+    this.name = normalizeExerciseName(this.name);
+  }
+  next();
+});
+
+ExerciseSchema.pre(
+  ["findOneAndUpdate", "updateOne", "updateMany"],
+  function (next) {
+    const update: any = this.getUpdate?.();
+    if (!update) return next();
+
+    // Support both direct updates and $set updates
+    const name = update.name ?? update.$set?.name;
+    if (typeof name === "string") {
+      const normalized = normalizeExerciseName(name);
+      if (update.name) update.name = normalized;
+      if (update.$set?.name) update.$set.name = normalized;
+      this.setUpdate(update);
+    }
+
+    next();
+  },
+);
+
 // Unique for global: (scope, name) when scope === "global"
 ExerciseSchema.index(
   { scope: 1, name: 1 },
-  { unique: true, partialFilterExpression: { scope: "global" } }
+  { unique: true, partialFilterExpression: { scope: "global" } },
 );
 
 // Unique for user: (userId, name) when scope === "user"
 ExerciseSchema.index(
   { userId: 1, name: 1 },
-  { unique: true, partialFilterExpression: { scope: "user" } }
+  { unique: true, partialFilterExpression: { scope: "user" } },
 );
 
 type ExerciseDoc = InferSchemaType<typeof ExerciseSchema>;

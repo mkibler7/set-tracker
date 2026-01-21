@@ -56,7 +56,7 @@ router.get(
         .status(err?.status ?? 500)
         .json({ message: err instanceof Error ? err.message : String(err) });
     }
-  }
+  },
 );
 
 // Get exercise history by ID
@@ -72,7 +72,7 @@ router.get(
         .status(err?.status ?? 500)
         .json({ message: err instanceof Error ? err.message : String(err) });
     }
-  }
+  },
 );
 
 // Create new exercise
