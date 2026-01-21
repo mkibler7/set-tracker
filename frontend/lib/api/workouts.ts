@@ -2,42 +2,66 @@ import { apiClient } from "@/lib/api/apiClient";
 import type { Workout } from "@/types/workout";
 import { MuscleGroup } from "@reptracker/shared/muscles";
 
+function normalizeWorkout(raw: any): Workout {
+  return {
+    ...raw,
+    id: raw.id ?? raw._id,
+    exercises: (raw.exercises ?? []).map((exercise: any) => ({
+      ...exercise,
+      id: exercise.id ?? exercise._id,
+      sets: (exercise.sets ?? []).map((set: any) => ({
+        ...set,
+        id: set.id ?? set._id,
+      })),
+    })),
+  } as Workout;
+}
+
 export const WorkoutsAPI = {
   // Fetch a list of all workouts
-  list: () => apiClient<Workout[]>("/api/workouts"),
+  list: async () => {
+    const data = await apiClient<Workout[]>("/api/workouts");
+    return data.map(normalizeWorkout);
+  },
 
   // Fetch a single workout by ID
-  get: (id: string) => apiClient<Workout>(`/api/workouts/${id}`),
+  get: async (id: string) => {
+    const data = await apiClient<Workout>(`/api/workouts/${id}`);
+    return normalizeWorkout(data);
+  },
 
   // Create a new workout
-  create: (payload: {
+  create: async (payload: {
     date: string;
     muscleGroups: MuscleGroup[];
     exercises: Workout["exercises"];
-  }) =>
-    apiClient<Workout>("/api/workouts", {
+  }) => {
+    const data = await apiClient<Workout>("/api/workouts", {
       method: "POST",
       body: JSON.stringify(payload),
-    }),
+    });
+    return normalizeWorkout(data);
+  },
 
   // Update an existing workout using ID
-  update: (
+  update: async (
     id: string,
     payload: {
       date?: string;
       muscleGroups?: MuscleGroup[];
       exercises?: Workout["exercises"];
-    }
+    },
   ) => {
     if (!payload.date && !payload.muscleGroups && !payload.exercises) {
       throw new Error(
-        "At least one field must be provided to update a workout."
+        "At least one field must be provided to update a workout.",
       );
     }
-    return apiClient<Workout>(`/api/workouts/${id}`, {
+    const data = await apiClient<Workout>(`/api/workouts/${id}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
+    return normalizeWorkout(data);
   },
 
   // Delete a workout by ID

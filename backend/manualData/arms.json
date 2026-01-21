@@ -1,0 +1,275 @@
+[
+  {
+    "scope": "global",
+    "name": "Barbell Bicep Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Stand tall holding a barbell with an underhand grip about shoulder-width. Keep elbows pinned to your sides, chest up, and core braced.\nExecution: Curl the bar up toward your shoulders without swinging, pause to squeeze, then lower slowly to full elbow extension."
+  },
+  {
+    "scope": "global",
+    "name": "EZ Bar Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Stand holding an EZ bar with an underhand grip on the angled portions. Keep elbows tucked and shoulders down.\nExecution: Curl to shoulder height, squeeze, then lower under control without rocking your torso."
+  },
+  {
+    "scope": "global",
+    "name": "Dumbbell Bicep Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Stand with dumbbells at your sides, palms forward, elbows close to torso, core braced.\nExecution: Curl both dumbbells up, squeeze at the top, then lower slowly to full extension without swinging."
+  },
+  {
+    "scope": "global",
+    "name": "Alternating Dumbbell Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Stand tall with dumbbells at your sides, elbows tucked, shoulders down.\nExecution: Curl one dumbbell up while the other stays down, squeeze, then lower under control and alternate sides."
+  },
+  {
+    "scope": "global",
+    "name": "Hammer Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Stand holding dumbbells with a neutral grip (palms facing each other). Keep elbows at your sides and core braced.\nExecution: Curl the dumbbells up without rotating the wrists, squeeze, then lower slowly to full extension."
+  },
+  {
+    "scope": "global",
+    "name": "Cross-Body Hammer Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Stand with dumbbells in a neutral grip, elbows tucked, core tight.\nExecution: Curl one dumbbell across your body toward the opposite shoulder, squeeze, then lower under control and alternate."
+  },
+  {
+    "scope": "global",
+    "name": "Preacher Curl (EZ Bar)",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Sit at a preacher bench with upper arms flat on the pad. Grip the EZ bar underhand and keep shoulders down.\nExecution: Curl the bar up until forearms are near vertical, squeeze, then lower slowly to a full stretch without letting shoulders lift."
+  },
+  {
+    "scope": "global",
+    "name": "Preacher Curl (Dumbbell)",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Sit at a preacher bench with upper arm supported on the pad. Hold a dumbbell underhand with wrist neutral.\nExecution: Curl up smoothly, squeeze, then lower slowly to full extension without bouncing at the bottom."
+  },
+  {
+    "scope": "global",
+    "name": "Incline Dumbbell Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Sit on an incline bench (45–60°) with arms hanging down and palms facing forward. Keep shoulders back.\nExecution: Curl dumbbells up without letting elbows drift forward, squeeze, then lower slowly to a deep stretch."
+  },
+  {
+    "scope": "global",
+    "name": "Concentration Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Sit and brace your elbow against the inside of your thigh. Hold a dumbbell with an underhand grip.\nExecution: Curl up toward your shoulder, squeeze at the top, then lower slowly to full extension."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Curl (Straight Bar)",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Attach a straight bar to a low cable. Stand tall with elbows tucked and shoulders down.\nExecution: Curl the bar toward your shoulders, squeeze, then return slowly to full extension keeping constant tension."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Curl (Rope)",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Attach a rope to a low cable. Stand tall with elbows tucked and wrists neutral.\nExecution: Curl the rope up and slightly separate the ends at the top, squeeze, then lower slowly to full extension."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Curl (EZ Bar)",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Attach an EZ Bar to a low cable. Stand tall with elbows tucked and wrists neutral.\nExecution: Curl the bar up, squeeze, then lower slowly to full extension."
+  },
+  {
+    "scope": "global",
+    "name": "Single-Arm Cable Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Attach a single handle to a low cable. Stand with elbow pinned to your side and core braced.\nExecution: Curl the handle up toward your shoulder, squeeze, then lower under control to a full stretch."
+  },
+  {
+    "scope": "global",
+    "name": "Spider Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Lie chest-down on an incline bench with arms hanging toward the floor holding dumbbells or an EZ bar. Keep shoulders stable.\nExecution: Curl up without swinging, squeeze, then lower slowly to full extension."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Bayesian Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Set a low cable with a handle and stand facing away from the stack. Let your working arm drift slightly behind your torso, elbow pinned.\nExecution: Curl forward toward your shoulder, squeeze, then lower slowly while keeping the elbow back for a deep stretch."
+  },
+  {
+    "scope": "global",
+    "name": "Chin-Up (Biceps Focus)",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Back", "Shoulders", "Abs"],
+    "description": "Setup: Grip the bar shoulder-width with an underhand grip. Start from a dead hang with shoulders down and core tight.\nExecution: Pull up by driving elbows down and back, bring chin over the bar, then lower slowly to a full hang without swinging."
+  },
+  {
+    "scope": "global",
+    "name": "Machine Bicep Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Adjust the seat so elbows line up with the machine pivot and arms rest comfortably on the pad. Grip handles underhand.\nExecution: Curl the handles up, squeeze the biceps, then lower slowly to full extension without letting the stack slam."
+  },
+  {
+    "scope": "global",
+    "name": "Resistance Band Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Stand on a resistance band and hold ends with an underhand grip. Keep elbows tucked and shoulders down.\nExecution: Curl hands toward shoulders, squeeze, then lower slowly to full extension maintaining band tension."
+  },
+  {
+    "scope": "global",
+    "name": "Zottman Curl",
+    "primaryMuscleGroup": "Biceps",
+    "secondaryMuscleGroups": ["Forearms"],
+    "description": "Setup: Stand holding dumbbells at sides with palms facing forward. Keep elbows close and core braced.\nExecution: Curl up with palms up, rotate to palms down at the top, then lower slowly with palms down to emphasize forearms. Rotate back at the bottom and repeat."
+  },
+
+  {
+    "scope": "global",
+    "name": "Close-Grip Bench Press",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Chest", "Shoulders"],
+    "description": "Setup: Lie on a flat bench with hands just inside shoulder width. Set shoulder blades down/back and keep elbows tucked.\nExecution: Lower the bar to mid/lower chest, then press up while keeping elbows close to the torso."
+  },
+  {
+    "name": "Tricep Pushdown (EZ Bar)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Shoulders"],
+    "description": "Setup: Attach an EZ bar to a high cable. Stand tall with elbows pinned to your sides and core braced.\nExecution: Push the bar down to full extension, squeeze, then return slowly without letting elbows flare."
+  },
+  {
+    "scope": "global",
+    "name": "Tricep Pushdown (V-Bar)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Shoulders"],
+    "description": "Setup: Attach a V-bar to a high cable. Stand tall with elbows tucked and wrists neutral.\nExecution: Press down to full elbow extension, squeeze, then return slowly to the start with control."
+  },
+  {
+    "scope": "global",
+    "name": "Overhead Tricep Extension (Rope)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Abs", "Shoulders"],
+    "description": "Setup: Attach a rope to a high cable and face away from the stack. Bring rope behind head, elbows pointing forward/up, core braced.\nExecution: Extend elbows to press the rope overhead until arms are straight, squeeze, then return slowly to a deep stretch behind the head."
+  },
+  {
+    "scope": "global",
+    "name": "Overhead Tricep Extension (Dumbbell)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Abs", "Shoulders"],
+    "description": "Setup: Sit or stand holding one dumbbell overhead with both hands. Keep elbows close and core braced.\nExecution: Lower the dumbbell behind your head by bending elbows, then extend back to full lockout and squeeze triceps."
+  },
+  {
+    "scope": "global",
+    "name": "Skull Crushers (EZ Bar)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Shoulders"],
+    "description": "Setup: Lie on a flat bench holding an EZ bar above chest with elbows pointing up. Keep shoulders stable.\nExecution: Bend elbows to lower bar toward forehead/top of head, then extend elbows to press back up, keeping upper arms mostly fixed."
+  },
+  {
+    "scope": "global",
+    "name": "Skull Crushers (Dumbbell)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Shoulders"],
+    "description": "Setup: Lie on a bench holding dumbbells above chest with palms facing each other. Keep upper arms vertical.\nExecution: Bend elbows to lower dumbbells near sides of head, then extend elbows to return to the top without flaring."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Skull Crushers",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Shoulders", "Abs"],
+    "description": "Setup: Attach a rope or bar to a low cable and face away from the stack. Step forward and hinge slightly so arms are angled overhead.\nExecution: Extend elbows to press the handle forward/up, squeeze triceps, then return slowly to a stretched position keeping upper arms stable."
+  },
+  {
+    "scope": "global",
+    "name": "Tricep Dips (Bench)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Chest", "Shoulders"],
+    "description": "Setup: Place hands on a bench behind you and feet out in front. Keep hips close to the bench and shoulders down.\nExecution: Lower by bending elbows until you feel a stretch, then press up to full extension. Avoid excessive shoulder discomfort by limiting depth."
+  },
+  {
+    "scope": "global",
+    "name": "Parallel Bar Dips (Triceps Focus)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Chest", "Shoulders"],
+    "description": "Setup: Support yourself on parallel bars with torso upright and elbows tucked. Keep shoulders depressed and core braced.\nExecution: Lower until elbows reach about 90° (or comfortable depth), then press up to lockout keeping torso upright."
+  },
+  {
+    "scope": "global",
+    "name": "Diamond Push-Up",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Chest", "Shoulders", "Abs"],
+    "description": "Setup: Get into a push-up position and place hands close together under chest forming a diamond. Keep body rigid and core braced.\nExecution: Lower chest toward hands with elbows tucked, then press back up to full extension without sagging hips."
+  },
+  {
+    "scope": "global",
+    "name": "Single-Arm Cable Tricep Pushdown",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Shoulders"],
+    "description": "Setup: Attach a single handle to a high cable. Stand tall with elbow pinned to your side and wrist neutral.\nExecution: Push down to full extension, squeeze, then return slowly to the start without letting the elbow drift forward."
+  },
+  {
+    "scope": "global",
+    "name": "Single-Arm Overhead Cable Tricep Extension",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Abs", "Shoulders"],
+    "description": "Setup: Use a single handle on a high cable. Turn away, bring handle behind head, elbow pointing forward/up, core braced.\nExecution: Extend the elbow to press overhead, squeeze, then return slowly to a deep stretch."
+  },
+  {
+    "scope": "global",
+    "name": "Tricep Kickback (Dumbbell)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Shoulders", "Back"],
+    "description": "Setup: Hinge forward with a flat back and support one hand on a bench if needed. Upper arm tight to torso, elbow bent holding dumbbell.\nExecution: Extend the elbow to straighten the arm behind you, squeeze triceps, then return slowly without letting the upper arm swing."
+  },
+  {
+    "scope": "global",
+    "name": "Tricep Kickback (Cable)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Shoulders", "Back"],
+    "description": "Setup: Attach a single handle to a low cable. Hinge forward slightly, keep upper arm pinned to torso, elbow bent.\nExecution: Extend the elbow to straighten the arm back, squeeze, then return slowly keeping the upper arm still."
+  },
+  {
+    "scope": "global",
+    "name": "JM Press",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Chest", "Shoulders"],
+    "description": "Setup: Lie on a bench holding a barbell or EZ bar with a close grip. Set shoulders down/back and keep elbows angled forward.\nExecution: Lower the bar toward upper chest while allowing elbows to bend forward, then press back up by extending elbows. Keep the movement controlled and in a comfortable range."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Tricep Press (Straight Bar)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Abs", "Shoulders"],
+    "description": "Setup: Attach a straight bar to a high cable. Step back slightly and hinge forward a bit with elbows tucked.\nExecution: Press the bar down and slightly forward to full extension, squeeze triceps, then return slowly while keeping elbows pinned."
+  },
+  {
+    "scope": "global",
+    "name": "Close-Grip Push-Up",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Chest", "Shoulders", "Abs"],
+    "description": "Setup: Assume a push-up position with hands just inside shoulder width. Keep body straight and core braced.\nExecution: Lower with elbows tucked, then press back up to full extension maintaining a rigid torso."
+  },
+  {
+    "scope": "global",
+    "name": "Assisted Dip Machine (Triceps Focus)",
+    "primaryMuscleGroup": "Triceps",
+    "secondaryMuscleGroups": ["Chest", "Shoulders"],
+    "description": "Setup: Set assistance level and place knees/feet on the pad. Grip handles and keep torso upright with shoulders down.\nExecution: Lower under control to about 90° elbow bend, then press up to lockout, squeezing triceps at the top."
+  }
+]

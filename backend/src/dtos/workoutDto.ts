@@ -1,27 +1,34 @@
 export default function toWorkoutDTO(doc: any) {
   const obj = doc.toObject?.() ?? doc;
-
   const exercises = Array.isArray(obj.exercises) ? obj.exercises : [];
 
-  const normalizedExercises = exercises.map((ex: any) => {
-    // Canonical: exerciseId (string)
-    // Back-compat fallbacks
+  const normalizedExercises = exercises.map((exercise: any) => {
     const exerciseIdRaw =
-      ex?.exerciseId ?? ex?.id ?? ex?.exercise?._id ?? ex?.exercise?.id;
+      exercise?.exerciseId ??
+      exercise?.id ??
+      exercise?.exercise?._id ??
+      exercise?.exercise?.id;
 
     const exerciseId = exerciseIdRaw != null ? String(exerciseIdRaw) : "";
 
-    const sets = Array.isArray(ex?.sets) ? ex.sets : [];
-    const normalizedSets = sets.map((s: any) => ({
-      reps: Number(s?.reps ?? 0),
-      weight: Number(s?.weight ?? 0),
-      tempo: s?.tempo,
-      rpe: s?.rpe != null ? Number(s.rpe) : undefined,
-    }));
+    const sets = Array.isArray(exercise?.sets) ? exercise.sets : [];
+    const normalizedSets = sets.map((set: any) => {
+      const setIdRaw = set?.id ?? set?._id;
+      const setId = setIdRaw != null ? String(setIdRaw) : "";
+
+      return {
+        id: setId,
+        reps: Number(set?.reps ?? 0),
+        weight: Number(set?.weight ?? 0),
+        tempo: set?.tempo,
+        rpe: set?.rpe != null ? Number(set.rpe) : undefined,
+        isWarmup: set?.isWarmup ?? false,
+      };
+    });
 
     return {
       exerciseId,
-      notes: ex?.notes ?? "",
+      notes: exercise?.notes ?? "",
       sets: normalizedSets,
     };
   });

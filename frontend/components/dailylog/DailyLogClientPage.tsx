@@ -90,7 +90,7 @@ export default function DailyLogClientPage() {
         const gate = canReplaceEditDraft(fromWorkoutId);
         if (!gate.ok && gate.reason === "dirty") {
           const discard = window.confirm(
-            "You have unsaved changes from another edit. Discard them and edit this workout instead?"
+            "You have unsaved changes from another edit. Discard them and edit this workout instead?",
           );
           if (!discard) {
             router.replace("/workouts");
@@ -100,6 +100,17 @@ export default function DailyLogClientPage() {
         }
 
         const workout = await WorkoutsAPI.get(fromWorkoutId);
+
+        // TESTING
+        console.log(
+          "API workout first set:",
+          workout.exercises?.[0]?.sets?.[0],
+        );
+        console.log(
+          "API set ids:",
+          workout.exercises?.[0]?.sets?.map((s: any) => s.id),
+        );
+
         if (cancelled) return;
 
         startEdit({
@@ -144,12 +155,12 @@ export default function DailyLogClientPage() {
     step === "session"
       ? splitLabel
       : isEditingSplit
-      ? "Edit Workout"
-      : "Start Workout";
+        ? "Edit Workout"
+        : "Start Workout";
 
   const handleToggleMuscleGroup = (group: MuscleGroup) => {
     setSelectedMuscleGroups((prev) =>
-      prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]
+      prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group],
     );
   };
 
@@ -260,7 +271,7 @@ export default function DailyLogClientPage() {
     } catch (error) {
       console.error("Failed to save workout:", error);
       setSaveError(
-        error instanceof Error ? error.message : "Failed to save workout."
+        error instanceof Error ? error.message : "Failed to save workout.",
       );
     } finally {
       setIsSaving(false);

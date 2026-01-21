@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import Workout from "../models/Workout.js";
+import crypto from "crypto";
 
 export type WorkoutSetInput = {
+  id?: string;
   weight: number;
   reps: number;
   tempo?: string;
@@ -50,6 +52,32 @@ function assertValidObjectId(id: string) {
   }
 }
 
+function ensureIds(exercises: any[] = []) {
+  for (const ex of exercises) {
+    // Your DB exercise schema uses "id" (string). Your API uses exerciseId in places.
+    // Keep this in sync with what you actually store.
+    if (!ex.id) ex.id = crypto.randomUUID();
+
+    for (const s of ex.sets ?? []) {
+      if (!s.id) s.id = crypto.randomUUID();
+    }
+  }
+}
+
+// TEMP
+function backfillSetIds(doc: any) {
+  let changed = false;
+  for (const ex of doc.exercises ?? []) {
+    for (const s of ex.sets ?? []) {
+      if (!s.id) {
+        s.id = crypto.randomUUID();
+        changed = true;
+      }
+    }
+  }
+  return changed;
+}
+
 export async function deleteAllWorkoutsDevOnly(userId: string) {
   return Workout.deleteMany({ userId });
 }
@@ -66,6 +94,10 @@ export async function getWorkoutById(userId: string, id: string) {
     const error = new Error("Not found");
     (error as any).status = 404;
     throw error;
+  }
+
+  if (backfillSetIds(doc)) {
+    await doc.save();
   }
   return doc;
 }
@@ -84,32 +116,29 @@ export async function createWorkout(userId: string, input: CreateWorkoutInput) {
 export async function updateWorkout(
   userId: string,
   id: string,
-  input: UpdateWorkoutInput
+  input: UpdateWorkoutInput,
 ) {
   assertValidObjectId(id);
-
-  const updateData: any = {};
-
-  if (input.date !== undefined) updateData.date = input.date;
-  if (input.muscleGroups !== undefined) {
-    updateData.muscleGroups = normalizeMuscleGroups(input.muscleGroups);
-  }
-  if (input.exercises !== undefined) updateData.exercises = input.exercises;
-
-  const updated = await Workout.findOneAndUpdate(
-    { _id: id, userId },
-    updateData,
-    {
-      new: true,
-    }
-  );
-
-  if (!updated) {
+  const doc = await Workout.findOne({ _id: id, userId });
+  if (!doc) {
     const error = new Error("Not found");
     (error as any).status = 404;
     throw error;
   }
-  return updated;
+
+  if (input.date !== undefined) doc.date = input.date;
+  if (input.muscleGroups !== undefined) {
+    doc.muscleGroups = normalizeMuscleGroups(input.muscleGroups) as any;
+  }
+
+  if (input.exercises !== undefined) {
+    // Ensure ids before assigning
+    ensureIds(input.exercises as any[]);
+    doc.exercises = input.exercises as any;
+  }
+
+  await doc.save();
+  return doc;
 }
 
 export async function deleteWorkout(userId: string, id: string) {

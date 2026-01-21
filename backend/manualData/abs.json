@@ -1,0 +1,142 @@
+[
+  {
+    "scope": "global",
+    "name": "Plank",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": ["Glutes", "Shoulders"],
+    "description": "Setup: Place forearms on the floor with elbows under shoulders and feet extended behind you. Brace your core and squeeze glutes to form a straight line from head to heels.\nExecution: Hold the position while keeping ribs down and hips level. Breathe steadily and avoid sagging or piking."
+  },
+  {
+    "scope": "global",
+    "name": "Side Plank",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": ["Glutes", "Shoulders"],
+    "description": "Setup: Lie on your side with forearm under shoulder and feet stacked (or staggered). Brace core and lift hips so body forms a straight line.\nExecution: Hold with hips high and torso rigid. Breathe steadily and keep shoulders stacked over elbow."
+  },
+  {
+    "scope": "global",
+    "name": "Hanging Knee Raise",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Hang from a pull-up bar with arms straight and shoulders pulled down. Brace core and keep body still.\nExecution: Raise knees toward chest by curling pelvis up. Pause briefly, then lower slowly without swinging."
+  },
+  {
+    "scope": "global",
+    "name": "Hanging Leg Raise",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Hang from a bar with shoulders down and core braced. Keep legs straight and minimize swinging.\nExecution: Raise straight legs up toward waist/chest height (or higher), then lower slowly under control to a full hang."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Crunch",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Attach a rope to a high cable and kneel facing the stack. Hold rope near sides of head and brace core with hips stacked over knees.\nExecution: Crunch down by curling ribs toward pelvis (spine flexion), keeping hips mostly fixed. Squeeze abs, then return slowly to a stretched position."
+  },
+  {
+    "scope": "global",
+    "name": "Machine Crunch",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Adjust seat so torso and handles/pads fit snugly. Sit tall, brace core, and set range to a comfortable stretch.\nExecution: Crunch forward by curling the torso, squeeze abs at peak, then return slowly under control without letting the stack slam."
+  },
+  {
+    "scope": "global",
+    "name": "Ab Wheel Rollout",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": ["Shoulders"],
+    "description": "Setup: Kneel on a pad and grip the ab wheel under shoulders. Brace core hard and squeeze glutes to prevent low-back arching.\nExecution: Roll the wheel forward slowly until you reach a controllable stretch, then pull back to start by bracing abs and keeping hips from sagging."
+  },
+  {
+    "scope": "global",
+    "name": "Swiss Ball Crunch",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Sit on a stability ball and walk feet forward until lower back rests on the ball. Place hands behind head or crossed on chest.\nExecution: Crunch up by curling ribs toward pelvis, pause/squeeze, then lower back over the ball for a controlled stretch."
+  },
+  {
+    "scope": "global",
+    "name": "Reverse Crunch",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Lie on your back with knees bent and feet off the floor. Brace core and press low back into the ground.\nExecution: Curl pelvis up to bring knees toward chest, pause, then lower slowly until hips lightly touch down without arching the back."
+  },
+  {
+    "scope": "global",
+    "name": "Bicycle Crunch",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Lie on your back with hands behind head and knees up. Brace core and keep low back pressed into the floor.\nExecution: Rotate torso to bring opposite elbow toward knee while extending the other leg. Alternate sides in a controlled, steady rhythm."
+  },
+  {
+    "scope": "global",
+    "name": "Russian Twist",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Sit with knees bent and lean back slightly with a tall chest. Hold a weight or keep hands clasped. Brace core.\nExecution: Rotate shoulders side-to-side with control, keeping hips relatively still. Move through a comfortable range without rounding excessively."
+  },
+  {
+    "scope": "global",
+    "name": "Mountain Climbers",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": ["Shoulders"],
+    "description": "Setup: Start in a high plank with hands under shoulders and core braced. Keep hips level.\nExecution: Drive one knee toward chest, then switch legs quickly while maintaining a rigid torso and steady shoulder position."
+  },
+  {
+    "scope": "global",
+    "name": "Flutter Kicks",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Lie on your back with hands under hips or by your sides. Press low back into the floor and lift legs slightly.\nExecution: Alternate small, controlled up-and-down kicks without letting the low back arch. Keep tension in the abs throughout."
+  },
+  {
+    "scope": "global",
+    "name": "V-Up",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Lie flat with arms overhead and legs straight. Brace core and keep low back controlled.\nExecution: Raise arms and legs together to meet at the top, then lower slowly back to the floor with control."
+  },
+  {
+    "scope": "global",
+    "name": "Toe Touch Crunch",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Lie on your back with legs straight up toward the ceiling. Reach arms up and brace core.\nExecution: Crunch upward to reach toward toes, squeeze abs, then lower shoulders back down under control."
+  },
+  {
+    "scope": "global",
+    "name": "Lying Leg Raise",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Lie on your back with legs straight and hands by sides or under hips. Brace core and press low back into the floor.\nExecution: Raise legs up to a controlled height, then lower slowly until just above the floor without losing low-back contact."
+  },
+  {
+    "scope": "global",
+    "name": "Heel Taps",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": [],
+    "description": "Setup: Lie on your back with knees bent and feet flat. Slightly lift shoulders off the floor and brace core.\nExecution: Reach side-to-side to tap each heel, keeping abs tight and ribs down. Move with control rather than momentum."
+  },
+  {
+    "scope": "global",
+    "name": "Pallof Press",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": ["Shoulders"],
+    "description": "Setup: Set a cable/band at chest height. Stand sideways to the anchor with feet shoulder-width and hands at chest. Brace core and squeeze glutes.\nExecution: Press hands straight out and hold, resisting rotation. Bring hands back to chest under control and repeat."
+  },
+  {
+    "scope": "global",
+    "name": "Cable Woodchopper",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": ["Shoulders"],
+    "description": "Setup: Set a cable at high or low position. Stand sideways with feet shoulder-width, arms extended, and core braced.\nExecution: Rotate torso to pull the handle across your body in a diagonal path. Control the return and avoid twisting through the knees."
+  },
+  {
+    "scope": "global",
+    "name": "Suitcase Carry",
+    "primaryMuscleGroup": "Abs",
+    "secondaryMuscleGroups": ["Traps", "Shoulders"],
+    "description": "Setup: Hold a heavy dumbbell or kettlebell in one hand at your side. Stand tall with shoulders level and core braced.\nExecution: Walk slowly for distance/time without leaning to one side. Keep ribs down and torso upright, then switch hands."
+  }
+]
