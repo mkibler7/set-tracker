@@ -29,12 +29,6 @@ export default function WorkoutDetailPage() {
         setCatalogLoading(true);
         const list = await ExerciseAPI.list();
         if (!cancelled) setExerciseCatalog(list);
-        // TEST
-        console.log("[workouts/[id]] catalog size:", list.length);
-        console.log(
-          "[workouts/[id]] catalog sample ids:",
-          list.slice(0, 5).map((e) => e.id),
-        );
       } catch (e) {
         console.error("Failed to load exercise catalog:", e);
       } finally {
@@ -59,11 +53,6 @@ export default function WorkoutDetailPage() {
       try {
         const data = await WorkoutsAPI.get(id);
         if (!cancelled) setWorkout(data);
-        //TEST
-        console.log(
-          "[workouts/[id]] workout exerciseIds:",
-          data.exercises.map((e) => e.exerciseId),
-        );
       } catch (err) {
         if (!cancelled) console.error("Failed to load workout:", err);
       }
@@ -142,12 +131,6 @@ export default function WorkoutDetailPage() {
         {workout.exercises.length > 0 ? (
           workout.exercises.map((exercise, index) => {
             const meta = catalogById[exercise.exerciseId];
-            // TEST
-            if (!meta)
-              console.log(
-                "[workouts/[id]] missing meta for",
-                exercise.exerciseId,
-              );
             const muscleLabel = meta ? formatExerciseMuscleLabel(meta) : "";
             const volume = exerciseVolume(exercise as WorkoutExercise);
 
