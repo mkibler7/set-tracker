@@ -3,9 +3,9 @@
 - Frontend: ✅ Next.js app deployed on Vercel
 - Backend: ⏳ In progress – current data is mock (no login, no real persistence yet).
 
-# RepTrack
+# SetTrack
 
-RepTrack is a full-stack workout logging app designed as a professional portfolio project.
+SetTrack is a full-stack workout logging app designed as a professional portfolio project.
 It lets lifters log workouts quickly, review history, and track basic progress over time.
 
 ## Tech Stack

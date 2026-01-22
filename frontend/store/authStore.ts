@@ -25,8 +25,8 @@ export const useAuthStore = create<AuthState>()(
       clear: () => set({ user: null }),
     }),
     {
-      name: "reptracker-auth",
+      name: "settracker-auth",
       partialize: (state) => ({ user: state.user }),
-    }
-  )
+    },
+  ),
 );

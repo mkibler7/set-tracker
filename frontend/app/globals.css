@@ -70,17 +70,17 @@
 
   /* === Charts === */
   /* Remove focus outline chart container */
-  .reptracker-chart:focus,
-  .reptracker-chart:focus-visible,
-  .reptracker-chart *:focus,
-  .reptracker-chart *:focus-visible {
+  .settracker-chart:focus,
+  .settracker-chart:focus-visible,
+  .settracker-chart *:focus,
+  .settracker-chart *:focus-visible {
     outline: none !important;
     box-shadow: none !important;
   }
-  .reptracker-chart,
-  .reptracker-chart .recharts-responsive-container,
-  .reptracker-chart .recharts-wrapper,
-  .reptracker-chart svg {
+  .settracker-chart,
+  .settracker-chart .recharts-responsive-container,
+  .settracker-chart .recharts-wrapper,
+  .settracker-chart svg {
     overflow: visible !important;
   }
 }

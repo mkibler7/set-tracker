@@ -43,7 +43,7 @@ export default function SignupPageClient() {
 
       setSuccess(
         resp.message ??
-          "Account created. Please check your email to verify your account."
+          "Account created. Please check your email to verify your account.",
       );
     } catch (err: any) {
       setError(err?.message ?? "Signup failed");
@@ -64,7 +64,7 @@ export default function SignupPageClient() {
       const resp = await AuthAPI.resendVerification({ email: trimmed });
       setSuccess(
         resp.message ??
-          "If an account exists for that email, we sent a verification link."
+          "If an account exists for that email, we sent a verification link.",
       );
     } catch (err: any) {
       setError(err?.message ?? "Failed to resend verification email.");
@@ -78,7 +78,7 @@ export default function SignupPageClient() {
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Sign Up</h1>
         <p className="text-sm text-muted-foreground">
-          Start tracking your training with RepTrack.
+          Start tracking your training with SetTracker.
         </p>
       </header>
 
@@ -173,7 +173,7 @@ export default function SignupPageClient() {
 
             <Link
               href={`/login?email=${encodeURIComponent(
-                email.trim()
+                email.trim(),
               )}&next=${encodeURIComponent(nextPath)}`}
               className="block w-full rounded-md bg-primary px-3 py-2 text-center text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >

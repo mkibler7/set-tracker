@@ -10,7 +10,7 @@ import LogoutNavLink from "@/components/auth/LogoutNavLink";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "RepTracker",
+  title: "SetTracker",
   description: "Track your workouts like a pro.",
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({
           {/* Sidebar (desktop only) */}
           <aside className="hidden md:flex w-60 flex-col border-r border-slate-800 bg-slate-900/60 p-4 gap-4">
             <div className="text-xl text-primary font-semibold tracking-tight mb-3">
-              RepTracker
+              SetTracker
             </div>
             <nav className="flex flex-col gap-2 text-sm">
               <Link href="/dashboard" className="hover:text-primary">
@@ -65,7 +65,7 @@ export default function RootLayout({
             {/* Mobile navigation (only < md) */}
             <header className="flex items-center justify-between border-b border-slate-800 bg-slate-900/80 px-4 py-3 md:hidden">
               <div className="text-lg text-primary font-semibold tracking-tight">
-                RepTracker
+                SetTracker
               </div>
               <MobileNavBar />
             </header>

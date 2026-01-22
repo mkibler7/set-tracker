@@ -42,7 +42,7 @@ function now() {
 function makeEmptySessionDraft(
   muscleGroups: MuscleGroup[] = [],
   date: string = new Date().toISOString(),
-  exercises: WorkoutExercise[] = []
+  exercises: WorkoutExercise[] = [],
 ): WorkoutDraft {
   return {
     kind: "session",
@@ -84,7 +84,7 @@ type WorkoutState = {
   startSession: (
     muscleGroups: MuscleGroup[],
     date: string,
-    exercises?: WorkoutExercise[]
+    exercises?: WorkoutExercise[],
   ) => void;
 
   updateSessionMeta: (updates: {
@@ -102,7 +102,7 @@ type WorkoutState = {
   updateSessionSet: (
     exerciseId: string,
     setId: string,
-    values: SetFormValues
+    values: SetFormValues,
   ) => void;
   deleteSessionSet: (exerciseId: string, setId: string) => void;
 
@@ -135,7 +135,7 @@ type WorkoutState = {
   updateEditSet: (
     exerciseId: string,
     setId: string,
-    values: SetFormValues
+    values: SetFormValues,
   ) => void;
   deleteEditSet: (exerciseId: string, setId: string) => void;
 
@@ -151,7 +151,7 @@ export const useWorkoutStore = create<WorkoutState>()(
     (set, get) => {
       const updateDraft = (
         key: "sessionDraft" | "editDraft",
-        updater: (d: WorkoutDraft) => WorkoutDraft
+        updater: (d: WorkoutDraft) => WorkoutDraft,
       ) => {
         set((state) => {
           const draft = state[key];
@@ -222,7 +222,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           updateDraft("sessionDraft", (d) => ({
             ...d,
             exercises: d.exercises.map((e) =>
-              e.exerciseId === exerciseId ? { ...e, notes } : e
+              e.exerciseId === exerciseId ? { ...e, notes } : e,
             ),
             dirty: true,
             updatedAt: now(),
@@ -234,7 +234,7 @@ export const useWorkoutStore = create<WorkoutState>()(
             exercises: d.exercises.map((e) =>
               e.exerciseId === exerciseId
                 ? { ...e, sets: [...e.sets, makeSet(values)] }
-                : e
+                : e,
             ),
             dirty: true,
             updatedAt: now(),
@@ -257,10 +257,10 @@ export const useWorkoutStore = create<WorkoutState>()(
                             rpe: values.rpe ?? s.rpe,
                             isWarmup: values.isWarmup ?? s.isWarmup,
                           }
-                        : s
+                        : s,
                     ),
                   }
-                : e
+                : e,
             ),
             dirty: true,
             updatedAt: now(),
@@ -272,7 +272,7 @@ export const useWorkoutStore = create<WorkoutState>()(
             exercises: d.exercises.map((e) =>
               e.exerciseId === exerciseId
                 ? { ...e, sets: e.sets.filter((s) => s.id !== setId) }
-                : e
+                : e,
             ),
             dirty: true,
             updatedAt: now(),
@@ -330,7 +330,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           updateDraft("editDraft", (d) => ({
             ...d,
             exercises: d.exercises.map((e) =>
-              e.exerciseId === exerciseId ? { ...e, notes } : e
+              e.exerciseId === exerciseId ? { ...e, notes } : e,
             ),
             dirty: true,
             updatedAt: now(),
@@ -342,7 +342,7 @@ export const useWorkoutStore = create<WorkoutState>()(
             exercises: d.exercises.map((e) =>
               e.exerciseId === exerciseId
                 ? { ...e, sets: [...e.sets, makeSet(values)] }
-                : e
+                : e,
             ),
             dirty: true,
             updatedAt: now(),
@@ -365,10 +365,10 @@ export const useWorkoutStore = create<WorkoutState>()(
                             rpe: values.rpe ?? s.rpe,
                             isWarmup: values.isWarmup ?? s.isWarmup,
                           }
-                        : s
+                        : s,
                     ),
                   }
-                : e
+                : e,
             ),
             dirty: true,
             updatedAt: now(),
@@ -380,7 +380,7 @@ export const useWorkoutStore = create<WorkoutState>()(
             exercises: d.exercises.map((e) =>
               e.exerciseId === exerciseId
                 ? { ...e, sets: e.sets.filter((s) => s.id !== setId) }
-                : e
+                : e,
             ),
             dirty: true,
             updatedAt: now(),
@@ -400,12 +400,12 @@ export const useWorkoutStore = create<WorkoutState>()(
       };
     },
     {
-      name: "reptracker-workout-drafts",
+      name: "settracker-workout-drafts",
       version: 1,
       partialize: (state) => ({
         sessionDraft: state.sessionDraft,
         editDraft: state.editDraft,
       }),
-    }
-  )
+    },
+  ),
 );

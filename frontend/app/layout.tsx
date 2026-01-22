@@ -6,7 +6,7 @@ import AuthBootstrap from "@/components/auth/AuthBootstrap";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "RepTracker",
+  title: "SetTracker",
   description: "Track your workouts like a pro.",
 };
 

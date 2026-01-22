@@ -47,18 +47,18 @@ export default function MuscleRingsChart({
         MUSCLES: { inner: 80, outer: 102 },
       }
     : isSmallScreen
-    ? {
-        FULL: { inner: 0, outer: 20 },
-        UPPER_LOWER: { inner: 24, outer: 52 },
-        GROUPS: { inner: 56, outer: 86 },
-        MUSCLES: { inner: 90, outer: 116 },
-      }
-    : {
-        FULL: { inner: 0, outer: 35 },
-        UPPER_LOWER: { inner: 40, outer: 80 },
-        GROUPS: { inner: 85, outer: 135 },
-        MUSCLES: { inner: 140, outer: 200 },
-      };
+      ? {
+          FULL: { inner: 0, outer: 20 },
+          UPPER_LOWER: { inner: 24, outer: 52 },
+          GROUPS: { inner: 56, outer: 86 },
+          MUSCLES: { inner: 90, outer: 116 },
+        }
+      : {
+          FULL: { inner: 0, outer: 35 },
+          UPPER_LOWER: { inner: 40, outer: 80 },
+          GROUPS: { inner: 85, outer: 135 },
+          MUSCLES: { inner: 140, outer: 200 },
+        };
 
   const COLORS = {
     full: "hsl(var(--chart-ring-full))",
@@ -183,15 +183,15 @@ export default function MuscleRingsChart({
         formatNumber={fmt}
       />
 
-      <ResponsiveContainer className="reptracker-chart">
+      <ResponsiveContainer className="settracker-chart">
         <PieChart
           onMouseLeave={clearHover}
           margin={
             isXsScreen
               ? { top: 8, right: 18, bottom: 8, left: 18 }
               : isSmallScreen
-              ? { top: 8, right: 32, bottom: 8, left: 32 }
-              : { top: 0, right: 80, bottom: 0, left: 80 }
+                ? { top: 8, right: 32, bottom: 8, left: 32 }
+                : { top: 0, right: 80, bottom: 0, left: 80 }
           }
         >
           <Pie

@@ -1,6 +1,6 @@
-# RepTrack – Core User Flows
+# SetTrack – Core User Flows
 
-This document describes the primary user flows in RepTrack and how we’ll know each flow is working (acceptance criteria). At this stage, flows are **mock-only** (no real backend), but the criteria anticipate real behavior.
+This document describes the primary user flows in SetTrack and how we’ll know each flow is working (acceptance criteria). At this stage, flows are **mock-only** (no real backend), but the criteria anticipate real behavior.
 
 ---
 

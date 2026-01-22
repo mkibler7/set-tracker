@@ -39,7 +39,7 @@ export async function sendVerifyEmail(to: string, verifyUrl: string) {
     from: MAIL_FROM!,
     to,
     replyTo: MAIL_REPLY_TO,
-    subject: "Verify your e-mail for your new RepTracker account!",
+    subject: "Verify your e-mail for your new SetTracker account!",
     text: `Verify your email by clicking this link: ${verifyUrl}`,
     html: `
       <p>Verify your e-mail by clicking the link below:</p>
@@ -56,7 +56,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
     from: MAIL_FROM!,
     to,
     replyTo: MAIL_REPLY_TO,
-    subject: "Reset your RepTracker password",
+    subject: "Reset your SetTracker password",
     text: `Reset your password using this link: ${resetUrl}`,
     html: `
       <p>Reset your password by clicking the link below:</p>

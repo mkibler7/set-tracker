@@ -84,7 +84,7 @@ export default function LoginClient() {
       const resp = await AuthAPI.resendVerification({ email: trimmed });
       setInfo(
         resp.message ??
-          "If an account exists for that email, we sent a verification link."
+          "If an account exists for that email, we sent a verification link.",
       );
     } catch (err: any) {
       setError(err?.message ?? "Failed to resend verification email.");
@@ -98,7 +98,7 @@ export default function LoginClient() {
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Log In</h1>
         <p className="text-sm text-muted-foreground">
-          Access your RepTrack account.
+          Access your SetTrack account.
         </p>
       </header>
 
@@ -185,7 +185,7 @@ export default function LoginClient() {
         <div className="text-center">
           <Link
             href={`/forgot-password?email=${encodeURIComponent(
-              email
+              email,
             )}&next=${encodeURIComponent(nextPath)}`}
             className="text-sm text-muted-foreground underline-offset-4 hover:underline"
           >
