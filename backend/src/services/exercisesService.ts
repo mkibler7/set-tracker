@@ -1,13 +1,7 @@
 import mongoose from "mongoose";
 import Exercise from "../models/Exercise.js";
 import Workout from "../models/Workout.js";
-
-export type CreateExerciseInput = {
-  name: string;
-  primaryMuscleGroup: string;
-  secondaryMuscleGroups?: string[];
-  description?: string;
-};
+import { CreateExerciseInputValidated } from "../validators/exercises.js";
 
 export async function deleteAllExercisesDevOnly() {
   return Exercise.deleteMany({});
@@ -31,7 +25,7 @@ export async function getExerciseHistory(userId: string, exerciseId: string) {
   const entries = workouts.map((workoutDoc: any) => {
     const workout = workoutDoc.toObject?.() ?? workoutDoc;
     const target = (workout.exercises ?? []).find(
-      (exercise: any) => exercise.id === exerciseId
+      (exercise: any) => exercise.id === exerciseId,
     );
 
     return {
@@ -77,7 +71,7 @@ export async function getExerciseById(userId: string, id: string) {
 
 export async function createExercise(
   userId: string,
-  input: CreateExerciseInput
+  input: CreateExerciseInputValidated,
 ) {
   // Limit user exercise count
   const limit = Number(process.env.USER_EXERCISE_LIMIT ?? "300");
@@ -122,13 +116,13 @@ export async function createExercise(
     // duplicate key (unique index) error handling
     if (error?.code === 11000) {
       const dupError = new Error(
-        "Exercise already exists (duplicate name or id)."
+        "Exercise already exists (duplicate name or id).",
       );
       (dupError as any).status = 409;
       throw dupError;
     }
     const err = new Error(
-      error instanceof Error ? error.message : String(error)
+      error instanceof Error ? error.message : String(error),
     );
     (err as any).status = 400;
     throw err;

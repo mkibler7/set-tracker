@@ -1,5 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { apiLimiter } from "../middleware/rateLimiters.js";
+import { CreateExerciseSchema } from "../validators/exercises.js";
 import {
   createExercise,
   deleteAllExercisesDevOnly,
@@ -12,6 +14,8 @@ import toExerciseDTO from "../dtos/exerciseDto.js";
 type IdParams = { id: string };
 
 const router = Router();
+
+router.use(apiLimiter);
 
 // DEV TESTING ONLY — delete all exercises
 router.delete("/__dev__/all", async (req: Request, res: Response) => {
@@ -78,12 +82,18 @@ router.get(
 // Create new exercise
 router.post("/", requireAuth, async (req: Request, res: Response) => {
   try {
-    const saved = await createExercise(req.user!.userId, req.body ?? {});
+    const input = CreateExerciseSchema.parse(req.body ?? {});
+    const saved = await createExercise(req.user!.userId, input);
     res.status(201).json(toExerciseDTO(saved));
   } catch (err: any) {
-    res.status(err?.status ?? 400).json({
-      message: err instanceof Error ? err.message : String(err),
-    });
+    if (err?.name === "ZodError") {
+      return res
+        .status(400)
+        .json({ message: "Invalid exercise input", issues: err.issues });
+    }
+    res
+      .status(err?.status ?? 400)
+      .json({ message: err?.message ?? "Bad request" });
   }
 });
 

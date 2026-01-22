@@ -26,11 +26,10 @@ function parseTtlToMs(ttl: string): number {
       return 15 * 60 * 1000;
   }
 }
+
 function mustGetEnv(name: string): string {
   const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing env var: ${name}`);
-  }
+  if (!value) throw new Error(`Missing env var: ${name}`);
   return value;
 }
 
@@ -38,10 +37,7 @@ export function signAccessToken(userId: string) {
   const ttl = (process.env.ACCESS_TOKEN_TTL ??
     "15m") as jwt.SignOptions["expiresIn"];
   const secret = mustGetEnv("JWT_ACCESS_SECRET");
-
-  return jwt.sign({ sub: userId }, secret, {
-    expiresIn: ttl,
-  });
+  return jwt.sign({ sub: userId }, secret, { expiresIn: ttl });
 }
 
 export function signRefreshToken(userId: string) {
@@ -58,18 +54,18 @@ export function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-// Refresh cookie: only sent to /auth/refresh
+type SameSite = "lax" | "strict" | "none";
+
+// Refresh cookie
 export function setRefreshCookie(res: Response, refreshToken: string) {
-  const isProd =
-    process.env.NODE_ENV === "production" &&
-    process.env.COOKIE_SECURE !== "false";
-  const isLocalhost = process.env.NODE_ENV !== "production";
+  const isProd = process.env.NODE_ENV === "production";
+  const secure = isProd && process.env.COOKIE_SECURE !== "false";
   const days = Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? "30");
   const maxAge = days * 24 * 60 * 60 * 1000;
 
   res.cookie("rt", refreshToken, {
     httpOnly: true,
-    secure: !isLocalhost && isProd,
+    secure,
     sameSite: "lax",
     path: "/",
     maxAge,
@@ -78,24 +74,26 @@ export function setRefreshCookie(res: Response, refreshToken: string) {
 
 export function clearRefreshCookie(res: Response) {
   const isProd = process.env.NODE_ENV === "production";
+  const secure = isProd && process.env.COOKIE_SECURE !== "false";
 
   res.clearCookie("rt", {
     path: "/",
     httpOnly: true,
-    secure: isProd,
+    secure,
     sameSite: "lax",
   });
 }
 
-// Access cookie: sent to ALL requests (so requireAuth can read it)
+// Access cookie
 export function setAccessCookie(res: Response, accessToken: string) {
   const isProd = process.env.NODE_ENV === "production";
+  const secure = isProd && process.env.COOKIE_SECURE !== "false";
   const ttl = process.env.ACCESS_TOKEN_TTL ?? "15m";
   const accessMaxAgeMs = parseTtlToMs(ttl);
 
   res.cookie("at", accessToken, {
     httpOnly: true,
-    secure: isProd,
+    secure,
     sameSite: "lax",
     path: "/",
     maxAge: accessMaxAgeMs,
@@ -104,33 +102,42 @@ export function setAccessCookie(res: Response, accessToken: string) {
 
 export function clearAccessCookie(res: Response) {
   const isProd = process.env.NODE_ENV === "production";
+  const secure = isProd && process.env.COOKIE_SECURE !== "false";
 
   res.clearCookie("at", {
     path: "/",
     httpOnly: true,
-    secure: isProd,
+    secure,
     sameSite: "lax",
   });
 }
 
 export function setSessionMarkerCookie(res: Response) {
   const isProd = process.env.NODE_ENV === "production";
+  const secure = isProd && process.env.COOKIE_SECURE !== "false";
+  const sameSite = (process.env.COOKIE_SAMESITE as SameSite) ?? "lax";
+  const domain = process.env.COOKIE_DOMAIN || undefined;
 
   res.cookie("has_session", "1", {
     httpOnly: false,
-    secure: isProd,
-    sameSite: "lax",
+    secure,
+    sameSite,
     path: "/",
-    maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
+    ...(domain ? { domain } : {}),
+    maxAge: 365 * 24 * 60 * 60 * 1000,
   });
 }
 
 export function clearSessionMarkerCookie(res: Response) {
   const isProd = process.env.NODE_ENV === "production";
+  const secure = isProd && process.env.COOKIE_SECURE !== "false";
+  const sameSite = (process.env.COOKIE_SAMESITE as SameSite) ?? "lax";
+  const domain = process.env.COOKIE_DOMAIN || undefined;
 
   res.clearCookie("has_session", {
-    secure: isProd,
-    sameSite: "lax",
+    secure,
+    sameSite,
     path: "/",
+    ...(domain ? { domain } : {}),
   });
 }

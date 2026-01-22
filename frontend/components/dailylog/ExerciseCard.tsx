@@ -76,12 +76,6 @@ export default function ExerciseCard({
 
     router.push(`/exercises/${id}?fromDailyLog=true`);
   };
-  console.log(
-    "Set keys:",
-    exercise.sets.map((s) => s.id),
-    "unique count:",
-    new Set(exercise.sets.map((s) => s.id)).size,
-  );
 
   return (
     <section

@@ -6,6 +6,7 @@ import User from "../models/User.js";
 import RefreshSession from "../models/RefreshSession.js";
 import crypto from "crypto";
 import { loginSchema, registerSchema } from "../validators/authInput.js";
+import { authLimiter, loginLimiter } from "../middleware/rateLimiters.js";
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -27,6 +28,9 @@ import z from "zod";
 import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = Router();
+
+// Apply to all auth routes
+router.use(authLimiter);
 
 router.post("/register", async (req: Request, res: Response) => {
   const parsed = registerSchema.safeParse(req.body);
@@ -52,7 +56,7 @@ router.post("/register", async (req: Request, res: Response) => {
   // Invalidate prior unused verify tokens for this user
   await EmailVerificationToken.updateMany(
     { userId: user._id, usedAt: null, expiresAt: { $gt: new Date() } },
-    { $set: { usedAt: new Date() } }
+    { $set: { usedAt: new Date() } },
   );
   // Create new verification token
   const rawToken = crypto.randomBytes(32).toString("hex");
@@ -70,7 +74,7 @@ router.post("/register", async (req: Request, res: Response) => {
 
   const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://localhost:3000";
   const verifyUrl = `${frontendOrigin}/verify-email?token=${encodeURIComponent(
-    rawToken
+    rawToken,
   )}`;
 
   await sendVerifyEmail(user.email, verifyUrl);
@@ -85,7 +89,7 @@ router.post("/register", async (req: Request, res: Response) => {
   });
 });
 
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login", loginLimiter, async (req: Request, res: Response) => {
   const parsed = loginSchema.safeParse(req.body);
 
   if (!parsed.success)
@@ -198,7 +202,7 @@ router.post("/logout", async (req: Request, res: Response) => {
     const tokenHash = hashToken(token);
     await RefreshSession.updateOne(
       { tokenHash },
-      { $set: { revokedAt: new Date() } }
+      { $set: { revokedAt: new Date() } },
     );
   }
 
@@ -246,7 +250,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
   // Invalidate prior unused tokens for this user
   await PasswordResetToken.updateMany(
     { userId: user._id, usedAt: null, expiresAt: { $gt: new Date() } },
-    { $set: { usedAt: new Date() } }
+    { $set: { usedAt: new Date() } },
   );
 
   await PasswordResetToken.create({
@@ -258,7 +262,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
 
   const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://localhost:3000";
   const resetUrl = `${frontendOrigin}/reset-password?token=${encodeURIComponent(
-    rawToken
+    rawToken,
   )}`;
 
   await sendPasswordResetEmail(user.email, resetUrl);
@@ -304,7 +308,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
   // Revoke refresh sessions to force re-login on other devices
   await RefreshSession.updateMany(
     { userId: user._id },
-    { $set: { revokedAt: new Date() } }
+    { $set: { revokedAt: new Date() } },
   );
 
   clearRefreshCookie(res);
@@ -368,14 +372,14 @@ router.post("/resend-verification", async (req: Request, res: Response) => {
 
   const email = parsed.data.email.trim().toLowerCase();
   const user = await User.findOne({ email }).select(
-    "_id email emailVerifiedAt"
+    "_id email emailVerifiedAt",
   );
   if (!user) return res.json(generic);
   if (user.emailVerifiedAt) return res.json(generic);
 
   await EmailVerificationToken.updateMany(
     { userId: user._id, usedAt: null, expiresAt: { $gt: new Date() } },
-    { $set: { usedAt: new Date() } }
+    { $set: { usedAt: new Date() } },
   );
 
   const rawToken = crypto.randomBytes(32).toString("hex");
@@ -393,7 +397,7 @@ router.post("/resend-verification", async (req: Request, res: Response) => {
 
   const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://localhost:3000";
   const verifyUrl = `${frontendOrigin}/verify-email?token=${encodeURIComponent(
-    rawToken
+    rawToken,
   )}`;
 
   await sendVerifyEmail(user.email, verifyUrl);

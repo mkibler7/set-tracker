@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import toWorkoutDTO from "../dtos/workoutDto.js";
 import { requireAuth } from "../middleware/requireAuth.js";
-
+import { apiLimiter } from "../middleware/rateLimiters.js";
 import {
   createWorkout,
   deleteAllWorkoutsDevOnly,
@@ -20,6 +20,8 @@ type IdParams = {
 };
 
 const router = Router();
+
+router.use(apiLimiter);
 
 // DEV TESTING ONLY — delete all workouts
 router.delete(
@@ -42,7 +44,7 @@ router.delete(
         .status(500)
         .json({ message: err instanceof Error ? err.message : String(err) });
     }
-  }
+  },
 );
 
 // Get all workouts (protected)
@@ -70,7 +72,7 @@ router.get(
         .status(err?.status ?? 400)
         .json({ message: err instanceof Error ? err.message : String(err) });
     }
-  }
+  },
 );
 
 // Create new workout (protected)
@@ -96,7 +98,7 @@ router.put(
       const updated = await updateWorkout(
         req.user!.userId,
         req.params.id,
-        input
+        input,
       );
       res.json(toWorkoutDTO(updated));
     } catch (err: any) {
@@ -104,7 +106,7 @@ router.put(
         message: err instanceof Error ? err.message : String(err),
       });
     }
-  }
+  },
 );
 
 // Delete workout by ID
@@ -120,7 +122,7 @@ router.delete(
         message: err instanceof Error ? err.message : String(err),
       });
     }
-  }
+  },
 );
 
 export default router;
