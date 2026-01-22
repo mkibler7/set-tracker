@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { WorkoutCard } from "./WorkoutCard";
+import { PaginationBar } from "../shared/PaginationBar";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -125,86 +126,12 @@ export function WorkoutList({
             </AnimatePresence>
           </div>
 
-          {filteredWorkouts.length > pageSize && (
-            <div className="mt-5 flex flex-col items-center gap-2">
-              {/* Pager row */}
-              <div className="flex items-center justify-center gap-2">
-                {/* Jump to first */}
-                <button
-                  type="button"
-                  aria-label="First page"
-                  onClick={() => onPageChange(1)}
-                  disabled={page <= 1}
-                  className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground 
-                  hover:bg-accent/15 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <ChevronDoubleLeftIcon className="h-5 w-5" />
-                </button>
-
-                {/* Previous page */}
-                <button
-                  type="button"
-                  aria-label="Previous page"
-                  onClick={() => onPageChange(Math.max(1, page - 1))}
-                  disabled={page <= 1}
-                  className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground 
-                  hover:bg-accent/15 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <ChevronLeftIcon className="h-5 w-5" />
-                </button>
-
-                {/* 3 page numbers */}
-                <div className="flex items-center gap-1">
-                  {pageWindow.map((p) => {
-                    const active = p === page;
-                    return (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => onPageChange(p)}
-                        className={
-                          active
-                            ? "min-w-[2.25rem] rounded-full bg-transparent px-3 py-1 text-base font-semibold text-foreground ring-1 ring-border"
-                            : "min-w-[2.25rem] rounded-full bg-transparent px-3 py-1 text-sm text-muted-foreground hover:bg-accent/15 hover:text-primary"
-                        }
-                      >
-                        {p}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Next page */}
-                <button
-                  type="button"
-                  aria-label="Next page"
-                  onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-                  disabled={page >= totalPages}
-                  className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground 
-                  hover:bg-accent/15 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <ChevronRightIcon className="h-5 w-5" />
-                </button>
-
-                {/* Jump to last */}
-                <button
-                  type="button"
-                  aria-label="Last page"
-                  onClick={() => onPageChange(totalPages)}
-                  disabled={page >= totalPages}
-                  className="grid h-9 w-9 place-items-center rounded-full bg-transparent text-muted-foreground 
-                  hover:bg-accent/15 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <ChevronDoubleRightIcon className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Range text below */}
-              <div className="mt-2 text-xs text-muted-foreground">
-                {rangeText}
-              </div>
-            </div>
-          )}
+          <PaginationBar
+            page={page}
+            totalItems={filteredWorkouts.length}
+            pageSize={pageSize}
+            onPageChange={onPageChange}
+          />
         </>
       )}
     </section>

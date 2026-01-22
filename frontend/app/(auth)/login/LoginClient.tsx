@@ -46,11 +46,31 @@ export default function LoginClient() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [isDemoSubmitting, setIsDemoSubmitting] = useState(false);
 
   const isUnverifiedError = useMemo(() => {
     if (!error) return false;
     return error.toLowerCase().includes("not verified");
   }, [error]);
+
+  async function onDemo() {
+    setError(null);
+    setInfo(null);
+    setIsDemoSubmitting(true);
+
+    try {
+      await AuthAPI.demoLogin();
+
+      localStorage.setItem("has_session", "1");
+
+      // same reasoning as onSubmit: hard navigation so middleware sees cookies
+      window.location.assign(nextPath);
+    } catch (err: any) {
+      setError(err?.message ?? "Demo login failed");
+    } finally {
+      setIsDemoSubmitting(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -173,6 +193,7 @@ export default function LoginClient() {
           />
         </div>
 
+        {/* Login Button */}
         <button
           type="submit"
           disabled={isSubmitting}
@@ -202,6 +223,16 @@ export default function LoginClient() {
         >
           Create new account
         </Link>
+
+        {/* Demo Login Button */}
+        <button
+          type="button"
+          onClick={onDemo}
+          disabled={isDemoSubmitting || isSubmitting}
+          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-card/80 disabled:opacity-60"
+        >
+          {isDemoSubmitting ? "Starting demo..." : "Recruiters - Try Demo"}
+        </button>
       </form>
     </section>
   );

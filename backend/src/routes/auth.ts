@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
+import { ensureRollingDemoData } from "../utils/demoSeed.js";
 import User from "../models/User.js";
 import RefreshSession from "../models/RefreshSession.js";
 import crypto from "crypto";
@@ -86,6 +86,63 @@ router.post("/register", async (req: Request, res: Response) => {
   return res.status(201).json({
     ok: true,
     message: "Account created. Please verify your email to continue.",
+  });
+});
+
+// Demo login route for easy access without registration
+router.post("/demo", async (_req: Request, res: Response) => {
+  // Safety switch so you can disable quickly if needed
+  if (process.env.ENABLE_DEMO !== "true") {
+    return res.status(404).json({ message: "Not found" });
+  }
+
+  const demoEmail = (
+    process.env.DEMO_EMAIL ?? "demo@set-tracker.com"
+  ).toLowerCase();
+
+  // Find or create the demo user
+  let user = await User.findOne({ email: demoEmail });
+
+  if (!user) {
+    // random password hash; nobody should be using password login for demo
+    const randomPass = crypto.randomBytes(24).toString("hex");
+    const passwordHash = await bcrypt.hash(randomPass, 12);
+
+    user = await User.create({
+      email: demoEmail,
+      passwordHash,
+      displayName: "SetTracker Demo",
+      roles: ["user"],
+      emailVerifiedAt: new Date(),
+    });
+  } else if (!user.emailVerifiedAt) {
+    user.emailVerifiedAt = new Date();
+    await user.save();
+  }
+
+  // Seed/refresh rolling last-7-days data
+  await ensureRollingDemoData(String(user._id));
+
+  // Issue session cookies (same as login)
+  const refreshToken = signRefreshToken(String(user._id));
+  const tokenHash = hashToken(refreshToken);
+
+  const days = Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? "30");
+  const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+  await RefreshSession.create({ userId: user._id, tokenHash, expiresAt });
+
+  setRefreshCookie(res, refreshToken);
+
+  const accessToken = signAccessToken(String(user._id));
+  setAccessCookie(res, accessToken);
+
+  return res.json({
+    user: {
+      id: String(user._id),
+      email: user.email,
+      displayName: user.displayName ?? "SetTracker Demo",
+    },
   });
 });
 

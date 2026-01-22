@@ -9,6 +9,7 @@ import ExerciseFormModal from "@/components/exercises/ExerciseFormModal";
 import { Exercise, ExerciseFormValues } from "@/types/exercise";
 import { MuscleGroup } from "@reptracker/shared/muscles";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import { PaginationBar } from "@/components/shared/PaginationBar";
 
 const PAGE_SIZE = 17;
 
@@ -239,47 +240,12 @@ export default function ExercisesPage() {
         </div>
       </section>
 
-      {/* bottom pagination bar */}
-      <div className="mt-3">
-        <div className="max-w-2xl mx-auto w-full px-4 pr-2">
-          <div className="flex flex-col items-center justify-center gap-2">
-            <div className="flex items-center justify-center">
-              {/* Prev */}
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage <= 1}
-                aria-label="Previous page"
-                className="inline-flex items-center justify-center px-2 py-2 text-muted-foreground hover:bg-card/70 disabled:opacity-50"
-              >
-                <ChevronLeftIcon className="h-8 w-8" />
-              </button>
-
-              {/* Page indicator */}
-
-              {totalCount > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {currentPage} / {totalPages}
-                </p>
-              )}
-
-              {/* Next */}
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage >= totalPages}
-                aria-label="Next page"
-                className="inline-flex items-center justify-center px-2 py-2 text-muted-foreground hover:bg-card/70 disabled:opacity-50"
-              >
-                <ChevronRightIcon className="h-8 w-8" />
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {totalCount} {totalCount === 1 ? "exercise" : "exercises"}
-            </p>
-          </div>
-        </div>
-      </div>
+      <PaginationBar
+        page={page}
+        totalItems={totalCount}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
 
       {/* Add Exercise modal */}
       <ExerciseFormModal

@@ -38,6 +38,19 @@ export const AuthAPI = {
       body: JSON.stringify(payload),
     }),
 
+  demoLogin: async () => {
+    const data = await apiClient<AuthResponse>("/api/auth/demo", {
+      method: "POST",
+    });
+
+    useAuthStore.getState().setUser({
+      ...data.user,
+      displayName: data.user.displayName ?? "",
+    });
+
+    return data.user;
+  },
+
   login: async (payload: { email: string; password: string }) => {
     const data = await apiClient<AuthResponse>("/api/auth/login", {
       method: "POST",
