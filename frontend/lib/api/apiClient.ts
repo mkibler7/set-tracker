@@ -1,6 +1,5 @@
 import { useAuthStore } from "@/store/authStore";
-console.log("NEXT_PUBLIC_API_BASE_URL =", process.env.NEXT_PUBLIC_API_BASE_URL);
-const BASE = "";
+const BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/+$/, "");
 
 export class ApiError extends Error {
   status: number;
@@ -112,7 +111,7 @@ async function refreshSession(): Promise<boolean> {
 
 export async function apiClient<T>(
   path: string,
-  init?: RequestInit
+  init?: RequestInit,
 ): Promise<T> {
   let res = await doFetch(path, init);
 
