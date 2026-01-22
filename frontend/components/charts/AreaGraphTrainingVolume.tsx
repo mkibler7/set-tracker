@@ -47,7 +47,7 @@ export default function AreaGraphTrainingVolume({
   };
 
   return (
-    <Card className="reptracker-chart ">
+    <Card className="settracker-chart ">
       <div className="w-full h-[190px] sm:h-[220px] md:h-[260px] lg:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
