@@ -98,7 +98,7 @@ export default function LoginClient() {
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Log In</h1>
         <p className="text-sm text-muted-foreground">
-          Access your SetTrack account.
+          Access your SetTracker account.
         </p>
       </header>
 
