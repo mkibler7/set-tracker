@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import WebNavBar from "./WebNav";
+import LogoutNavLink from "@/components/auth/LogoutNavLink";
 
 const navButtonClass =
   "block px-3 py-2 text-slate-100 hover:bg-slate-800 hover:text-primary";
@@ -69,11 +69,7 @@ export default function MobileNavBar() {
           >
             Charts
           </Link>
-          <Link href="" onClick={close} className={`${navButtonClass}`}>
-            Log-out
-          </Link>
-
-          <div className="mt-1 border-t border-slate-800" />
+          <LogoutNavLink className={`${navButtonClass}`} />
         </div>
       )}
     </div>
