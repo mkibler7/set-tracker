@@ -4,12 +4,6 @@ import { AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { WorkoutCard } from "./WorkoutCard";
 import { PaginationBar } from "../shared/PaginationBar";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronDoubleLeftIcon,
-  ChevronDoubleRightIcon,
-} from "@heroicons/react/24/solid";
 type WorkoutsListProps = {
   filteredWorkouts: Workout[];
   pageWorkouts: Workout[];
@@ -49,7 +43,6 @@ export function WorkoutList({
 
     window.scrollTo({ top: 0, left: 0, behavior });
 
-    // Optional: if your list is also independently scrollable, reset it too
     const el = listRef.current;
     if (el) el.scrollTop = 0;
   }, [page]);

@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-
-import Link from "next/link";
 import "../globals.css";
 import { Inter } from "next/font/google";
 import MobileNavBar from "@/components/layout/MobileNav";
 import AuthBootstrap from "@/components/auth/AuthBootstrap";
-import LogoutNavLink from "@/components/auth/LogoutNavLink";
+import WebNavBar from "@/components/layout/WebNav";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,36 +26,7 @@ export default function RootLayout({
         <div className="flex min-h-screen flex-col md:flex-row overflow-hidden">
           {/* Sidebar (desktop only) */}
           <aside className="hidden md:flex w-60 flex-col border-r border-slate-800 bg-slate-900/60 p-4 gap-4">
-            <div className="text-xl text-primary font-semibold tracking-tight mb-3">
-              SetTracker
-            </div>
-            <nav className="flex flex-col gap-2 text-sm">
-              <Link href="/dashboard" className="hover:text-primary">
-                Dashboard
-              </Link>
-              <Link href="/dailylog" className="hover:text-primary">
-                Daily Log
-              </Link>
-              <Link href="/workouts" className="hover:text-primary">
-                Workouts
-              </Link>
-              <Link href="/exercises" className="hover:text-primary">
-                Exercises
-              </Link>
-              <Link href="/charts" className="hover:text-primary">
-                Charts
-              </Link>
-              <LogoutNavLink className="text-left hover:text-red-500" />
-            </nav>
-
-            <div className="mt-auto">
-              <Link
-                href="/login"
-                className="text-xs text-slate-400 hover:text-primary"
-              >
-                Log in
-              </Link>
-            </div>
+            <WebNavBar />
           </aside>
 
           {/* Main column: mobile header + content */}

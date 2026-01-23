@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import WebNavBar from "./WebNav";
 
 const navButtonClass =
   "block px-3 py-2 text-slate-100 hover:bg-slate-800 hover:text-primary";
@@ -73,14 +74,6 @@ export default function MobileNavBar() {
           </Link>
 
           <div className="mt-1 border-t border-slate-800" />
-
-          {/* <Link
-            href="/login"
-            onClick={close}
-            className="block px-3 py-2 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-100"
-          >
-            Log in
-          </Link> */}
         </div>
       )}
     </div>
