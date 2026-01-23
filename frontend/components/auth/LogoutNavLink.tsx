@@ -10,7 +10,6 @@ export default function LogoutNavLink({ className }: { className?: string }) {
 
   async function onClick() {
     await appLogout();
-    // router.replace("/login");
   }
 
   return (

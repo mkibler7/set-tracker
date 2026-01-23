@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AuthAPI } from "@/lib/api/apiAuth";
+import TitleIcon from "@/components/icons/title-icon";
 
 export default function LoginClient() {
   const searchParams = useSearchParams();
@@ -114,9 +115,12 @@ export default function LoginClient() {
   }
 
   return (
-    <section className="mx-auto max-w-md space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Log In</h1>
+    <section className="mx-auto w-full max-w-md space-y-5 px-4 sm:px-0 ">
+      <TitleIcon className="mx-auto h-auto w-44 text-primary mb-10 sm:mx-0 sm:w-52" />
+      <header className="space-y-1 text-center sm:text-left">
+        <h1 className="text-xl pb-2 sm:text-2xl font-semibold tracking-tight">
+          Log In
+        </h1>
         <p className="text-sm text-muted-foreground">
           Access your SetTracker account.
         </p>
@@ -124,7 +128,7 @@ export default function LoginClient() {
 
       <form
         onSubmit={onSubmit}
-        className="space-y-4 rounded-lg border border-border p-4"
+        className="space-y-3 sm:space-y-4 rounded-lg p-3 sm:p-4 bg-card/20 sm:bg-card/30 border border-transparent sm:border-border/60 shadow-none sm:shadow-sm"
       >
         {verifiedMessage ? (
           <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground">
@@ -161,14 +165,17 @@ export default function LoginClient() {
           </button>
         ) : null}
 
-        <div className="space-y-1 text-sm text-foreground">
-          <label htmlFor="email" className="ml-2 block text-foreground">
+        <div className="space-y-1">
+          <label
+            htmlFor="email"
+            className="block text-xs font-medium text-foreground"
+          >
             E-mail
           </label>
           <input
             id="email"
             type="email"
-            className="w-full rounded-md border border-border bg-card px-3 py-2 mt-1 text-sm"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -177,14 +184,17 @@ export default function LoginClient() {
           />
         </div>
 
-        <div className="space-y-1 text-sm">
-          <label htmlFor="password" className="ml-2 block text-foreground">
+        <div className="space-y-1">
+          <label
+            htmlFor="password"
+            className="block text-xs font-medium text-foreground"
+          >
             Password
           </label>
           <input
             id="password"
             type="password"
-            className="w-full rounded-md border border-border bg-card px-3 py-2 mt-1 text-sm"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -193,7 +203,6 @@ export default function LoginClient() {
           />
         </div>
 
-        {/* Login Button */}
         <button
           type="submit"
           disabled={isSubmitting}
@@ -202,37 +211,41 @@ export default function LoginClient() {
           {isSubmitting ? "Logging in..." : "Log In"}
         </button>
 
-        {/* Forgot password */}
         <div className="text-center">
           <Link
-            href={`/forgot-password?email=${encodeURIComponent(
-              email,
-            )}&next=${encodeURIComponent(nextPath)}`}
+            href={`/forgot-password?email=${encodeURIComponent(email)}&next=${encodeURIComponent(nextPath)}`}
             className="text-sm text-muted-foreground underline-offset-4 hover:underline"
           >
             Forgot password?
           </Link>
         </div>
 
-        <div className="mb-4 border-t border-border" />
+        <div className="border-t border-border pt-3" />
 
-        {/* Create account */}
-        <Link
-          href={`/signup?next=${encodeURIComponent(nextPath)}`}
-          className="block w-full rounded-md border border-border bg-card px-3 py-2 text-center text-sm font-medium text-foreground hover:bg-card/80"
-        >
-          Create new account
-        </Link>
+        {/* Mobile-compact secondary actions */}
+        <div className="space-y-2 pb-2 text-center text-sm text-muted-foreground">
+          <div>
+            New here?{" "}
+            <Link
+              href={`/signup?next=${encodeURIComponent(nextPath)}`}
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              Create an account
+            </Link>
+          </div>
 
-        {/* Demo Login Button */}
-        <button
-          type="button"
-          onClick={onDemo}
-          disabled={isDemoSubmitting || isSubmitting}
-          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-card/80 disabled:opacity-60"
-        >
-          {isDemoSubmitting ? "Starting demo..." : "Recruiters - Try Demo"}
-        </button>
+          <div>
+            Recruiter?{" "}
+            <button
+              type="button"
+              onClick={onDemo}
+              disabled={isDemoSubmitting || isSubmitting}
+              className="font-medium text-foreground underline-offset-4 hover:underline disabled:opacity-60"
+            >
+              {isDemoSubmitting ? "Starting demo..." : "Try the demo"}
+            </button>
+          </div>
+        </div>
       </form>
     </section>
   );
