@@ -111,7 +111,7 @@ router.post("/demo", async (_req: Request, res: Response) => {
     user = await User.create({
       email: demoEmail,
       passwordHash,
-      displayName: "SetTracker Demo",
+      displayName: "John Smith",
       roles: ["user"],
       emailVerifiedAt: new Date(),
     });
