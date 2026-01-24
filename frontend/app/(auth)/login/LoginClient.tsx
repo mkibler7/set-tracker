@@ -115,35 +115,35 @@ export default function LoginClient() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-md space-y-5 px-4 sm:px-0 ">
-      <TitleIcon className="mx-auto h-auto w-44 text-primary mb-10 sm:mx-0 sm:w-52" />
-      <header className="space-y-1 text-center sm:text-left">
+    <section className="mx-auto w-full max-w-md space-y-5 px-4 sm:px-0 max-[380px]:space-y-3">
+      <TitleIcon className="mx-auto h-auto w-36 min-[400px]:w-48 text-primary mb-10 sm:mx-0 max-[380px]:w-28 max-[380px]:mb-4" />
+      <header className="space-y-1 text-center sm:text-left ">
         <h1 className="text-xl pb-2 sm:text-2xl font-semibold tracking-tight">
           Log In
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground max-[380px]:text-xs">
           Access your SetTracker account.
         </p>
       </header>
 
       <form
         onSubmit={onSubmit}
-        className="space-y-3 sm:space-y-4 rounded-lg p-3 sm:p-4 bg-card/20 sm:bg-card/30 border border-transparent sm:border-border/60 shadow-none sm:shadow-sm"
+        className="space-y-3 sm:space-y-4 rounded-lg p-3 sm:p-4 bg-card/20 sm:bg-card/30 border border-transparent sm:border-border/60 shadow-none sm:shadow-sm max-[380px]:p-2 max-[380px]:space-y-2"
       >
         {verifiedMessage ? (
-          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground">
+          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground max-[380px]:p-2 max-[380px]:text-xs">
             {verifiedMessage}
           </div>
         ) : null}
 
         {reasonMessage && hadSessionBefore ? (
-          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground">
+          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground max-[380px]:p-2 max-[380px]:text-xs">
             {reasonMessage}
           </div>
         ) : null}
 
         {info ? (
-          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground">
+          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground max-[380px]:p-2 max-[380px]:text-xs">
             {info}
           </div>
         ) : null}
@@ -168,14 +168,14 @@ export default function LoginClient() {
         <div className="space-y-1">
           <label
             htmlFor="email"
-            className="block text-xs font-medium text-foreground"
+            className="block text-xs font-medium text-foreground max-[380px]:text-[11px]"
           >
             E-mail
           </label>
           <input
             id="email"
             type="email"
-            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm max-[380px]:px-2 max-[380px]:py-1.5 max-[380px]:text-xs"
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -187,14 +187,14 @@ export default function LoginClient() {
         <div className="space-y-1">
           <label
             htmlFor="password"
-            className="block text-xs font-medium text-foreground"
+            className="block text-xs font-medium text-foreground max-[380px]:text-[11px]"
           >
             Password
           </label>
           <input
             id="password"
             type="password"
-            className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 mb-3 text-sm max-[380px]:px-2 max-[380px]:py-1.5 max-[380px]:text-xs"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
