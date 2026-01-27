@@ -11,19 +11,19 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/logos/set-tracker-logo-v2.png",
+        url: "/logos/set-tracker-logo-v3.png",
         sizes: "32x32",
         type: "image/png",
       },
       {
-        url: "/logos/set-tracker-logo-v2.png",
+        url: "/logos/set-tracker-logo-v3.png",
         sizes: "16x16",
         type: "image/png",
       },
     ],
     apple: [
       {
-        url: "/logos/set-tracker-logo-v2.png",
+        url: "/logos/set-tracker-logo-v3.png",
         sizes: "180x180",
         type: "image/png",
       },
