@@ -8,27 +8,6 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "SetTracker",
   description: "Track your workouts like a pro.",
-  icons: {
-    icon: [
-      {
-        url: "/logos/set-tracker-logo-v3.png",
-        sizes: "32x32",
-        type: "image/png",
-      },
-      {
-        url: "/logos/set-tracker-logo-v3.png",
-        sizes: "16x16",
-        type: "image/png",
-      },
-    ],
-    apple: [
-      {
-        url: "/logos/set-tracker-logo-v3.png",
-        sizes: "180x180",
-        type: "image/png",
-      },
-    ],
-  },
 };
 
 export default function RootLayout({

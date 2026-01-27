@@ -6,6 +6,8 @@ export const apiLimiter = rateLimit({
   limit: 300, // 300 requests / 15 min / IP
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === "OPTIONS",
+  message: { message: "API rate limit hit." },
 });
 
 // Auth limiter (stricter)
@@ -14,6 +16,8 @@ export const authLimiter = rateLimit({
   limit: 30, // 30 auth requests / 15 min / IP
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === "OPTIONS",
+  message: { message: "Auth rate limit hit." },
 });
 
 // Login limiter (strictest)
