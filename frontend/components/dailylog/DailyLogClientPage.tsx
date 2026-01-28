@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/components/dailylog/Header";
 import EmptyState from "@/components/dailylog/EmptyState";
@@ -14,12 +14,12 @@ import {
   ALL_MUSCLE_GROUPS,
   type MuscleGroup,
 } from "@reptracker/shared/muscles";
+import FocusOverlay from "../ui/FocusOverlay";
 
-type WorkoutStep = "empty" | "split" | "session";
+type ViewMode = "empty" | "session";
 
 export default function DailyLogClientPage() {
   // Zustand workout session store
-  // Use individual selectors to avoid unnecessary re-renders
   const sessionDraft = useWorkoutStore((s) => s.sessionDraft);
   const editDraft = useWorkoutStore((s) => s.editDraft);
 
@@ -38,9 +38,12 @@ export default function DailyLogClientPage() {
   const isEditingHistory = !!fromWorkoutId;
   const activeDraft = isEditingHistory ? editDraft : sessionDraft;
 
-  const loadedFromWorkoutRef = useRef<string | null>(null);
+  const [view, setView] = useState<ViewMode>("empty");
 
-  const [step, setStep] = useState<WorkoutStep>("empty");
+  // Split overlay state (this replaces the old `step === "split"` view)
+  const [isSplitOverlayOpen, setIsSplitOverlayOpen] = useState(false);
+  const [isEditingSplit, setIsEditingSplit] = useState(false);
+
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<
     MuscleGroup[]
   >([]);
@@ -50,20 +53,10 @@ export default function DailyLogClientPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const [isEditingSplit, setIsEditingSplit] = useState(false);
-
   // Backend-loaded exercise catalog (used for ExercisePicker / adding to session)
   const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([]);
   const [exercisesLoading, setExercisesLoading] = useState(false);
   const [exercisesError, setExercisesError] = useState<string | null>(null);
-
-  function toYYYYMMDDUTC(value: string | Date) {
-    const d = value instanceof Date ? value : new Date(value);
-    const y = d.getUTCFullYear();
-    const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(d.getUTCDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  }
 
   function fromYYYYMMDDToUTCNoon(yyyyMmDd: string) {
     // store as UTC noon to avoid day-shift
@@ -113,7 +106,6 @@ export default function DailyLogClientPage() {
         }
 
         const workout = await WorkoutsAPI.get(fromWorkoutId);
-
         if (cancelled) return;
 
         startEdit({
@@ -123,10 +115,14 @@ export default function DailyLogClientPage() {
           exercises: workout.exercises,
         });
 
-        setStep("session");
+        // Underlying page stays "session"
+        setView("session");
         setSelectedMuscleGroups(workout.muscleGroups);
         setWorkoutDate(new Date(workout.date));
+
+        // Make sure overlays/modals are closed
         setIsEditingSplit(false);
+        setIsSplitOverlayOpen(false);
         setIsPickerOpen(false);
       } catch (error) {
         if (cancelled) return;
@@ -142,24 +138,20 @@ export default function DailyLogClientPage() {
 
   // 2) If there is already a current workout in the store, auto-resume it
   useEffect(() => {
-    if (fromWorkoutId || !sessionDraft || step !== "empty") return;
+    if (fromWorkoutId || !sessionDraft || view !== "empty") return;
 
     setSelectedMuscleGroups(sessionDraft.muscleGroups);
     setWorkoutDate(new Date(sessionDraft.date));
-    setStep("session");
-  }, [fromWorkoutId, sessionDraft, step]);
+    setView("session");
+  }, [fromWorkoutId, sessionDraft, view]);
 
   const splitLabel =
     (selectedMuscleGroups?.length ?? 0) > 0
       ? selectedMuscleGroups.join(" / ")
       : "Start Workout";
 
-  const headerTitle =
-    step === "session"
-      ? splitLabel
-      : isEditingSplit
-        ? "Edit Workout"
-        : "Start Workout";
+  // IMPORTANT: header title should NOT change just because overlay is open
+  const headerTitle = view === "session" ? splitLabel : "Start Workout";
 
   const handleToggleMuscleGroup = (group: MuscleGroup) => {
     setSelectedMuscleGroups((prev) =>
@@ -167,10 +159,37 @@ export default function DailyLogClientPage() {
     );
   };
 
-  const handleBeginSession = () => {
+  const openStartOverlay = () => {
+    setIsEditingSplit(false);
+    setIsSplitOverlayOpen(true);
+  };
+
+  const handleEditSplit = () => {
+    if (!activeDraft) return;
+
+    setSelectedMuscleGroups(activeDraft.muscleGroups);
+    setWorkoutDate(new Date(activeDraft.date));
+    setIsEditingSplit(true);
+    setIsSplitOverlayOpen(true);
+  };
+
+  const handleCancelSplit = () => {
+    // If user was starting a brand new session and cancels, go back to empty
+    if (!isEditingSplit && !activeDraft) {
+      setSelectedMuscleGroups([]);
+      setWorkoutDate(new Date());
+      setView("empty");
+    }
+
+    // Otherwise just close overlay and keep the session view as-is
+    setIsEditingSplit(false);
+    setIsSplitOverlayOpen(false);
+  };
+
+  const handleBeginOrSaveSplit = () => {
     if (selectedMuscleGroups.length === 0) return;
 
-    // Editing the split of the currently open draft (session OR edit)
+    // Editing split of an existing draft (session OR edit) -> update meta + close overlay
     if (isEditingSplit && activeDraft) {
       if (isEditingHistory) {
         useWorkoutStore.getState().updateEditMeta({
@@ -184,43 +203,21 @@ export default function DailyLogClientPage() {
         });
       }
 
-      setStep("session");
       setIsEditingSplit(false);
+      setIsSplitOverlayOpen(false);
       return;
     }
 
     // Starting a NEW session draft
     if (!isEditingHistory) {
       startSession(selectedMuscleGroups, workoutDate.toISOString());
-      setStep("session");
+      setView("session");
+      setIsSplitOverlayOpen(false);
       return;
     }
 
     // If we’re editing history and not in "edit split" mode, do nothing here.
     // Edit draft is created by the fromWorkout effect.
-  };
-
-  const handleCancelSplit = () => {
-    // If user was editing split for an existing draft, just return to session view
-    if (isEditingSplit && activeDraft) {
-      setStep("session");
-      setIsEditingSplit(false);
-      return;
-    }
-
-    // Otherwise we were starting a brand new session and want to exit back to empty
-    setSelectedMuscleGroups([]);
-    setWorkoutDate(new Date());
-    setStep("empty");
-  };
-
-  const handleEditSplit = () => {
-    if (!activeDraft) return;
-
-    setSelectedMuscleGroups(activeDraft.muscleGroups);
-    setWorkoutDate(new Date(activeDraft.date));
-    setIsEditingSplit(true);
-    setStep("split");
   };
 
   const handleSaveWorkout = async () => {
@@ -244,6 +241,7 @@ export default function DailyLogClientPage() {
         resetEditDraft();
         setIsPickerOpen(false);
         setIsEditingSplit(false);
+        setIsSplitOverlayOpen(false);
 
         router.replace("/dailylog");
 
@@ -251,11 +249,11 @@ export default function DailyLogClientPage() {
         if (sessionDraft) {
           setSelectedMuscleGroups(sessionDraft.muscleGroups);
           setWorkoutDate(new Date(sessionDraft.date));
-          setStep("session");
+          setView("session");
         } else {
           setSelectedMuscleGroups([]);
           setWorkoutDate(new Date());
-          setStep("empty");
+          setView("empty");
         }
 
         return;
@@ -267,10 +265,11 @@ export default function DailyLogClientPage() {
       resetSession();
       setIsPickerOpen(false);
       setIsEditingSplit(false);
+      setIsSplitOverlayOpen(false);
 
       setSelectedMuscleGroups([]);
       setWorkoutDate(new Date());
-      setStep("empty");
+      setView("empty");
     } catch (error) {
       console.error("Failed to save workout:", error);
       setSaveError(
@@ -287,12 +286,9 @@ export default function DailyLogClientPage() {
         <Header
           title={headerTitle}
           date={workoutDate}
-          isSession={step === "session"}
-          onEditSplit={step === "session" ? handleEditSplit : undefined}
-          onAddExercise={
-            step === "session" ? () => setIsPickerOpen(true) : undefined
-          }
-          canEditDate={isEditingHistory && step === "session"}
+          isSession={view === "session"}
+          onEditSplit={view === "session" ? handleEditSplit : undefined}
+          canEditDate={isEditingHistory && view === "session"}
           onCommitDate={(ymd) => {
             if (!isEditingHistory) return;
 
@@ -306,25 +302,14 @@ export default function DailyLogClientPage() {
           }}
         />
 
-        {step === "empty" && (
+        {view === "empty" && (
           <div className="flex flex-1 items-center justify-center pb-10 sm:pb-16 lg:pb-20">
-            <EmptyState onStart={() => setStep("split")} />
+            <EmptyState onStart={openStartOverlay} />
           </div>
         )}
 
-        {step === "split" && (
-          <SplitSelector
-            allGroups={ALL_MUSCLE_GROUPS}
-            selected={selectedMuscleGroups}
-            onToggleGroup={handleToggleMuscleGroup}
-            onCancel={handleCancelSplit}
-            onBegin={handleBeginSession}
-            primaryLabel={isEditingSplit ? "Save changes" : "Begin Session"}
-          />
-        )}
-
-        {step === "session" && (
-          <div className="flex-1 flex flex-col overflow-hidden scroll">
+        {view === "session" && (
+          <div className="flex flex-1 flex-col">
             <SessionView
               mode={isEditingHistory ? "edit" : "session"}
               selectedMuscleGroups={selectedMuscleGroups}
@@ -338,6 +323,22 @@ export default function DailyLogClientPage() {
             />
           </div>
         )}
+
+        {/* Overlay floats above current view; underlying header/page does NOT change */}
+        <FocusOverlay
+          open={isSplitOverlayOpen}
+          onClose={handleCancelSplit}
+          maxWidthClassName="max-w-xl"
+        >
+          <SplitSelector
+            allGroups={ALL_MUSCLE_GROUPS}
+            selected={selectedMuscleGroups}
+            onToggleGroup={handleToggleMuscleGroup}
+            onCancel={handleCancelSplit}
+            onBegin={handleBeginOrSaveSplit}
+            primaryLabel={isEditingSplit ? "Save changes" : "Begin Session"}
+          />
+        </FocusOverlay>
       </div>
     </main>
   );

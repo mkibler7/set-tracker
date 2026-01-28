@@ -22,21 +22,19 @@ export default function RootLayout({
       <body className={`${inter.className} bg-background text-foreground`}>
         <AuthBootstrap />
 
-        {/* Outer layout: column on mobile, row on desktop */}
-        <div className="flex min-h-screen flex-col md:flex-row">
-          {/* Main column: mobile header + content */}
-          <div className="flex flex-1 flex-col">
-            <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900 backdrop-blur">
-              <div className="mx-auto flex h-14 items-center px-4 md:px-8">
-                <NavBar /> {/* responsive */}
-              </div>
-            </header>
+        {/* App shell */}
+        <div className="flex h-dvh flex-col overflow-hidden">
+          {/* Always-visible header */}
+          <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900">
+            <div className="mx-auto flex h-14 items-center px-4 md:px-8">
+              <NavBar />
+            </div>
+          </header>
 
-            {/* Main content */}
-            <main className="flex-1 bg-background-dark p-4 md:p-8">
-              {children}
-            </main>
-          </div>
+          {/* Scroll container */}
+          <main className="flex-1 min-h-0 overflow-y-auto bg-background-dark">
+            <div className="p-4 md:p-8">{children}</div>
+          </main>
         </div>
       </body>
     </html>

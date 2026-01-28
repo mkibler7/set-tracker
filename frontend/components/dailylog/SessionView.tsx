@@ -1,22 +1,25 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import ExercisePicker from "@/components/dailylog/ExercisePicker";
 import ExerciseCard from "@/components/dailylog/ExerciseCard";
 import DeleteExerciseModal from "./DeleteExerciseModal";
+import FocusOverlay from "@/components/ui/FocusOverlay";
+
 import { useWorkoutStore } from "@/app/store/useWorkoutStore";
 import type { WorkoutExercise } from "@/types/workout";
 import type { Exercise } from "@/types/exercise";
 import { formatExerciseMuscleLabel } from "@/lib/util/exercises";
-import { ADDRCONFIG } from "dns";
 
 type SessionViewProps = {
   mode: "session" | "edit";
   selectedMuscleGroups: string[];
   fromWorkoutId?: string | null;
+
   isPickerOpen: boolean;
   onClosePicker: () => void;
   onOpenPicker: () => void;
+
   onSaveWorkout?: () => void;
   exerciseCatalog: Exercise[];
   exercisesCatalogLoading?: boolean;
@@ -38,7 +41,7 @@ export default function SessionView({
   const upsertSessionExercise = useWorkoutStore((s) => s.upsertSessionExercise);
   const removeSessionExercise = useWorkoutStore((s) => s.removeSessionExercise);
   const updateSessionExerciseNotes = useWorkoutStore(
-    (s) => s.updateSessionExerciseNotes
+    (s) => s.updateSessionExerciseNotes,
   );
   const addSessionSet = useWorkoutStore((s) => s.addSessionSet);
   const updateSessionSet = useWorkoutStore((s) => s.updateSessionSet);
@@ -47,7 +50,7 @@ export default function SessionView({
   const upsertEditExercise = useWorkoutStore((s) => s.upsertEditExercise);
   const removeEditExercise = useWorkoutStore((s) => s.removeEditExercise);
   const updateEditExerciseNotes = useWorkoutStore(
-    (s) => s.updateEditExerciseNotes
+    (s) => s.updateEditExerciseNotes,
   );
   const addEditSet = useWorkoutStore((s) => s.addEditSet);
   const updateEditSet = useWorkoutStore((s) => s.updateEditSet);
@@ -57,61 +60,58 @@ export default function SessionView({
   const sessionExercises = draft?.exercises ?? [];
 
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(
+    null,
+  );
+
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const exerciseToDelete = pendingDeleteId
-    ? sessionExercises.find(
-        (exercise) => exercise.exerciseId === pendingDeleteId
-      )
+    ? sessionExercises.find((ex) => ex.exerciseId === pendingDeleteId)
     : undefined;
 
-  // const hasExercises = sessionExercises.length > 0;
   const excludedIds = useMemo(
-    () => sessionExercises.map((exercise) => exercise.exerciseId),
-    [sessionExercises]
+    () => sessionExercises.map((ex) => ex.exerciseId),
+    [sessionExercises],
   );
 
   const catalogById = useMemo(() => {
     return Object.fromEntries(exerciseCatalog.map((e) => [e.id, e]));
   }, [exerciseCatalog]);
 
-  const exerciseCount = sessionExercises.length;
-  const hasExercises = exerciseCount > 0;
-
-  const setCount = useMemo(
-    () =>
-      sessionExercises.reduce(
-        (total, exercise) => total + exercise.sets.length,
-        0
-      ),
-    [sessionExercises]
-  );
-
   const catalogByName = useMemo(() => {
     return Object.fromEntries(
       exerciseCatalog
         .filter((e) => typeof e.name === "string" && e.name.trim().length > 0)
-        .map((e) => [e.name.trim().toLowerCase(), e])
+        .map((e) => [e.name.trim().toLowerCase(), e]),
     );
   }, [exerciseCatalog]);
 
+  const exerciseCount = sessionExercises.length;
+  const hasExercises = exerciseCount > 0;
+
+  const setCount = useMemo(() => {
+    return sessionExercises.reduce((total, ex) => total + ex.sets.length, 0);
+  }, [sessionExercises]);
+
   const totalVolume = useMemo(() => {
-    return sessionExercises.reduce<number>((total, exercise) => {
-      const exerciseVolume = exercise.sets.reduce<number>((acc, set) => {
+    return sessionExercises.reduce<number>((total, ex) => {
+      const exVol = ex.sets.reduce<number>((acc, set) => {
         const weight = set.weight ?? 0;
         const reps = set.reps ?? 0;
         return acc + weight * reps;
       }, 0);
-      return total + exerciseVolume;
+      return total + exVol;
     }, 0);
   }, [sessionExercises]);
 
-  // IMPORTANT: id here MUST be the Mongo exercise id (exercise.id)
+  // IMPORTANT: exerciseId here MUST be Mongo exercise id (exercise.id)
   const handleSelectExercise = (exerciseId: string) => {
-    const base = exerciseCatalog.find((exercise) => exercise.id === exerciseId);
+    const base = exerciseCatalog.find((e) => e.id === exerciseId);
     if (!base) return;
 
     const workoutExercise: WorkoutExercise = {
-      exerciseId: base.id, // MongoDB id
+      exerciseId: base.id,
       exerciseName: base.name,
       notes: "",
       sets: [],
@@ -120,8 +120,28 @@ export default function SessionView({
     if (mode === "edit") upsertEditExercise(workoutExercise);
     else upsertSessionExercise(workoutExercise);
 
+    setExpandedExerciseId(base.id);
+
+    requestAnimationFrame(() => {
+      cardRefs.current[base.id]?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+
     onClosePicker();
   };
+
+  function getCompactMuscleLabel(meta?: Exercise) {
+    if (!meta) return "";
+    const primary = meta.primaryMuscleGroup;
+    const secondaries = meta.secondaryMuscleGroups ?? [];
+    const firstSecondary = secondaries[0];
+    const hasMore = secondaries.length > 1;
+
+    if (!firstSecondary) return primary;
+    return `${primary} / ${firstSecondary}${hasMore ? " / …" : ""}`;
+  }
 
   return (
     <>
@@ -133,7 +153,7 @@ export default function SessionView({
             type="button"
             onClick={onOpenPicker}
             aria-label="Add exercise"
-            className="font-medium text-foreground underline-offset-2 underline decoration-dotted hover:decoration-solid"
+            className="font-medium text-foreground underline decoration-dotted underline-offset-2 hover:decoration-solid"
           >
             Add Exercise
           </button>{" "}
@@ -156,53 +176,82 @@ export default function SessionView({
             const meta =
               metaById ?? (nameKey ? catalogByName[nameKey] : undefined);
 
+            const isExpanded = expandedExerciseId === id;
+
             return (
-              <ExerciseCard
+              <div
                 key={id}
-                exercise={exercise}
-                muscleLabel={meta ? formatExerciseMuscleLabel(meta) : ""}
-                onRemove={() => setPendingDeleteId(id)}
-                onAddSet={(values) =>
-                  mode === "edit"
-                    ? addEditSet(id, values)
-                    : addSessionSet(id, values)
-                }
-                onUpdateSet={(setId, values) =>
-                  mode === "edit"
-                    ? updateEditSet(id, setId, values)
-                    : updateSessionSet(id, setId, values)
-                }
-                onDeleteSet={(setId) =>
-                  mode === "edit"
-                    ? deleteEditSet(id, setId)
-                    : deleteSessionSet(id, setId)
-                }
-                onNotesChange={(notes) =>
-                  mode === "edit"
-                    ? updateEditExerciseNotes(id, notes)
-                    : updateSessionExerciseNotes(id, notes)
-                }
-              />
+                ref={(el) => {
+                  cardRefs.current[id] = el;
+                }}
+              >
+                <ExerciseCard
+                  exercise={exercise}
+                  isExpanded={isExpanded}
+                  onToggleExpanded={() =>
+                    setExpandedExerciseId((cur) => (cur === id ? null : id))
+                  }
+                  muscleLabel={
+                    meta
+                      ? isExpanded
+                        ? formatExerciseMuscleLabel(meta)
+                        : getCompactMuscleLabel(meta)
+                      : ""
+                  }
+                  onRemove={() => {
+                    setPendingDeleteId(id);
+                    if (expandedExerciseId === id) setExpandedExerciseId(null);
+                  }}
+                  onAddSet={(values) =>
+                    mode === "edit"
+                      ? addEditSet(id, values)
+                      : addSessionSet(id, values)
+                  }
+                  onUpdateSet={(setId, values) =>
+                    mode === "edit"
+                      ? updateEditSet(id, setId, values)
+                      : updateSessionSet(id, setId, values)
+                  }
+                  onDeleteSet={(setId) =>
+                    mode === "edit"
+                      ? deleteEditSet(id, setId)
+                      : deleteSessionSet(id, setId)
+                  }
+                  onNotesChange={(notes) =>
+                    mode === "edit"
+                      ? updateEditExerciseNotes(id, notes)
+                      : updateSessionExerciseNotes(id, notes)
+                  }
+                />
+              </div>
             );
           })}
+
           {/* Bottom Add Exercise CTA */}
           <button
             type="button"
             onClick={onOpenPicker}
             aria-label="Add exercise"
-            className="w-full rounded-lg border border-dashed border-border/70 bg-card/30 hover:bg-card/45 transition-colors"
+            className="group w-full rounded-lg border border-dashed border-border/70 bg-card/30 transition-colors hover:bg-card/45 active:bg-card/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
           >
-            <div className="flex flex-col items-center justify-center gap-2 py-4 sm:py-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-background/20 text-lg text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 py-5 sm:py-7">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-border/70 bg-background/20 text-xl text-muted-foreground transition-colors group-hover:text-foreground">
                 +
+              </div>
+              <div className="text-sm font-medium text-foreground">
+                Add exercise
               </div>
             </div>
           </button>
         </div>
       )}
 
-      {/* Picker modal */}
-      {isPickerOpen && (
+      {/* Picker Overlay (FocusOverlay owns backdrop + blur + centering) */}
+      <FocusOverlay
+        open={isPickerOpen}
+        onClose={onClosePicker}
+        maxWidthClassName="max-w-lg"
+      >
         <ExercisePicker
           isOpen={isPickerOpen}
           onClose={onClosePicker}
@@ -212,7 +261,7 @@ export default function SessionView({
           exercises={exerciseCatalog}
           loading={exercisesCatalogLoading}
         />
-      )}
+      </FocusOverlay>
 
       {/* Delete confirmation */}
       <DeleteExerciseModal
@@ -228,27 +277,40 @@ export default function SessionView({
         }}
       />
 
-      {/* Footer summary + Save */}
-      <div className="mt-2 shrink-0">
-        <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            {exerciseCount} {exerciseCount === 1 ? "exercise" : "exercises"} •{" "}
-            {setCount} {setCount === 1 ? "set" : "sets"}
-          </span>
+      {/* Spacer so the last card isn't hidden behind the fixed bar (mobile only) */}
+      <div className="h-16 md:hidden" aria-hidden />
 
-          {/* Show total volume only if > 0 */}
-          {totalVolume > 0 && (
-            <span>{totalVolume.toLocaleString()} total volume</span>
-          )}
+      {/* Desktop breathing room above footer */}
+      <div className="hidden md:block h-6" aria-hidden />
+
+      {/* Footer summary + Save */}
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border/60 bg-background/85 backdrop-blur md:static md:z-auto md:border-0 md:bg-transparent md:backdrop-blur-0">
+        <div className="mx-auto max-w-3xl px-4 py-3 md:px-0 md:py-0">
+          <div className="flex items-center justify-between gap-3">
+            {/* Summary */}
+            <div className="min-w-0">
+              <div className="text-xs text-muted-foreground">
+                {exerciseCount} {exerciseCount === 1 ? "exercise" : "exercises"}{" "}
+                • {setCount} {setCount === 1 ? "set" : "sets"}
+              </div>
+              {totalVolume > 0 && (
+                <div className="truncate text-xs text-muted-foreground">
+                  {totalVolume.toLocaleString()} total volume
+                </div>
+              )}
+            </div>
+
+            {/* Save */}
+            <button
+              type="button"
+              onClick={onSaveWorkout}
+              className="primary-button shrink-0 px-5"
+              disabled={!onSaveWorkout}
+            >
+              Save
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={onSaveWorkout} // call handler from page
-          className="primary-button w-full "
-          disabled={!onSaveWorkout}
-        >
-          Save Workout
-        </button>
       </div>
     </>
   );

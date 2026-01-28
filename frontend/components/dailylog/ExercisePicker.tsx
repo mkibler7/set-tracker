@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import type { Exercise } from "@/types/exercise";
 import { formatExerciseMuscleLabel } from "@/lib/util/exercises";
 
 type ExercisePickerProps = {
+  /** If you're wrapping with FocusOverlay, you can keep isOpen for convenience */
   isOpen: boolean;
   onClose: () => void;
   onSelect: (id: string) => void;
@@ -28,7 +29,7 @@ export default function ExercisePicker({
   const [search, setSearch] = useState("");
 
   const filteredExercises = useMemo(() => {
-    const lowerSearch = search.toLowerCase();
+    const lowerSearch = search.trim().toLowerCase();
 
     return exercises.filter((exercise) => {
       if (excludeIds.includes(exercise.id)) return false;
@@ -37,12 +38,12 @@ export default function ExercisePicker({
         const exerciseMuscleGroups = [
           exercise.primaryMuscleGroup,
           ...(exercise.secondaryMuscleGroups ?? []),
-        ].map((group) => group.toLowerCase());
+        ].map((g) => g.toLowerCase());
 
-        const hasMuscleGroup = split.some((splitGroup) =>
-          exerciseMuscleGroups.includes(splitGroup.toLowerCase())
+        const matchesSplit = split.some((sg) =>
+          exerciseMuscleGroups.includes(sg.toLowerCase()),
         );
-        if (!hasMuscleGroup) return false;
+        if (!matchesSplit) return false;
       }
 
       if (lowerSearch && !exercise.name.toLowerCase().includes(lowerSearch)) {
@@ -56,89 +57,110 @@ export default function ExercisePicker({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/70">
-      <div className="mx-4 w-full flex flex-col overflow-hidden rounded-2xl bg-card shadow-xl max-w-xs sm:max-w-sm md:max-w-md">
-        {/* Header */}
-        <div className="px-3 pb-2 pt-2 sm:px-4 sm:pb-3 sm:pt-3">
-          <div className="mb-2 flex items-center justify-between gap-4">
-            <h2 className="text-[13px] font-semibold text-foreground sm:text-sm my-2 ml-2">
-              Add exercise to session
-            </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-[11px] text-muted-foreground hover:text-foreground sm:text-xs"
-            >
-              Close
-            </button>
-          </div>
+    <section className="w-full overflow-hidden rounded-xl border border-border/70 bg-card/60 shadow-lg">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 border-b border-border/60 bg-background/10 px-5 py-4">
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold text-foreground">
+            Add exercise
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Search and tap an exercise to add it to your session.
+          </p>
+        </div>
 
+        {/* Close icon button */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          title="Close"
+          className="shrink-0 inline-flex h-9 w-9 items-center justify-center rounded-md border border-border/70 bg-card/30
+                     text-muted-foreground hover:bg-card/60 hover:text-foreground
+                     focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40"
+        >
+          <span className="text-lg leading-none">×</span>
+        </button>
+      </div>
+
+      {/* Search */}
+      <div className="px-5 pt-4">
+        <div className="relative">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search exercises..."
-            className="w-full rounded-md border border-border bg-background/60 px-3 py-2 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 sm:text-sm"
+            className="w-full rounded-md border border-border/70 bg-background/40 pl-4 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground 
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus:border-emerald-500/60"
           />
         </div>
+      </div>
 
-        {/* List area */}
-        <div className="px-4 pb-3 text-[13px] sm:text-sm scroll">
-          <div className="rounded-lg border border-border bg-background/40 px-1 sm:px-1.5">
-            <div className="max-h-[45vh] overflow-y-auto sm:max-h-[55vh] pr-2 pt-1 pb-1 sm:pt-2 sm:pb-2">
-              {loading ? (
-                <p>Loading exercises..</p>
-              ) : filteredExercises.length === 0 ? (
-                <p className="px-2 py-3 text-[11px] text-muted-foreground sm:text-xs">
-                  No exercises match your filters.
-                </p>
-              ) : (
-                <ul className="divide-y divide-border/40">
-                  {filteredExercises.map((exercise) => (
-                    <li key={exercise.id}>
-                      <button
-                        type="button"
-                        onClick={() => onSelect(exercise.id)}
-                        className="w-full rounded-md px-3 py-2.5 text-left text-[13px] text-foreground
-                                   hover:bg-accent/15 hover:text-accent-foreground
-                                   focus:outline-none focus:ring-1 focus:ring-accent/60 sm:text-sm"
-                      >
-                        <div className="truncate font-medium">
+      {/* List */}
+      <div className="px-5 pb-5 pt-4">
+        <div className="rounded-lg border border-border/70 bg-background/25">
+          <div className="max-h-[55vh] overflow-y-auto p-1">
+            {loading ? (
+              <div className="px-3 py-3 text-sm text-muted-foreground">
+                Loading exercises…
+              </div>
+            ) : filteredExercises.length === 0 ? (
+              <div className="px-3 py-3 text-sm text-muted-foreground">
+                No exercises match your filters.
+              </div>
+            ) : (
+              <ul className="divide-y divide-border/40">
+                {filteredExercises.map((exercise) => (
+                  <li key={exercise.id}>
+                    <button
+                      type="button"
+                      onClick={() => onSelect(exercise.id)}
+                      className="group flex w-full items-start justify-between gap-3 rounded-md px-3 py-2.5 text-left
+                                 hover:bg-card/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40"
+                    >
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-medium text-foreground">
                           {exercise.name}
                         </div>
-                        <div className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
+                        <div className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">
                           {formatExerciseMuscleLabel(exercise)}
                         </div>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        </div>
-        {/* Footer */}
-        <div className="px-4 pb-3 pt-0">
-          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-            {onCreateExercise && (
-              <button
-                type="button"
-                onClick={onCreateExercise}
-                className="w-full rounded-md border border-border bg-card px-3 py-2 text-[11px] font-medium text-muted-foreground hover:border-accent hover:bg-accent/10 hover:text-accent-foreground sm:text-xs"
-              >
-                Create New Exercise
-              </button>
+                      </div>
+
+                      <div className="shrink-0 text-muted-foreground group-hover:text-emerald-300">
+                        ›
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
-            <button
-              type="button"
-              onClick={onClose}
-              className="primary-button w-full text-[11px] sm:text-xs"
-            >
-              Done
-            </button>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-end gap-2 border-t border-border/60 bg-background/10 px-5 py-4">
+        {onCreateExercise && (
+          <button
+            type="button"
+            onClick={onCreateExercise}
+            className="rounded-md border border-border/70 bg-card/30 px-3 py-2 text-xs text-muted-foreground
+                       hover:bg-card/60 hover:text-foreground"
+          >
+            Create New
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground"
+        >
+          Done
+        </button>
+      </div>
+    </section>
   );
 }

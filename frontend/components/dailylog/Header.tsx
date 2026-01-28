@@ -9,11 +9,9 @@ type HeaderProps = {
   date: Date;
   isSession: boolean;
   onEditSplit?: () => void;
-  onAddExercise?: () => void;
 
-  // date editing (only for history edits)
   canEditDate?: boolean;
-  onCommitDate?: (ymd: string) => void; // YYYY-MM-DD
+  onCommitDate?: (ymd: string) => void;
 };
 
 export default function Header({
@@ -21,41 +19,45 @@ export default function Header({
   date,
   isSession,
   onEditSplit,
-  onAddExercise,
   canEditDate,
   onCommitDate,
 }: HeaderProps) {
+  const canEditSplit = isSession && !!onEditSplit;
+
   return (
     <div>
       <div className="mb-4 mt-1 flex flex-col items-center gap-3">
-        <div className="flex items-center gap-2">
-          <h1
-            className="my-2 max-w-[80vw] truncate text-center text-2xl font-semibold tracking-tight text-foreground"
-            title={title}
-          >
-            {title}
-          </h1>
+        {/* Title row */}
+        <div className="w-full max-w-3xl">
+          <div className="grid grid-cols-[1fr_auto_auto_1fr] items-center gap-x-2">
+            {/* left spacer keeps the title centered */}
+            <div />
 
-          {isSession && onEditSplit && (
-            <button
-              type="button"
-              onClick={onEditSplit}
-              className="inline-flex w-auto items-center justify-center rounded border border-emerald-500 px-2 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10"
+            <h1
+              className="my-2 max-w-[70vw] truncate text-center text-2xl font-semibold tracking-tight text-foreground"
+              title={title}
             >
-              <EditIcon />
-            </button>
-          )}
-        </div>
+              {title}
+            </h1>
 
-        {isSession && onAddExercise && (
-          <button
-            type="button"
-            onClick={onAddExercise}
-            className="primary-button w-full max-w-xs sm:max-w-sm"
-          >
-            + Add Exercise
-          </button>
-        )}
+            {canEditSplit && (
+              <button
+                type="button"
+                onClick={onEditSplit}
+                aria-label="Edit split"
+                title="Edit split"
+                className="inline-flex h-5 w-5 items-center justify-center rounded-md border border-border/60 bg-card/30
+                   text-muted-foreground hover:bg-card/60 hover:text-emerald-400 focus:outline-none
+                   focus-visible:ring-2 focus-visible:ring-emerald-500/40 transition-colors"
+              >
+                <EditIcon />
+              </button>
+            )}
+
+            {/* right spacer balances the grid (optional but keeps symmetry) */}
+            <div />
+          </div>
+        </div>
       </div>
 
       <div className="mb-6 flex items-center justify-center">
