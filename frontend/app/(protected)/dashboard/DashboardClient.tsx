@@ -55,7 +55,7 @@ export default function DashboardClient() {
 
   const { workoutsLast7Days, totalSetsLast7Days } = useMemo(
     () => computeDashboardStats(workouts),
-    [workouts]
+    [workouts],
   );
 
   const displayStats = useMemo(
@@ -77,22 +77,22 @@ export default function DashboardClient() {
             : "Consistency compounds",
       },
     ],
-    [workoutsLast7Days, totalSetsLast7Days]
+    [workoutsLast7Days, totalSetsLast7Days],
   );
 
   const filteredWorkouts = useMemo(
     () => filterWorkoutsByRange(workouts, range),
-    [workouts, range]
+    [workouts, range],
   );
 
   const volumeData = useMemo(
     () => getVolumeSeries(filteredWorkouts),
-    [filteredWorkouts]
+    [filteredWorkouts],
   );
 
   const recentWorkouts = useMemo(
     () => sortWorkoutsByDateDesc(workouts).slice(0, 5),
-    [workouts]
+    [workouts],
   );
 
   if (error) {
@@ -217,7 +217,7 @@ export default function DashboardClient() {
             </div>
 
             {workouts.length > 5 && (
-              <p className="mt-3 text-sm text-muted-foreground text-center hover:text-primary">
+              <p className="mt-4 text-sm text-muted-foreground text-center hover:text-primary">
                 <Link href="/workouts">View All Workouts</Link>
               </p>
             )}

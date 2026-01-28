@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { appLogout } from "@/lib/auth/logout";
 import clsx from "clsx";
-import Link from "next/dist/client/link";
+import Link from "next/link";
 
 export default function LogoutNavLink({ className }: { className?: string }) {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function LogoutNavLink({ className }: { className?: string }) {
     <Link
       href="/login"
       onClick={onClick}
-      className={clsx("text-left", className)}
+      className={clsx("text-left !hover:text-red-400", className)}
     >
       Log-out
     </Link>

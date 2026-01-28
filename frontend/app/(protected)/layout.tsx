@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "../globals.css";
 import { Inter } from "next/font/google";
-import MobileNavBar from "@/components/layout/MobileNav";
+import MobileNavBar from "@/components/layout/NavBar";
 import AuthBootstrap from "@/components/auth/AuthBootstrap";
-import WebNavBar from "@/components/layout/WebNav";
+import NavBar from "@/components/layout/NavBar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,19 +24,12 @@ export default function RootLayout({
 
         {/* Outer layout: column on mobile, row on desktop */}
         <div className="flex min-h-screen flex-col md:flex-row overflow-hidden">
-          {/* Sidebar (desktop only) */}
-          <aside className="hidden md:flex w-60 flex-col border-r border-slate-800 bg-slate-900/60 p-4 gap-4">
-            <WebNavBar />
-          </aside>
-
           {/* Main column: mobile header + content */}
           <div className="flex flex-1 flex-col">
-            {/* Mobile navigation (only < md) */}
-            <header className="flex items-center justify-between border-b border-slate-800 bg-slate-900/80 px-4 py-3 md:hidden">
-              <div className="text-lg text-primary font-semibold tracking-tight">
-                SetTracker
+            <header className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900/70 backdrop-blur">
+              <div className="mx-auto flex h-14 items-center px-4 md:px-8">
+                <NavBar /> {/* responsive */}
               </div>
-              <MobileNavBar />
             </header>
 
             {/* Main content */}
