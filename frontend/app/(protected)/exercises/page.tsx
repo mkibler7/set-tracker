@@ -1,21 +1,31 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { ExerciseAPI } from "@/lib/api/exercises";
 import ExercisesHeader from "@/components/exercises/ExercisesHeader";
 import { formatExerciseMuscleLabel } from "@/lib/util/exercises";
 import ExerciseFormModal from "@/components/exercises/ExerciseFormModal";
 import { Exercise, ExerciseFormValues } from "@/types/exercise";
-import { MuscleGroup } from "@reptracker/shared/muscles";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import { MuscleGroup, ALL_MUSCLE_GROUPS } from "@reptracker/shared/muscles";
 import { PaginationBar } from "@/components/shared/PaginationBar";
+import DropdownShell from "@/components/ui/DropdownShell";
 
 const PAGE_SIZE = 17;
+
+const filterClassName =
+  "block w-full px-3 py-2 text-left text-slate-100 hover:bg-slate-800 hover:text-primary";
 
 export default function ExercisesPage() {
   const [search, setSearch] = useState("");
   const [selectedGroups, setSelectedGroups] = useState<MuscleGroup[]>([]);
+  const [groupsOpen, setGroupsOpen] = useState(false);
+  const groupsWrapRef = useRef<HTMLDivElement | null>(null);
+
+  const groupLabel = useMemo(() => {
+    return selectedGroups.length === 0 ? "Any" : selectedGroups[0];
+  }, [selectedGroups]);
+
   // controls the Add Exercise modal
   const [isFormOpen, setIsFormOpen] = useState(false);
 
@@ -53,17 +63,41 @@ export default function ExercisesPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!groupsOpen) return;
+
+    const onDown = (e: MouseEvent) => {
+      const el = groupsWrapRef.current;
+      if (!el) return;
+      if (!el.contains(e.target as Node)) setGroupsOpen(false);
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setGroupsOpen(false);
+    };
+
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [groupsOpen]);
+
   // Reset to page 1 whenever filters/search change
   useEffect(() => {
     setPage(1);
   }, [search, selectedGroups]);
+
+  useEffect(() => {
+    setGroupsOpen(false);
+  }, [search]);
 
   // All distinct muscle groups from current exercises
   const muscleGroupFilters = useMemo<MuscleGroup[]>(() => {
     const set = new Set<MuscleGroup>();
     exercises.forEach((exercise) => {
       set.add(exercise.primaryMuscleGroup);
-      // (exercise.secondaryMuscleGroups ?? []).forEach((group) => set.add(group));
     });
     // Sort alphabetically
     return Array.from(set).sort((a, b) => a.localeCompare(b));
@@ -81,10 +115,6 @@ export default function ExercisesPage() {
 
     if (selectedGroups.length > 0) {
       list = list.filter((exercise) => {
-        // const groups = [
-        //   exercise.primaryMuscleGroup,s
-        //   ...(exercise.secondaryMuscleGroups ?? []),
-        // ];
         return selectedGroups.includes(exercise.primaryMuscleGroup);
       });
     }
@@ -148,44 +178,58 @@ export default function ExercisesPage() {
         search={search}
         onSearchChange={setSearch}
         onAddExercise={() => setIsFormOpen(true)}
-      />
+        splitControl={
+          <div ref={groupsWrapRef} className="relative w-full">
+            <DropdownShell
+              leftLabel="Split:"
+              valueText={groupLabel}
+              onClick={() => setGroupsOpen((v) => !v)}
+            />
 
-      {/* filters */}
-      <div className="mt-3">
-        <div className="max-w-2xl mx-auto w-full px-4 pr-2">
-          <div className="flex flex-wrap gap-2 justify-center">
-            <button
-              type="button"
-              onClick={clearGroups}
-              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                selectedGroups.length === 0
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "text-muted-foreground hover:bg-card/70"
-              }`}
-            >
-              All groups
-            </button>
-
-            {muscleGroupFilters.map((group) => {
-              const active = selectedGroups.includes(group);
-              return (
+            {groupsOpen && (
+              <div
+                className="absolute left-0 right-0 z-50 mt-2 overflow-hidden rounded-md
+                     border border-slate-700 bg-slate-900/95 shadow-lg backdrop-blur text-sm"
+                role="menu"
+                aria-label="Split filter"
+              >
                 <button
-                  key={group}
                   type="button"
-                  onClick={() => toggleGroup(group)}
-                  className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                    active
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "text-muted-foreground hover:bg-card/70"
+                  className={`${filterClassName} ${
+                    selectedGroups.length === 0 ? "text-primary" : ""
                   }`}
+                  onClick={() => {
+                    setSelectedGroups([]);
+                    setGroupsOpen(false);
+                  }}
+                  role="menuitem"
                 >
-                  {group}
+                  Any
                 </button>
-              );
-            })}
+
+                {ALL_MUSCLE_GROUPS.map((g) => {
+                  const active =
+                    selectedGroups.length === 1 && selectedGroups[0] === g;
+                  return (
+                    <button
+                      key={g}
+                      type="button"
+                      className={`${filterClassName} ${active ? "text-primary" : ""}`}
+                      onClick={() => {
+                        setSelectedGroups([g]);
+                        setGroupsOpen(false);
+                      }}
+                      role="menuitem"
+                    >
+                      {g}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* exercise list viewer */}
       <section className="mt-4 flex-1 overflow-y-auto rounded-xl bg-background-dark scroll">
