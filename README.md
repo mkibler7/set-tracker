@@ -43,25 +43,13 @@ so charts and dashboards are fully populated without actually having to make an 
 
 ## Screenshots
 
-### Dashboard
+| Dashboard                                | Charts                                  | Login                                  |
+| ---------------------------------------- | --------------------------------------- | -------------------------------------- |
+| ![](docs/Screenshots/mobile-desktop.png) | ![](docs/Screenshots/mobile-charts.png) | ![](docs/Screenshots/mobile-login.png) |
 
-![SetTracker Dashboard](docs/screenshots/mobile-dash.png)
-
-### Charts
-
-![SetTracker Workouts](docs/screenshots/mobile-charts.png)
-
-### Dailylog
-
-![SetTracker Login Mobile](docs/screenshots/mobile-dailylog.png)
-
-### Workouts
-
-![SetTracker Workouts](docs/screenshots/mobile-workouts.png)
-
-### Login
-
-![SetTracker Login Mobile](docs/screenshots/mobile-login.png)
+| Dailylog                                  | Workouts                                  |
+| ----------------------------------------- | ----------------------------------------- |
+| ![](docs/Screenshots/mobile-dailylog.png) | ![](docs/Screenshots/mobile-workouts.png) |
 
 ---
 
