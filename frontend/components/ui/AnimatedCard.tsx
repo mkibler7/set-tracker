@@ -48,13 +48,12 @@ export function AnimatedCard({
 
   // "Phones" heuristic: Tailwind sm breakpoint is 640px
   const isPhone = useMediaQuery("(max-width: 639px)");
-  const isCoarsePointer = useMediaQuery("(pointer: coarse)");
+
+  // Prefer hover capability over coarse pointer detection
+  const canHover = useMediaQuery("(hover: hover) and (pointer: fine)");
 
   // Reduce travel on phone to avoid “floaty” feel + text shimmer
   const travel = isPhone ? 8 : 16;
-
-  const yIn = direction === 1 ? travel : -travel;
-  const yOut = direction === 1 ? -travel : travel;
 
   // Reverse stagger on backward pagination; remove stagger on phones
   const delayIndex = direction === 1 ? index : Math.max(0, total - 1 - index);
@@ -64,9 +63,12 @@ export function AnimatedCard({
   const layoutProp = isPhone ? undefined : true;
 
   // Disable hover effects on touch devices
-  const hoverProps = isCoarsePointer
+  const hoverProps = !canHover
     ? {}
-    : { whileHover: { y: -3, scale: 1.01 }, whileTap: { scale: 0.99 } };
+    : {
+        whileHover: { y: -3, boxShadow: "0 12px 24px rgba(0,0,0,0.35)" },
+        whileTap: { y: 0 },
+      };
 
   if (reduceMotion) {
     // Accessibility / user preference: no motion
@@ -79,7 +81,7 @@ export function AnimatedCard({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
-      transition={{ ...baseTransition, delay: isPhone ? 0 : index * 0.03 }}
+      transition={{ ...baseTransition, delay }}
       style={{ willChange: "transform" }}
       className={className}
       {...hoverProps}

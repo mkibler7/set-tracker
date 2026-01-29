@@ -5,18 +5,24 @@ type SplitSelectorProps = {
   allGroups: readonly MuscleGroup[];
   selected: MuscleGroup[];
   onToggleGroup: (group: MuscleGroup) => void;
+  onClear: () => void;
   onCancel: () => void;
   onBegin: () => void;
   primaryLabel?: string;
+  title?: string;
+  description?: string;
 };
 
 export default function SplitSelector({
   allGroups,
   selected,
   onToggleGroup,
+  onClear,
   onCancel,
   onBegin,
   primaryLabel = "Begin Session",
+  title = "Choose today&apos;s split",
+  description = "Pick one or more muscle groups you plan to train.",
 }: SplitSelectorProps) {
   const hasSelection = selected.length > 0;
 
@@ -25,12 +31,8 @@ export default function SplitSelector({
       {/* Header */}
       <div className="flex items-start justify-between gap-4 border-b border-border/60 bg-background/10 px-5 py-4">
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-foreground">
-            Choose today&apos;s split
-          </h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Pick one or more muscle groups you plan to train.
-          </p>
+          <h2 className="text-base font-semibold text-foreground">{title}</h2>
+          <p className="mt-1 text-xs text-muted-foreground">{description}</p>
         </div>
 
         <div className="shrink-0 rounded-full border border-border/70 bg-card/40 px-2.5 py-1 text-[11px] text-muted-foreground">
@@ -67,7 +69,7 @@ export default function SplitSelector({
           {hasSelection && (
             <button
               type="button"
-              onClick={() => selected.forEach(onToggleGroup)}
+              onClick={onClear}
               className="shrink-0 rounded-md border border-border/70 bg-card/30 px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-card/60"
             >
               Clear

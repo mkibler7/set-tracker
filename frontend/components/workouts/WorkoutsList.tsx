@@ -35,7 +35,6 @@ export function WorkoutList({
 
   // Scroll list to top when user changes pages
   useEffect(() => {
-    // useEffect only runs client-side, but keep it explicit anyway
     if (typeof window === "undefined") return;
 
     const isCoarse = window.matchMedia("(pointer: coarse)").matches;
@@ -82,7 +81,7 @@ export function WorkoutList({
   return (
     <section
       ref={listRef}
-      className="mt-2 min-h-0 flex-1 overflow-y-auto scroll px-3 pb-3"
+      className="mt-2 min-h-0 flex-1 overflow-y-auto scroll px-3 pb-3 pt-1"
     >
       {filteredWorkouts.length === 0 ? (
         <div className="mt-8 rounded-lg border border-dashed border-border bg-card/40 p-6 text-sm text-muted-foreground">

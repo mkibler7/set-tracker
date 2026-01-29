@@ -1,61 +1,227 @@
 "use client";
 
-import { TimeFilter } from "@/types/workout";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import type { TimeFilter } from "@/types/workout";
+import type { MuscleGroup } from "@reptracker/shared/muscles";
+import { ALL_MUSCLE_GROUPS } from "@reptracker/shared/muscles";
+import SplitSelector from "@/components/dailylog/SplitSelector";
+import FocusOverlay from "@/components/ui/FocusOverlay";
+
+const filterClassName =
+  "block w-full px-3 py-2 text-left text-slate-100 hover:bg-slate-800 hover:text-primary";
+
+const TIME_OPTIONS: { value: TimeFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "7d", label: "Last 7 days" },
+  { value: "30d", label: "Last 30 days" },
+];
 
 type WorkoutsFiltersProps = {
   timeFilter: TimeFilter;
-  search: string;
   onTimeFilterChange: (value: TimeFilter) => void;
-  onSearchChange: (value: string) => void;
+
+  selectedGroups: MuscleGroup[];
+  onChangeSelectedGroups: (groups: MuscleGroup[]) => void;
 };
 
-/**
- * WorkoutsFilters
- * Time-range pill buttons + search input used on the workouts list page.
- */
+function DropdownShell({
+  leftLabel,
+  valueText,
+  onClick,
+  children,
+}: {
+  leftLabel: string;
+  valueText: string;
+  onClick?: () => void;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="relative w-full">
+      <button
+        type="button"
+        onClick={onClick}
+        className="h-10 w-full rounded-md border border-border bg-card/60 px-3 pr-10 text-left text-sm text-foreground
+                   focus:outline-none focus:ring-2 focus:ring-primary/60"
+      >
+        <span className="text-muted-foreground">{leftLabel} </span>
+        <span className="font-medium text-foreground">{valueText}</span>
+      </button>
+
+      {/* chevron */}
+      <svg
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fillRule="evenodd"
+          d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+          clipRule="evenodd"
+        />
+      </svg>
+
+      {children}
+    </div>
+  );
+}
+
 export function WorkoutsFilters({
   timeFilter,
   onTimeFilterChange,
-  search,
-  onSearchChange,
+  selectedGroups,
+  onChangeSelectedGroups,
 }: WorkoutsFiltersProps) {
+  const [splitOpen, setSplitOpen] = useState(false);
+
+  // custom menu state for time dropdown (mobile)
+  const [timeOpen, setTimeOpen] = useState(false);
+  const timeWrapRef = useRef<HTMLDivElement | null>(null);
+
+  const timeLabel = useMemo(() => {
+    return TIME_OPTIONS.find((o) => o.value === timeFilter)?.label ?? "All";
+  }, [timeFilter]);
+
+  const splitLabel = useMemo(() => {
+    if (selectedGroups.length === 0) return "Any";
+    if (selectedGroups.length === 1) return selectedGroups[0];
+    return `${selectedGroups.length} selected`;
+  }, [selectedGroups]);
+
+  function toggleGroup(group: MuscleGroup) {
+    onChangeSelectedGroups(
+      selectedGroups.includes(group)
+        ? selectedGroups.filter((g) => g !== group)
+        : [...selectedGroups, group],
+    );
+  }
+
+  function clearAllGroups() {
+    onChangeSelectedGroups([]);
+  }
+
+  // Close time dropdown on outside click / Escape
+  useEffect(() => {
+    if (!timeOpen) return;
+
+    const onDown = (e: MouseEvent) => {
+      const el = timeWrapRef.current;
+      if (!el) return;
+      if (!el.contains(e.target as Node)) setTimeOpen(false);
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setTimeOpen(false);
+    };
+
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [timeOpen]);
+
   return (
-    <section className="mb-4 flex flex-wrap justify-between items-center gap-3">
-      {/* Time filter pills */}
-      <div className="mx-auto sm:mx-0 inline-flex flex-shrink-0 items-center gap-2 rounded-full border border-border bg-card/40 px-2 py-1 mb-3">
-        {[
-          { value: "all", label: "All" },
-          { value: "7d", label: "Last 7 days" },
-          { value: "30d", label: "Last 30 days" },
-        ].map((option) => {
-          const active = timeFilter === option.value;
-          return (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => onTimeFilterChange(option.value as TimeFilter)}
-              className={`rounded-full px-3 py-1 text-xs transition-colors ${
-                active
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-card/70"
-              }`}
-            >
-              {option.label}
-            </button>
-          );
-        })}
+    <section className="mb-4 flex flex-col gap-3">
+      {/* Desktop row: pills + split dropdown on right */}
+      <div className="hidden sm:flex items-center justify-between gap-3">
+        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/40 px-2 py-1">
+          {TIME_OPTIONS.map((option) => {
+            const active = timeFilter === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => onTimeFilterChange(option.value)}
+                className={`rounded-full px-3 py-1 text-xs transition-colors ${
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-card/70"
+                }`}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Desktop split */}
+        <div className="w-full max-w-xs">
+          <DropdownShell
+            leftLabel="Split:"
+            valueText={splitLabel}
+            onClick={() => setSplitOpen(true)}
+          />
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[150px] sm:max-w-xs">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search workouts…"
-          className="w-full rounded-md border border-border bg-card/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/60"
+      {/* Mobile: time + split stacked and identical */}
+      <div className="sm:hidden flex flex-col gap-2">
+        {/* Time (custom dropdown menu like navbar) */}
+        <div ref={timeWrapRef} className="relative w-full">
+          <DropdownShell
+            leftLabel="Time:"
+            valueText={timeLabel}
+            onClick={() => setTimeOpen((v) => !v)}
+          />
+
+          {timeOpen && (
+            <div
+              className="absolute left-0 right-0 z-50 mt-2 overflow-hidden rounded-md
+                         border border-slate-700 bg-slate-900/95 shadow-lg backdrop-blur"
+              role="menu"
+              aria-label="Time filter"
+            >
+              {TIME_OPTIONS.map((o) => {
+                const active = o.value === timeFilter;
+                return (
+                  <button
+                    key={o.value}
+                    type="button"
+                    className={`${filterClassName} ${
+                      active ? "text-primary" : ""
+                    }`}
+                    onClick={() => {
+                      onTimeFilterChange(o.value);
+                      setTimeOpen(false);
+                    }}
+                    role="menuitem"
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Split */}
+        <DropdownShell
+          leftLabel="Split:"
+          valueText={splitLabel}
+          onClick={() => setSplitOpen(true)}
         />
       </div>
+
+      {/* Split selector overlay */}
+      <FocusOverlay
+        open={splitOpen}
+        onClose={() => setSplitOpen(false)}
+        maxWidthClassName="max-w-xl"
+      >
+        <SplitSelector
+          allGroups={ALL_MUSCLE_GROUPS}
+          selected={selectedGroups}
+          onToggleGroup={toggleGroup}
+          onClear={clearAllGroups}
+          onCancel={() => setSplitOpen(false)}
+          onBegin={() => setSplitOpen(false)}
+          primaryLabel="Done"
+          title="Choose muscle groups to filter"
+          description="Pick one or more muscle groups you want to search for."
+        />
+      </FocusOverlay>
     </section>
   );
 }

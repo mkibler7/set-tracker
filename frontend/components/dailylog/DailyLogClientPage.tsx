@@ -220,6 +220,10 @@ export default function DailyLogClientPage() {
     // Edit draft is created by the fromWorkout effect.
   };
 
+  const handleClearSplit = () => {
+    setSelectedMuscleGroups([]);
+  };
+
   const handleSaveWorkout = async () => {
     if (!activeDraft) return;
 
@@ -334,6 +338,7 @@ export default function DailyLogClientPage() {
             allGroups={ALL_MUSCLE_GROUPS}
             selected={selectedMuscleGroups}
             onToggleGroup={handleToggleMuscleGroup}
+            onClear={handleClearSplit}
             onCancel={handleCancelSplit}
             onBegin={handleBeginOrSaveSplit}
             primaryLabel={isEditingSplit ? "Save changes" : "Begin Session"}
