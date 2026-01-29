@@ -1,14 +1,29 @@
 # SetTracker
 
-SetTracker is a full-stack workout logging application built as a portfolio-grade project. It enables lifters to log workouts quickly (exercises + sets + notes), review training history, and view dashboard insights/charts over time.
+SetTracker is a full-stack workout logging application built as a **production-quality portfolio project**. It enables lifters to log workouts quickly (exercises, sets, notes), review training history, and analyze training volume and muscle group distribution over time.
 
 **Live App:** https://app.set-tracker.com  
 **API:** https://api.set-tracker.com
 
 ---
 
+## Try the Demo
+
+To explore SetTracker without creating an account:
+
+1. Visit https://app.set-tracker.com
+2. Click **“Try the demo”** on the login screen
+
+The demo account automatically seeds realistic, up-to-date workout data
+so charts and dashboards are fully populated without actually having to make an account.
+
+---
+
 ## Features
 
+- **Dashboard & analytics**
+  - Training volume trends over time
+  - Muscle group breakdowns (primary vs secondary)
 - **Workout logging**
   - Create and update workout sessions
   - Add/remove exercises and sets
@@ -21,10 +36,32 @@ SetTracker is a full-stack workout logging application built as a portfolio-grad
   - **Email verification**
   - **Password reset**
   - Session security using **HttpOnly cookies** (access + refresh tokens)
-- **Dashboard**
-  - Summary metrics and charts driven by real logged data
 - **Responsive UI**
   - Mobile-first layouts for core pages (ongoing refinements)
+
+---
+
+## Screenshots
+
+### Dashboard
+
+![SetTracker Dashboard](docs/screenshots/mobile-dash.png)
+
+### Charts
+
+![SetTracker Workouts](docs/screenshots/mobile-charts.png)
+
+### Dailylog
+
+![SetTracker Login Mobile](docs/screenshots/mobile-dailylog.png)
+
+### Workouts
+
+![SetTracker Workouts](docs/screenshots/mobile-workouts.png)
+
+### Login
+
+![SetTracker Login Mobile](docs/screenshots/mobile-login.png)
 
 ---
 
@@ -103,7 +140,7 @@ https://api.set-tracker.com
 
 ## Release
 
-See [`CHANGELOG.md`](CHANGELOG.md) for versioned changes.  
+See [`CHANGELOG.md`](docs/CHANGELOG.md) for versioned changes.  
 Current release target: **v1.0.0**.
 
 ---
@@ -119,5 +156,5 @@ Current release target: **v1.0.0**.
 
 ## Legal
 
-- [Privacy Policy](PRIVACY.md)
-- [Terms of Service](TERMS.md)
+- [Privacy Policy](docs/PRIVACY.md)
+- [Terms of Service](docs/TERMS.md)
