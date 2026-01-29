@@ -21,7 +21,7 @@ export default function SplitSelector({
   onCancel,
   onBegin,
   primaryLabel = "Begin Session",
-  title = "Choose today&apos;s split",
+  title = "Choose today's split",
   description = "Pick one or more muscle groups you plan to train.",
 }: SplitSelectorProps) {
   const hasSelection = selected.length > 0;

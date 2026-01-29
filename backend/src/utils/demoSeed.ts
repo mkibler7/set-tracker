@@ -104,6 +104,24 @@ function buildDemoWorkout(date: Date, picks: ExercisePick[]) {
 }
 
 export async function ensureRollingDemoData(userId: string) {
+  // console.log("[demoSeed] start", { userId });
+
+  // const before = await Workout.countDocuments({ userId });
+  // const beforeAlt = await Workout.countDocuments({ user: userId });
+  // const beforeOwner = await Workout.countDocuments({ ownerId: userId });
+
+  // console.log("[demoSeed] counts before", {
+  //   userIdField: before,
+  //   userField: beforeAlt,
+  //   ownerIdField: beforeOwner,
+  // });
+
+  // const del = await Workout.deleteMany({ userId }); // <-- whatever you currently use
+  // console.log("[demoSeed] deleted", del.deletedCount);
+
+  // const after = await Workout.countDocuments({ userId });
+  // console.log("[demoSeed] after delete", after);
+
   const WINDOW_DAYS = Number(process.env.DEMO_WINDOW_DAYS ?? "90");
 
   const today = startOfDay(new Date());
