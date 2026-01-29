@@ -43,13 +43,13 @@ so charts and dashboards are fully populated without actually having to make an 
 
 ## Screenshots
 
-| Dashboard                                | Charts                                  | Login                                  |
-| ---------------------------------------- | --------------------------------------- | -------------------------------------- |
-| ![](docs/Screenshots/mobile-desktop.png) | ![](docs/Screenshots/mobile-charts.png) | ![](docs/Screenshots/mobile-login.png) |
+| Dashboard                             | Charts                                  | Login                                  |
+| ------------------------------------- | --------------------------------------- | -------------------------------------- |
+| ![](docs/screenshots/mobile-dash.png) | ![](docs/screenshots/mobile-charts.png) | ![](docs/screenshots/mobile-login.png) |
 
 | Dailylog                                  | Workouts                                  |
 | ----------------------------------------- | ----------------------------------------- |
-| ![](docs/Screenshots/mobile-dailylog.png) | ![](docs/Screenshots/mobile-workouts.png) |
+| ![](docs/screenshots/mobile-dailylog.png) | ![](docs/screenshots/mobile-workouts.png) |
 
 ---
 
