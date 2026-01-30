@@ -139,6 +139,9 @@ export default function SessionView({
     const firstSecondary = secondaries[0];
     const hasMore = secondaries.length > 1;
 
+    const resolvedName =
+      typeof meta?.name === "string" && meta.name.trim() ? meta.name : "";
+
     if (!firstSecondary) return primary;
     return `${primary} / ${firstSecondary}${hasMore ? " / …" : ""}`;
   }
@@ -176,6 +179,11 @@ export default function SessionView({
             const meta =
               metaById ?? (nameKey ? catalogByName[nameKey] : undefined);
 
+            const resolvedName =
+              typeof meta?.name === "string" && meta.name.trim()
+                ? meta.name
+                : "";
+
             const isExpanded = expandedExerciseId === id;
 
             return (
@@ -187,6 +195,7 @@ export default function SessionView({
               >
                 <ExerciseCard
                   exercise={exercise}
+                  resolvedName={resolvedName}
                   isExpanded={isExpanded}
                   onToggleExpanded={() =>
                     setExpandedExerciseId((cur) => (cur === id ? null : id))

@@ -10,6 +10,7 @@ import SetActionsMenu from "@/components/dailylog/SetActionsMenu";
 
 type ExerciseCardProps = {
   exercise: WorkoutExercise;
+  resolvedName?: string;
   muscleLabel?: string;
   isExpanded: boolean;
   onToggleExpanded: () => void;
@@ -22,6 +23,7 @@ type ExerciseCardProps = {
 
 export default function ExerciseCard({
   exercise,
+  resolvedName,
   muscleLabel,
   isExpanded,
   onToggleExpanded,
@@ -38,10 +40,7 @@ export default function ExerciseCard({
   const [isAddingSet, setIsAddingSet] = useState(false);
 
   const displayName =
-    (typeof exercise.exerciseName === "string" &&
-      exercise.exerciseName.trim()) ||
-    (typeof exerciseName === "string" && exerciseName.trim()) ||
-    "Unknown exercise";
+    exercise.exerciseName?.trim() || resolvedName?.trim() || "Unknown exercise";
 
   const totalVolume = useMemo(() => {
     return exercise.sets.reduce(

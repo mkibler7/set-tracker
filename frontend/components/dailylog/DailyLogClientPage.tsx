@@ -58,6 +58,10 @@ export default function DailyLogClientPage() {
   const [exercisesLoading, setExercisesLoading] = useState(false);
   const [exercisesError, setExercisesError] = useState<string | null>(null);
 
+  const catalogById = React.useMemo(() => {
+    return Object.fromEntries(exerciseCatalog.map((e) => [e.id, e]));
+  }, [exerciseCatalog]);
+
   function fromYYYYMMDDToUTCNoon(yyyyMmDd: string) {
     // store as UTC noon to avoid day-shift
     return new Date(`${yyyyMmDd}T12:00:00.000Z`);
@@ -106,13 +110,19 @@ export default function DailyLogClientPage() {
         }
 
         const workout = await WorkoutsAPI.get(fromWorkoutId);
+
         if (cancelled) return;
+
+        const normalizedExercises = workout.exercises.map((ex: any) => {
+          const exerciseId = String(ex.exerciseId ?? ex.id ?? "");
+          return { ...ex, exerciseId };
+        });
 
         startEdit({
           id: workout.id,
           date: workout.date,
           muscleGroups: workout.muscleGroups,
-          exercises: workout.exercises,
+          exercises: normalizedExercises,
         });
 
         // Underlying page stays "session"
