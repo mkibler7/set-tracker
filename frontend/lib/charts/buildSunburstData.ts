@@ -98,7 +98,7 @@ function determineRegion(muscle: MuscleKey): RegionKey {
 export function buildSunburstData(
   workouts: Workout[],
   exerciseCatalog: Exercise[],
-  mode: "primary" | "secondary" = "primary"
+  mode: "primary" | "secondary" = "primary",
 ): SunburstData {
   const muscleVolume = initMuscleMap();
 
