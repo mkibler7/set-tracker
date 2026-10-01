@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { useWorkoutStore } from "@/app/store/useWorkoutStore";
-import { apiClient } from "@/lib/api/apiClient";
+import { apiClient, isApiError, refreshSession } from "@/lib/api/apiClient";
 
 export default function AuthBootstrap() {
   const ran = useRef(false);
@@ -35,27 +35,31 @@ export default function AuthBootstrap() {
         return;
       }
 
-      // If /me failed, try refresh (uses rt cookie, sets at cookie)
-      const refreshed = await apiClient<{ ok?: boolean; accessToken?: string }>(
-        "/api/auth/refresh",
-        { method: "POST" }
-      ).catch(() => null);
+      // If /me failed, try refresh (uses rt cookie, sets at cookie).
+      // Shares apiClient's single-flight refresh so a page load and a 401
+      // retry never send two refreshes at once.
+      const refreshed = await refreshSession();
 
-      if (!refreshed) {
-        // Hard logout client state
-        auth.clear();
-        workouts.resetAllDrafts();
-        // workouts.resetSession();
-        // workouts.resetEditDraft();
+      if (!refreshed.ok) {
+        // Only a 401 means the session is gone. On server/network trouble keep
+        // local state (including unsaved workout drafts) for the next attempt.
+        if (refreshed.status === 401) {
+          auth.clear();
+          workouts.resetAllDrafts();
+        }
         return;
       }
 
       // Try /me again after refresh
+      let meError: unknown = null;
       const me2 = await apiClient<{
         id: string;
         email: string;
         displayName?: string;
-      }>("/api/auth/me").catch(() => null);
+      }>("/api/auth/me").catch((err) => {
+        meError = err;
+        return null;
+      });
 
       if (me2) {
         auth.setUser({
@@ -65,11 +69,11 @@ export default function AuthBootstrap() {
         return;
       }
 
-      // If still no auth, clear
-      auth.clear();
-      workouts.resetAllDrafts();
-      // workouts.resetSession();
-      // workouts.resetEditDraft();
+      // Session rejected or account gone: clear. Other errors are temporary.
+      if (isApiError(meError) && [401, 404].includes(meError.status)) {
+        auth.clear();
+        workouts.resetAllDrafts();
+      }
     })();
   }, []);
 

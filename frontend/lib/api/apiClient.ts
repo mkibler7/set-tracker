@@ -65,7 +65,7 @@ async function doFetch(path: string, init?: RequestInit): Promise<Response> {
   }
 }
 
-let refreshInFlight: Promise<boolean> | null = null;
+let refreshInFlight: Promise<RefreshResult> | null = null;
 
 // Prevent redirect loops when multiple requests fail at once
 let redirectingToLogin = false;
@@ -88,19 +88,32 @@ function forceLogoutAndRedirect(reason: string) {
 
 let refreshPermanentlyFailed = false;
 
-async function refreshSession(): Promise<boolean> {
-  if (refreshPermanentlyFailed) return false;
+/**
+ * `status` is the refresh response status (0 = network error). Only 401 means
+ * the session is really gone; anything else is a temporary failure and must
+ * not log the user out.
+ */
+export type RefreshResult = { ok: true } | { ok: false; status: number };
+
+/**
+ * Refresh the session cookies. Concurrent callers in this tab share a single
+ * request, so a burst of 401s triggers only one refresh.
+ */
+export async function refreshSession(): Promise<RefreshResult> {
+  if (refreshPermanentlyFailed) return { ok: false, status: 401 };
 
   if (!refreshInFlight) {
-    refreshInFlight = (async () => {
-      const res = await doFetch("/api/auth/refresh", { method: "POST" });
-
-      if (!res.ok) {
-        if (res.status === 401) refreshPermanentlyFailed = true;
-        return false;
+    refreshInFlight = (async (): Promise<RefreshResult> => {
+      let res: Response;
+      try {
+        res = await doFetch("/api/auth/refresh", { method: "POST" });
+      } catch {
+        return { ok: false, status: 0 };
       }
 
-      return true;
+      if (res.ok) return { ok: true };
+      if (res.status === 401) refreshPermanentlyFailed = true;
+      return { ok: false, status: res.status };
     })().finally(() => {
       refreshInFlight = null;
     });
@@ -121,7 +134,15 @@ export async function apiClient<T>(
   if (res.status === 401 && !isAuthRoute) {
     const refreshed = await refreshSession();
 
-    if (!refreshed) {
+    if (!refreshed.ok) {
+      // Server or network trouble: keep the session and let the user retry
+      if (refreshed.status !== 401) {
+        throw new ApiError(
+          refreshed.status,
+          toFriendlyMessage(refreshed.status, ""),
+        );
+      }
+
       const raw = await parseErrorMessage(res);
       forceLogoutAndRedirect("expired");
       throw new ApiError(401, toFriendlyMessage(401, raw));
