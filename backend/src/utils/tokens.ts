@@ -37,7 +37,10 @@ export function signAccessToken(userId: string) {
   const ttl = (process.env.ACCESS_TOKEN_TTL ??
     "15m") as jwt.SignOptions["expiresIn"];
   const secret = mustGetEnv("JWT_ACCESS_SECRET");
-  return jwt.sign({ sub: userId }, secret, { expiresIn: ttl });
+  return jwt.sign({ sub: userId }, secret, {
+    algorithm: "HS256",
+    expiresIn: ttl,
+  });
 }
 
 export function signRefreshToken(userId: string) {
@@ -46,6 +49,7 @@ export function signRefreshToken(userId: string) {
   const expiresIn = `${days}d` as jwt.SignOptions["expiresIn"];
 
   return jwt.sign({ sub: userId, jti: crypto.randomUUID() }, secret, {
+    algorithm: "HS256",
     expiresIn,
   });
 }

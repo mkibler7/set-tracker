@@ -59,7 +59,7 @@ export function createApp() {
       origin: (origin, cb) => {
         if (!origin) return cb(null, true); // allows curl/postman/server-to-server
         if (allowed.has(origin)) return cb(null, true);
-        return cb(new Error("Not allowed by CORS"));
+        return cb(Object.assign(new Error("Not allowed by CORS"), { status: 403 }));
       },
       credentials: true,
     }),
@@ -84,13 +84,16 @@ export function createApp() {
   });
 
   // Centralized error handler (prevents leaking stack traces)
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err?.status ?? 500;
     const message =
       status >= 500
         ? "Internal server error"
         : (err?.message ?? "Request failed");
-    console.error("UNHANDLED ERROR:", err);
+    // 4xx (bad JSON, CORS rejections, oversized bodies) are client errors, not server faults
+    if (status >= 500) {
+      console.error(`UNHANDLED ERROR [${(req as any).requestId}]:`, err);
+    }
     res.status(status).json({ message });
   });
 

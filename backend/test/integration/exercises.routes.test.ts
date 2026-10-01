@@ -283,16 +283,50 @@ describe("Exercises routes", () => {
     expect(res.body[0]).toHaveProperty("sets");
   });
 
+  it("DEV ONLY: DELETE /api/exercises/__dev__/all returns 401 without auth", async () => {
+    process.env.NODE_ENV = "test";
+    process.env.ENABLE_DEV_ROUTES = "true";
+
+    const res = await request(app).delete("/api/exercises/__dev__/all");
+    expect(res.status).toBe(401);
+  });
+
+  it("DEV ONLY: DELETE /api/exercises/__dev__/all returns 404 when ENABLE_DEV_ROUTES is not true", async () => {
+    process.env.NODE_ENV = "test";
+    delete process.env.ENABLE_DEV_ROUTES;
+
+    const res = await auth(agent.delete("/api/exercises/__dev__/all"));
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ message: "Not found" });
+  });
+
   it("DEV ONLY: DELETE /api/exercises/__dev__/all returns 403 in production", async () => {
     process.env.NODE_ENV = "production";
+    process.env.ENABLE_DEV_ROUTES = "true";
 
     const res = await auth(agent.delete("/api/exercises/__dev__/all"));
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ message: "Forbidden" });
   });
 
-  it("DEV ONLY: DELETE /api/exercises/__dev__/all deletes exercises when not production", async () => {
+  it("DEV ONLY: DELETE /api/exercises/__dev__/all only deletes the caller's own exercises", async () => {
     process.env.NODE_ENV = "test";
+    process.env.ENABLE_DEV_ROUTES = "true";
+
+    const otherUserId = new User()._id;
+    await Exercise.create([
+      {
+        scope: "global",
+        name: "Global Bench Press",
+        primaryMuscleGroup: "Chest",
+      },
+      {
+        scope: "user",
+        userId: otherUserId,
+        name: "Other User Curl",
+        primaryMuscleGroup: "Biceps",
+      },
+    ]);
 
     await Exercise.create([
       {
@@ -319,5 +353,10 @@ describe("Exercises routes", () => {
 
     const remaining = await Exercise.countDocuments({ scope: "user", userId });
     expect(remaining).toBe(0);
+
+    expect(await Exercise.countDocuments({ scope: "global" })).toBe(1);
+    expect(
+      await Exercise.countDocuments({ scope: "user", userId: otherUserId }),
+    ).toBe(1);
   });
 });
