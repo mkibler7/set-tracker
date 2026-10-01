@@ -40,6 +40,10 @@ Do not commit secrets to Git.
   - Purpose: Refresh token lifetime in days
   - Example: `7` or `14`
 
+- `REFRESH_REUSE_GRACE_SECONDS` (optional, default `30`)
+  - Purpose: How long a just-rotated refresh token is still accepted. Covers several tabs refreshing at the same moment. A rotated token presented after this window is treated as stolen and its whole session family is revoked.
+  - Example: `30`
+
 ### Cookies
 
 The backend sets three cookies:

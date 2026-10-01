@@ -12,12 +12,15 @@ const EmailVerificationTokenSchema = new Schema<EmailVerificationTokenDoc>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     tokenHash: { type: String, required: true, index: true },
-    expiresAt: { type: Date, required: true, index: true },
+    expiresAt: { type: Date, required: true },
     usedAt: { type: Date, default: null },
     createdAt: { type: Date, default: () => new Date() },
   },
   { versionKey: false }
 );
+
+// TTL: MongoDB deletes tokens once they expire
+EmailVerificationTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export default model<EmailVerificationTokenDoc>(
   "EmailVerificationToken",

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { syncTokenIndexes } from "./indexes.js";
 
 export default async function connectDB(): Promise<void> {
   const uri = process.env.MONGODB_URI;
@@ -16,4 +17,6 @@ export default async function connectDB(): Promise<void> {
   mongoose.connection.on("error", (err) => {
     console.error("MongoDB connection error:", err);
   });
+
+  await syncTokenIndexes();
 }

@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { ensureRollingDemoData } from "../utils/demoSeed.js";
 import User from "../models/User.js";
-import RefreshSession from "../models/RefreshSession.js";
 import crypto from "crypto";
 import { loginSchema, registerSchema } from "../validators/authInput.js";
 import { authLimiter, loginLimiter } from "../middleware/rateLimiters.js";
@@ -15,11 +14,13 @@ import {
   clearAccessCookie,
   clearRefreshCookie,
   hashToken,
-  setAccessCookie,
-  setRefreshCookie,
-  signAccessToken,
-  signRefreshToken,
 } from "../utils/tokens.js";
+import {
+  issueSession,
+  revokeAllUserSessions,
+  revokeFamilyByToken,
+  rotateSession,
+} from "../services/authService.js";
 import PasswordResetToken from "../models/PasswordResetToken.js";
 import EmailVerificationToken from "../models/EmailVerificationToken.js";
 import { sendPasswordResetEmail, sendVerifyEmail } from "../utils/mailer.js";
@@ -127,18 +128,7 @@ router.post("/demo", async (_req: Request, res: Response) => {
   await ensureRollingDemoData(String(user._id));
 
   // Issue session cookies (same as login)
-  const refreshToken = signRefreshToken(String(user._id));
-  const tokenHash = hashToken(refreshToken);
-
-  const days = Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? "30");
-  const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-
-  await RefreshSession.create({ userId: user._id, tokenHash, expiresAt });
-
-  setRefreshCookie(res, refreshToken);
-
-  const accessToken = signAccessToken(String(user._id));
-  setAccessCookie(res, accessToken);
+  await issueSession(res, String(user._id));
 
   return res.json({
     user: {
@@ -170,19 +160,7 @@ router.post(
       return res.status(403).json({ message: "Email not verified" });
     }
 
-    const refreshToken = signRefreshToken(String(user._id));
-    const tokenHash = hashToken(refreshToken);
-
-    const days = Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? "30");
-    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-
-    await RefreshSession.create({ userId: user._id, tokenHash, expiresAt });
-
-    setRefreshCookie(res, refreshToken);
-
-    const accessToken = signAccessToken(String(user._id));
-    setAccessCookie(res, accessToken);
-    // setSessionMarkerCookie(res);
+    await issueSession(res, String(user._id));
 
     res.json({
       user: {
@@ -197,80 +175,39 @@ router.post(
 router.post("/refresh", async (req: Request, res: Response) => {
   const token = req.cookies?.rt as string | undefined;
 
-  // If no refresh token cookie, clear any access cookie too (defensive)
-  if (!token) {
+  // Clear cookies on auth failures so the client stops sending junk
+  const unauthorized = (message: string) => {
     clearRefreshCookie(res);
     clearAccessCookie(res);
-    // clearSessionMarkerCookie(res);
-    return res.status(401).json({ message: "Missing refresh token" });
-  }
+    return res.status(401).json({ message });
+  };
 
+  if (!token) return unauthorized("Missing refresh token");
+
+  let userId: string;
   try {
     const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!, {
       algorithms: ["HS256"],
-    }) as {
-      sub: string;
-    };
-    const tokenHash = hashToken(token);
-
-    const session = await RefreshSession.findOne({
-      tokenHash,
-      revokedAt: null,
-      expiresAt: { $gt: new Date() },
-    });
-
-    // If session invalid/expired/revoked: clear cookies so client stops sending junk
-    if (!session) {
-      clearRefreshCookie(res);
-      clearAccessCookie(res);
-      // clearSessionMarkerCookie(res);
-      return res.status(401).json({ message: "Refresh token invalid" });
-    }
-
-    // Rotate: revoke old
-    session.revokedAt = new Date();
-    await session.save();
-
-    // Issue new refresh
-    const newRefreshToken = signRefreshToken(payload.sub);
-    const newHash = hashToken(newRefreshToken);
-
-    const days = Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? "30");
-    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-
-    await RefreshSession.create({
-      userId: payload.sub,
-      tokenHash: newHash,
-      expiresAt,
-    });
-    setRefreshCookie(res, newRefreshToken);
-
-    // Issue new access
-    const accessToken = signAccessToken(payload.sub);
-    setAccessCookie(res, accessToken);
-    // setSessionMarkerCookie(res);
-
-    // Cookie-based auth: frontend does not need the token body
-    return res.json({ ok: true });
+    }) as { sub: string };
+    userId = payload.sub;
   } catch {
-    // JWT verify failed (expired / invalid signature): clear cookies here too
-    clearRefreshCookie(res);
-    clearAccessCookie(res);
-    // clearSessionMarkerCookie(res);
-    return res.status(401).json({ message: "Refresh token invalid" });
+    // Expired or bad signature
+    return unauthorized("Refresh token invalid");
   }
+
+  // Database errors propagate as 500s and leave cookies alone, so a brief
+  // outage doesn't log everyone out
+  const result = await rotateSession(res, token, userId);
+  if (!result.ok) return unauthorized("Refresh token invalid");
+
+  // Cookie-based auth: frontend does not need the token body
+  return res.json({ ok: true });
 });
 
 router.post("/logout", async (req: Request, res: Response) => {
   const token = req.cookies?.rt as string | undefined;
 
-  if (token) {
-    const tokenHash = hashToken(token);
-    await RefreshSession.updateOne(
-      { tokenHash },
-      { $set: { revokedAt: new Date() } },
-    );
-  }
+  if (token) await revokeFamilyByToken(token);
 
   clearRefreshCookie(res);
   clearAccessCookie(res);
@@ -346,11 +283,11 @@ router.post("/reset-password", async (req: Request, res: Response) => {
 
   const tokenHash = hashToken(token);
 
-  const record = await PasswordResetToken.findOne({
-    tokenHash,
-    usedAt: null,
-    expiresAt: { $gt: new Date() },
-  });
+  // Claim the link atomically so it can only ever be used once
+  const record = await PasswordResetToken.findOneAndUpdate(
+    { tokenHash, usedAt: null, expiresAt: { $gt: new Date() } },
+    { $set: { usedAt: new Date() } },
+  );
 
   if (!record) {
     return res
@@ -368,14 +305,8 @@ router.post("/reset-password", async (req: Request, res: Response) => {
   user.passwordHash = await bcrypt.hash(password, 12);
   await user.save();
 
-  record.usedAt = new Date();
-  await record.save();
-
   // Revoke refresh sessions to force re-login on other devices
-  await RefreshSession.updateMany(
-    { userId: user._id },
-    { $set: { revokedAt: new Date() } },
-  );
+  await revokeAllUserSessions(user._id);
 
   clearRefreshCookie(res);
   clearAccessCookie(res);
