@@ -26,6 +26,7 @@ import { sendPasswordResetEmail, sendVerifyEmail } from "../utils/mailer.js";
 import z from "zod";
 
 import { requireAuth } from "../middleware/requireAuth.js";
+import { zodMessage } from "../utils/httpErrors.js";
 
 const router = Router();
 
@@ -38,7 +39,7 @@ router.post("/register", async (req: Request, res: Response) => {
   const parsed = registerSchema.safeParse(req.body);
 
   if (!parsed.success)
-    return res.status(400).json({ message: parsed.error.message });
+    return res.status(400).json({ message: zodMessage(parsed.error) });
 
   const { email, password, displayName } = parsed.data;
 
@@ -155,7 +156,7 @@ router.post(
     const parsed = loginSchema.safeParse(req.body);
 
     if (!parsed.success)
-      return res.status(400).json({ message: parsed.error.message });
+      return res.status(400).json({ message: zodMessage(parsed.error) });
 
     const { email, password } = parsed.data;
 
@@ -205,7 +206,9 @@ router.post("/refresh", async (req: Request, res: Response) => {
   }
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as {
+    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!, {
+      algorithms: ["HS256"],
+    }) as {
       sub: string;
     };
     const tokenHash = hashToken(token);
@@ -290,7 +293,7 @@ router.get("/me", requireAuth, async (req: Request, res: Response) => {
 router.post("/forgot-password", async (req: Request, res: Response) => {
   const parsed = forgotPasswordSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: parsed.error.message });
+    return res.status(400).json({ message: zodMessage(parsed.error) });
   }
 
   const { email } = parsed.data;
@@ -336,7 +339,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
 router.post("/reset-password", async (req: Request, res: Response) => {
   const parsed = resetPasswordSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: parsed.error.message });
+    return res.status(400).json({ message: zodMessage(parsed.error) });
   }
 
   const { token, password } = parsed.data;
@@ -381,10 +384,12 @@ router.post("/reset-password", async (req: Request, res: Response) => {
 });
 
 router.post("/verify-email", async (req: Request, res: Response) => {
-  const schema = z.object({ token: z.string().min(1) });
+  const schema = z.object({
+    token: z.string().min(1, "Verification link is invalid or expired."),
+  });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: parsed.error.message });
+    return res.status(400).json({ message: zodMessage(parsed.error) });
   }
 
   const tokenHash = hashToken(parsed.data.token);
@@ -421,10 +426,12 @@ router.post("/verify-email", async (req: Request, res: Response) => {
 });
 
 router.post("/resend-verification", async (req: Request, res: Response) => {
-  const schema = z.object({ email: z.string().email() });
+  const schema = z.object({
+    email: z.string().email("Please enter a valid email address"),
+  });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: parsed.error.message });
+    return res.status(400).json({ message: zodMessage(parsed.error) });
   }
 
   // Generic response to avoid enumeration

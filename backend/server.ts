@@ -16,14 +16,25 @@ async function startServer() {
       console.log(`Backend API listening on http://localhost:${PORT}`);
     });
 
-    // Graceful shutdown
-    process.on("SIGINT", async () => {
-      console.log("Closing MongoDB connection...");
-      await mongoose.connection.close();
-      server.close(() => {
+    // Graceful shutdown: SIGINT (Ctrl+C locally), SIGTERM (Render deploys/restarts).
+    // Stop accepting requests first, let in-flight ones finish, then close MongoDB.
+    let shuttingDown = false;
+    const shutdown = (signal: string) => {
+      if (shuttingDown) return;
+      shuttingDown = true;
+      console.log(`${signal} received, shutting down...`);
+
+      server.close(async () => {
+        await mongoose.connection.close();
         process.exit(0);
       });
-    });
+
+      // Don't hang forever on keep-alive connections
+      setTimeout(() => process.exit(1), 10_000).unref();
+    };
+
+    process.on("SIGINT", () => shutdown("SIGINT"));
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
   } catch (err) {
     console.error("Failed to start server:", err);
     process.exit(1);

@@ -6,10 +6,29 @@ import { useSearchParams } from "next/navigation";
 import { AuthAPI } from "@/lib/api/apiAuth";
 import TitleIcon from "@/components/icons/title-icon";
 
+const DEFAULT_NEXT = "/dashboard";
+
+/**
+ * Only allow same-origin redirects after login. A plain startsWith("/") check
+ * lets through "//evil.com" and "/\evil.com", which browsers treat as other sites.
+ * Resolving with URL() normalizes it exactly like the browser will.
+ */
+function getSafeNextPath(next: string | null): string {
+  if (!next || !next.startsWith("/")) return DEFAULT_NEXT;
+  try {
+    const url = new URL(next, window.location.origin);
+    if (url.origin !== window.location.origin) return DEFAULT_NEXT;
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return DEFAULT_NEXT;
+  }
+}
+
 export default function LoginClient() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
-  const nextPath = next && next.startsWith("/") ? next : "/dashboard";
+  // Forwarded to signup/forgot-password links only; navigation uses getSafeNextPath
+  const nextPath = next && next.startsWith("/") ? next : DEFAULT_NEXT;
 
   const reason = searchParams.get("reason");
   const verified = searchParams.get("verified");
@@ -65,7 +84,7 @@ export default function LoginClient() {
       localStorage.setItem("has_session", "1");
 
       // same reasoning as onSubmit: hard navigation so middleware sees cookies
-      window.location.assign(nextPath);
+      window.location.assign(getSafeNextPath(next));
     } catch (err: any) {
       setError(err?.message ?? "Demo login failed");
     } finally {
@@ -85,7 +104,7 @@ export default function LoginClient() {
       localStorage.setItem("has_session", "1");
 
       // Hard navigation so middleware runs with the cookie
-      window.location.assign(nextPath);
+      window.location.assign(getSafeNextPath(next));
     } catch (err: any) {
       setError(err?.message ?? "Login failed");
     } finally {

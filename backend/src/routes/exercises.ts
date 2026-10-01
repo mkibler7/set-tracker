@@ -10,6 +10,7 @@ import {
   getExerciseHistory,
 } from "../services/exercisesService.js";
 import toExerciseDTO from "../dtos/exerciseDto.js";
+import { sendError } from "../utils/httpErrors.js";
 
 type IdParams = { id: string };
 
@@ -17,23 +18,27 @@ const router = Router();
 
 router.use(apiLimiter);
 
-// DEV TESTING ONLY — delete all exercises
-router.delete("/__dev__/all", async (req: Request, res: Response) => {
-  if (process.env.NODE_ENV === "production") {
-    return res.status(403).json({ message: "Forbidden" });
-  }
-
-  try {
-    const result = await deleteAllExercisesDevOnly();
-    res.json({
-      deletedCount: result.deletedCount,
-    });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: err instanceof Error ? err.message : String(err) });
-  }
-});
+// DEV TESTING ONLY — delete the current user's custom exercises
+router.delete(
+  "/__dev__/all",
+  requireAuth,
+  async (req: Request, res: Response) => {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    if (process.env.ENABLE_DEV_ROUTES !== "true") {
+      return res.status(404).json({ message: "Not found" });
+    }
+    try {
+      const result = await deleteAllExercisesDevOnly(req.user!.userId);
+      res.json({
+        deletedCount: result.deletedCount,
+      });
+    } catch (err) {
+      sendError(res, err);
+    }
+  },
+);
 
 // Get all exercises
 router.get("/", requireAuth, async (req: Request, res: Response) => {
@@ -41,9 +46,7 @@ router.get("/", requireAuth, async (req: Request, res: Response) => {
     const exercises = await getExercises(req.user!.userId);
     res.json(exercises.map(toExerciseDTO));
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: err instanceof Error ? err.message : String(err) });
+    sendError(res, err);
   }
 });
 
@@ -55,10 +58,8 @@ router.get(
     try {
       const doc = await getExerciseById(req.user!.userId, req.params.id);
       res.json(toExerciseDTO(doc));
-    } catch (err: any) {
-      res
-        .status(err?.status ?? 500)
-        .json({ message: err instanceof Error ? err.message : String(err) });
+    } catch (err) {
+      sendError(res, err);
     }
   },
 );
@@ -71,10 +72,8 @@ router.get(
     try {
       const entries = await getExerciseHistory(req.user!.userId, req.params.id);
       res.json(entries);
-    } catch (err: any) {
-      res
-        .status(err?.status ?? 500)
-        .json({ message: err instanceof Error ? err.message : String(err) });
+    } catch (err) {
+      sendError(res, err);
     }
   },
 );
@@ -91,9 +90,7 @@ router.post("/", requireAuth, async (req: Request, res: Response) => {
         .status(400)
         .json({ message: "Invalid exercise input", issues: err.issues });
     }
-    res
-      .status(err?.status ?? 400)
-      .json({ message: err?.message ?? "Bad request" });
+    sendError(res, err);
   }
 });
 

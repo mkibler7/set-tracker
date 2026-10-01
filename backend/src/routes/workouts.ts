@@ -14,6 +14,7 @@ import {
   parseCreateWorkoutInput,
   parseUpdateWorkoutInput,
 } from "../validators/workoutInput.js";
+import { sendError } from "../utils/httpErrors.js";
 
 type IdParams = {
   id: string;
@@ -40,9 +41,7 @@ router.delete(
         deletedCount: result.deletedCount,
       });
     } catch (err) {
-      res
-        .status(500)
-        .json({ message: err instanceof Error ? err.message : String(err) });
+      sendError(res, err);
     }
   },
 );
@@ -53,9 +52,7 @@ router.get("/", requireAuth, async (req: Request, res: Response) => {
     const workouts = await getWorkouts(req.user!.userId);
     res.json(workouts.map(toWorkoutDTO));
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: err instanceof Error ? err.message : String(err) });
+    sendError(res, err);
   }
 });
 
@@ -67,10 +64,8 @@ router.get(
     try {
       const doc = await getWorkoutById(req.user!.userId, req.params.id);
       res.json(toWorkoutDTO(doc));
-    } catch (err: any) {
-      res
-        .status(err?.status ?? 400)
-        .json({ message: err instanceof Error ? err.message : String(err) });
+    } catch (err) {
+      sendError(res, err);
     }
   },
 );
@@ -81,10 +76,8 @@ router.post("/", requireAuth, async (req: Request, res: Response) => {
     const input = parseCreateWorkoutInput(req.body);
     const saved = await createWorkout(req.user!.userId, input);
     res.status(201).json(toWorkoutDTO(saved));
-  } catch (error) {
-    res.status(400).json({
-      message: error instanceof Error ? error.message : String(error),
-    });
+  } catch (err) {
+    sendError(res, err);
   }
 });
 
@@ -101,10 +94,8 @@ router.put(
         input,
       );
       res.json(toWorkoutDTO(updated));
-    } catch (err: any) {
-      res.status(err?.status ?? 400).json({
-        message: err instanceof Error ? err.message : String(err),
-      });
+    } catch (err) {
+      sendError(res, err);
     }
   },
 );
@@ -117,10 +108,8 @@ router.delete(
     try {
       const deleted = await deleteWorkout(req.user!.userId, req.params.id);
       res.json(deleted);
-    } catch (err: any) {
-      res.status(err?.status ?? 400).json({
-        message: err instanceof Error ? err.message : String(err),
-      });
+    } catch (err) {
+      sendError(res, err);
     }
   },
 );

@@ -3,8 +3,8 @@ import Exercise from "../models/Exercise.js";
 import Workout from "../models/Workout.js";
 import { CreateExerciseInputValidated } from "../validators/exercises.js";
 
-export async function deleteAllExercisesDevOnly() {
-  return Exercise.deleteMany({});
+export async function deleteAllExercisesDevOnly(userId: string) {
+  return Exercise.deleteMany({ scope: "user", userId });
 }
 
 export async function getExercises(userId: string) {
@@ -121,10 +121,7 @@ export async function createExercise(
       (dupError as any).status = 409;
       throw dupError;
     }
-    const err = new Error(
-      error instanceof Error ? error.message : String(error),
-    );
-    (err as any).status = 400;
-    throw err;
+    // Validation errors map to 400 in sendError; anything else is a real 500
+    throw error;
   }
 }
