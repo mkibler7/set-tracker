@@ -9,6 +9,7 @@ import morgan from "morgan";
 import workoutsRouter from "./src/routes/workouts.js";
 import exercisesRouter from "./src/routes/exercises.js";
 import authRouter from "./src/routes/auth.js";
+import { logIpHeaders } from "./src/middleware/logIpHeaders.js";
 
 export function createApp() {
   const app = express();
@@ -22,6 +23,9 @@ export function createApp() {
     res.setHeader("X-Request-Id", (req as any).requestId);
     next();
   });
+
+  // TEMPORARY: client-IP header diagnostic (off unless LOG_IP_HEADERS=true)
+  app.use(logIpHeaders);
 
   // Request logging
   if (process.env.NODE_ENV !== "test") {
