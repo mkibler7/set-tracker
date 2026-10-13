@@ -39,6 +39,11 @@ export function middleware(req: NextRequest) {
     return forwardToBackend(req);
   }
 
+  // Uptime checks have no session; let them reach the backend health endpoint
+  if (pathname === "/health") {
+    return NextResponse.next();
+  }
+
   // Allow Next internals/static
   if (PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
