@@ -1,4 +1,7 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+import type { Request } from "express";
+
+import { getClientIp } from "../utils/clientIp.js";
 
 const num = (key: string, fallback: number) => {
   const raw = process.env[key];
@@ -6,12 +9,17 @@ const num = (key: string, fallback: number) => {
   return Number.isFinite(n) ? n : fallback;
 };
 
+// Key on the real client IP, not the proxy in front of Render.
+// ipKeyGenerator groups IPv6 addresses by subnet so one user cannot rotate addresses.
+const keyGenerator = (req: Request) => ipKeyGenerator(getClientIp(req));
+
 // General API limiter (reasonable baseline)
 export const apiLimiter = rateLimit({
   windowMs: num("API_RATE_WINDOW_MS", 15 * 60 * 1000),
   limit: num("API_RATE_LIMIT", 300),
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator,
   skip: (req) => req.method === "OPTIONS",
   message: { message: "API rate limit hit." },
 });
@@ -22,6 +30,7 @@ export const authLimiter = rateLimit({
   limit: num("AUTH_RATE_LIMIT", 30),
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator,
   skip: (req) => req.method === "OPTIONS",
   message: { message: "Auth rate limit hit." },
 });
@@ -32,5 +41,6 @@ export const loginLimiter = rateLimit({
   limit: num("LOGIN_RATE_LIMIT", 10),
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator,
   message: { message: "Too many login attempts. Please try again later." },
 });

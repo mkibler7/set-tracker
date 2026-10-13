@@ -118,6 +118,13 @@ Current behavior:
   - Purpose: Hard cap for user-created exercises
   - Example: `200`
 
+### Proxy / Rate Limiting
+
+- `PROXY_SHARED_SECRET`
+  - Purpose: Proves a request came through the Vercel frontend, so the backend can trust its `X-Client-IP` header for rate limiting. Without it, rate limits key on `CF-Connecting-IP` (Vercel's server, not the user).
+  - Must be the **same value on Render and Vercel**.
+  - Example: a random 64-character hex string (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
+
 ---
 
 ## Frontend (Vercel / frontend service)
@@ -125,6 +132,9 @@ Current behavior:
 - `BACKEND_ORIGIN`
   - Purpose: Base URL for the backend API (Render domain)
   - Example: `https://api.set-tracker.com`
+
+- `PROXY_SHARED_SECRET`
+  - Purpose: Sent by `middleware.ts` with the real client IP on `/api` requests. Same value as on the backend.
 
 ---
 
