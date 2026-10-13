@@ -10,12 +10,33 @@ const PUBLIC_PATHS = [
 ];
 const PUBLIC_PREFIXES = ["/_next", "/favicon.ico"];
 
+// The backend sits behind Cloudflare, so it cannot see who the user is.
+// Pass the real client IP along with a shared secret that proves the request
+// came through this app (see backend/src/utils/clientIp.ts).
+function forwardToBackend(req: NextRequest) {
+  const headers = new Headers(req.headers);
+  headers.delete("x-client-ip");
+  headers.delete("x-proxy-secret");
+
+  const secret = process.env.PROXY_SHARED_SECRET;
+  const clientIp =
+    req.headers.get("x-real-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+
+  if (secret && clientIp) {
+    headers.set("x-client-ip", clientIp);
+    headers.set("x-proxy-secret", secret);
+  }
+
+  return NextResponse.next({ request: { headers } });
+}
+
 export function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
   // Never guard/protect API proxy routes
   if (pathname.startsWith("/api")) {
-    return NextResponse.next();
+    return forwardToBackend(req);
   }
 
   // Allow Next internals/static
@@ -41,5 +62,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

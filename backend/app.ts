@@ -9,7 +9,7 @@ import morgan from "morgan";
 import workoutsRouter from "./src/routes/workouts.js";
 import exercisesRouter from "./src/routes/exercises.js";
 import authRouter from "./src/routes/auth.js";
-import { logIpHeaders } from "./src/middleware/logIpHeaders.js";
+import { getClientIp, maskIp } from "./src/utils/clientIp.js";
 
 export function createApp() {
   const app = express();
@@ -24,16 +24,15 @@ export function createApp() {
     next();
   });
 
-  // TEMPORARY: client-IP header diagnostic (off unless LOG_IP_HEADERS=true)
-  app.use(logIpHeaders);
-
   // Request logging
   if (process.env.NODE_ENV !== "test") {
     morgan.token("rid", (req) => (req as any).requestId);
+    // Masked real client IP (never the full address).
+    morgan.token("client", (req) => maskIp(getClientIp(req as Request)));
 
     const format =
       process.env.NODE_ENV === "production"
-        ? ":rid :remote-addr :method :url :status :res[content-length] - :response-time ms"
+        ? ":rid :client :method :url :status :res[content-length] - :response-time ms"
         : ":rid :method :url :status - :response-time ms";
 
     app.use(

@@ -121,6 +121,7 @@ In those cases, switch to:
 At minimum, configure the backend base URL used by the frontend:
 
 - `BACKEND_ORIGIN=https://api.set-tracker.com`
+- `PROXY_SHARED_SECRET=<same value as on Render>` (lets rate limits use the real client IP; see `docs/env.md`)
 
 ---
 
